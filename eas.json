@@ -1,6 +1,7 @@
 {
   "cli": {
-    "version": ">= 13.2.1"
+    "version": ">= 13.2.1",
+    "appVersionSource": "remote"
   },
   "build": {
     "development": {
@@ -11,7 +12,30 @@
       }
     },
     "preview": {
-      "distribution": "internal"
+      "distribution": "internal",
+      "ios": {
+        "simulator": false,
+        "buildConfiguration": "Release"
+      },
+      "android": {
+        "buildType": "apk"
+      },
+      "env": {
+        "NPM_CONFIG_LEGACY_PEER_DEPS": "true",
+        "NODE_ENV": "production"
+      },
+      "channel": "preview"
+    },
+    "preview-aab": {
+      "distribution": "internal",
+      "android": {
+        "buildType": "app-bundle"
+      },
+      "env": {
+        "NPM_CONFIG_LEGACY_PEER_DEPS": "true",
+        "NODE_ENV": "production"
+      },
+      "channel": "preview"
     },
     "production": {
       "distribution": "store"
@@ -21,7 +45,7 @@
     "production": {
       "ios": {
         "appleId": "louispage@icloud.com",
-        "ascAppId": "TBD",
+        "ascAppId": "6753561999",
         "appleTeamId": "TBD"
       }
     }
