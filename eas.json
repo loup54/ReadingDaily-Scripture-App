@@ -38,7 +38,15 @@
       "channel": "preview"
     },
     "production": {
-      "distribution": "store"
+      "distribution": "store",
+      "ios": {
+        "simulator": false,
+        "buildConfiguration": "Release"
+      },
+      "env": {
+        "NPM_CONFIG_LEGACY_PEER_DEPS": "true",
+        "NODE_ENV": "production"
+      }
     }
   },
   "submit": {
