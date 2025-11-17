@@ -18,8 +18,7 @@
         "buildConfiguration": "Release"
       },
       "android": {
-        "buildType": "apk",
-        "ndk": "26.1.10909125"
+        "buildType": "apk"
       },
       "env": {
         "NPM_CONFIG_LEGACY_PEER_DEPS": "true",
@@ -30,8 +29,7 @@
     "preview-aab": {
       "distribution": "internal",
       "android": {
-        "buildType": "app-bundle",
-        "ndk": "26.1.10909125"
+        "buildType": "app-bundle"
       },
       "env": {
         "NPM_CONFIG_LEGACY_PEER_DEPS": "true",
@@ -44,9 +42,6 @@
       "ios": {
         "simulator": false,
         "buildConfiguration": "Release"
-      },
-      "android": {
-        "ndk": "26.1.10909125"
       },
       "env": {
         "NPM_CONFIG_LEGACY_PEER_DEPS": "true",
