@@ -1,0 +1,104 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Testing
+coverage/
+
+# Build files
+*.jsbundle
+*.bundle
+dist/
+build/
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# IDE and editor settings
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# OS files
+Thumbs.db
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Expo
+.expo/
+.expo-shared/
+dist/
+npm-debug.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.orig.*
+web-build/
+
+# Android
+android/.gradle/
+android/local.properties
+android/*/build/
+android/*/.gradle
+*.apk
+*.aab
+
+# iOS
+ios/Pods/
+ios/Podfile.lock
+ios/*/xcuserdata/
+ios/*.xcworkspace
+ios/build/
+ios/.xcode.env
+
+# Firebase
+.firebase/
+.firebaserc
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build artifacts
+*.o
+*.a
+*.so
+*.dylib
+*.obj
+*.lib
+*.exe
+*.out
+
+# Large files and vendor
+vendor/
+.bundle/
+Gemfile.lock
+
+# Documentation build files
+docs/_build/
+docs/.doctrees/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+
+# Miscellaneous
+.cache/
+*.orig
+*.tmp
