@@ -46,7 +46,7 @@
       "env": {
         "NPM_CONFIG_LEGACY_PEER_DEPS": "true",
         "NODE_ENV": "production",
-        "EXPO_PUBLIC_FIREBASE_API_KEY": "AIzaSyD88ay8YDTyZk4A891TGqWPVXjFV2smb7Q",
+        "EXPO_PUBLIC_FIREBASE_API_KEY": "YOUR_FIREBASE_API_KEY",
         "EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN": "readingdaily-scripture-fe502.firebaseapp.com",
         "EXPO_PUBLIC_FIREBASE_PROJECT_ID": "readingdaily-scripture-fe502",
         "EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET": "readingdaily-scripture-fe502.firebasestorage.app",
@@ -55,12 +55,12 @@
         "EXPO_PUBLIC_FIREBASE_MEASUREMENT_ID": "G-EZFWTHSMNB",
         "EXPO_PUBLIC_AZURE_SPEECH_KEY": "YOUR_AZURE_SPEECH_KEY",
         "EXPO_PUBLIC_AZURE_SPEECH_REGION": "australiaeast",
-        "EXPO_PUBLIC_GOOGLE_CLOUD_API_KEY": "AIzaSyBOZQx-eoNcdbm98MtZ2dqdjetPhAskkJ4",
+        "EXPO_PUBLIC_GOOGLE_CLOUD_API_KEY": "YOUR_GOOGLE_CLOUD_API_KEY",
         "EXPO_PUBLIC_TRIAL_DURATION_MINUTES": "10",
         "EXPO_PUBLIC_LIFETIME_PRICE": "5",
         "EXPO_PUBLIC_USE_MOCK_PAYMENTS": "false",
         "EXPO_PUBLIC_PAYMENT_BACKEND_URL": "https://us-central1-readingdaily-scripture-fe502.cloudfunctions.net",
-        "EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY": "pk_live_CMORN1dBBJ1zloDf0iiyJe8B00h63No8Ny",
+        "EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY": "YOUR_STRIPE_PUBLISHABLE_KEY",
         "EXPO_PUBLIC_APPLE_IAP_PRODUCT_ID": "lifetime_access_001",
         "EXPO_PUBLIC_GOOGLE_PLAY_PRODUCT_ID": "lifetime_access_001"
       }
