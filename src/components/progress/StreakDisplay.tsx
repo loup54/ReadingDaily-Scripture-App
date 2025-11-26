@@ -205,7 +205,12 @@ export const StreakDisplay: React.FC<StreakDisplayProps> = ({
         {/* Last Reading */}
         <View style={styles.statItem}>
           <Text
-            style={styles.statLabel}
+            style={[
+              styles.statLabel,
+              {
+                color: colors.text.secondary,
+              },
+            ]}
           >
             Last Reading
           </Text>
@@ -234,7 +239,12 @@ export const StreakDisplay: React.FC<StreakDisplayProps> = ({
             />
             <View style={styles.statItem}>
               <Text
-                style={styles.statLabel}
+                style={[
+                  styles.statLabel,
+                  {
+                    color: colors.text.secondary,
+                  },
+                ]}
               >
                 Before Reset
               </Text>
@@ -266,7 +276,12 @@ export const StreakDisplay: React.FC<StreakDisplayProps> = ({
           />
           <View style={styles.longestStreakSection}>
             <Text
-              style={styles.longestStreakLabel}
+              style={[
+                styles.longestStreakLabel,
+                {
+                  color: colors.text.secondary,
+                },
+              ]}
             >
               Longest Streak
             </Text>
@@ -374,7 +389,6 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.xs / 2,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
-    color: '#FFFFFF',
   },
 
   statValue: {
@@ -405,7 +419,6 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.xs / 2,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
-    color: '#FFFFFF',
   },
 
   longestStreakValue: {

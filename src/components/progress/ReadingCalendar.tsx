@@ -188,9 +188,6 @@ export const ReadingCalendar: React.FC<ReadingCalendarProps> = ({
         style={[
           styles.dayContainer,
           !day.isCurrentMonth && styles.otherMonthDay,
-          {
-            borderColor: colors.ui.border,
-          },
         ]}
         onPress={() => {
           if (isClickable && day.date) {
@@ -206,7 +203,7 @@ export const ReadingCalendar: React.FC<ReadingCalendarProps> = ({
             style={[
               styles.todayBackground,
               {
-                borderColor: colors.primary.main,
+                backgroundColor: colors.primary.main + '20',
               },
             ]}
           />
@@ -229,7 +226,12 @@ export const ReadingCalendar: React.FC<ReadingCalendarProps> = ({
           style={[
             styles.dayNumber,
             {
-              color: day.isCurrentMonth ? colors.text.primary : colors.text.secondary,
+              color:
+                day.hasReading && day.isCurrentMonth
+                  ? colors.text.white
+                  : day.isCurrentMonth
+                  ? colors.text.primary
+                  : colors.text.secondary,
             },
           ]}
         >
@@ -303,7 +305,7 @@ export const ReadingCalendar: React.FC<ReadingCalendarProps> = ({
       </View>
 
       {/* Weekday Headers */}
-      <View style={[styles.weekdayHeader, { backgroundColor: colors.background.secondary }]}>
+      <View style={styles.weekdayHeader}>
         {weekDays.map((day) => (
           <View key={day} style={styles.weekdayCell}>
             <Text
@@ -321,7 +323,7 @@ export const ReadingCalendar: React.FC<ReadingCalendarProps> = ({
       </View>
 
       {/* Calendar Grid */}
-      <View style={[styles.calendarGrid, { backgroundColor: colors.background.card }]}>
+      <View style={styles.calendarGrid}>
         {calendarDays.map((day) => (
           <View key={day.date} style={styles.dayWrapper}>
             {renderDay(day)}
@@ -388,9 +390,7 @@ export const ReadingCalendar: React.FC<ReadingCalendarProps> = ({
             style={[
               styles.legendIndicator,
               {
-                backgroundColor: colors.background.tertiary || colors.background.secondary,
-                borderWidth: 1,
-                borderColor: colors.ui.border,
+                backgroundColor: colors.background.tertiary || colors.ui.border,
               },
             ]}
           />
@@ -414,7 +414,6 @@ export const ReadingCalendar: React.FC<ReadingCalendarProps> = ({
           {
             backgroundColor: colors.background.card,
             borderColor: colors.ui.border,
-            borderTopColor: colors.ui.border,
           },
         ]}
       >
@@ -443,14 +442,7 @@ export const ReadingCalendar: React.FC<ReadingCalendarProps> = ({
           </Text>
         </View>
 
-        <View
-          style={[
-            styles.divider,
-            {
-              backgroundColor: colors.ui.border,
-            },
-          ]}
-        />
+        <View style={styles.divider} />
 
         <View style={styles.statItem}>
           <Text
@@ -475,14 +467,7 @@ export const ReadingCalendar: React.FC<ReadingCalendarProps> = ({
           </Text>
         </View>
 
-        <View
-          style={[
-            styles.divider,
-            {
-              backgroundColor: colors.ui.border,
-            },
-          ]}
-        />
+        <View style={styles.divider} />
 
         <View style={styles.statItem}>
           <Text
@@ -547,6 +532,7 @@ const styles = StyleSheet.create({
   // Weekday Headers
   weekdayHeader: {
     flexDirection: 'row',
+    backgroundColor: Colors.background.secondary,
   },
 
   weekdayCell: {
@@ -564,6 +550,7 @@ const styles = StyleSheet.create({
   calendarGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
+    backgroundColor: Colors.background.card,
   },
 
   dayWrapper: {
@@ -576,6 +563,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 0.5,
+    borderColor: Colors.ui.border,
     position: 'relative',
   },
 
@@ -590,6 +578,7 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     borderWidth: 2,
+    borderColor: Colors.primary.blue,
     borderRadius: BorderRadius.sm,
   },
 
@@ -658,8 +647,6 @@ const styles = StyleSheet.create({
   statItem: {
     flex: 1,
     alignItems: 'center',
-    justifyContent: 'flex-end',
-    paddingBottom: Spacing.xs,
   },
 
   statLabel: {
@@ -672,11 +659,11 @@ const styles = StyleSheet.create({
   statValue: {
     fontSize: FontSizes.lg,
     fontWeight: FontWeights.bold,
-    textAlign: 'center',
   },
 
   divider: {
     width: 1,
+    backgroundColor: Colors.ui.border,
     marginHorizontal: Spacing.md,
   },
 });

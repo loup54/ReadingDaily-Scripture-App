@@ -1,0 +1,93 @@
+{
+  "generatedAt": "2025-11-08T11:03:53.089703Z",
+  "liturgicalYear": "2025",
+  "version": "2.0",
+  "note": "Readings bundle with actual Catholic daily readings for 2025-2026",
+  "readings": {
+    "2025-11-08": {
+      "date": "2025-11-08",
+      "liturgicalDate": {
+        "season": "Ordinary Time",
+        "week": 32,
+        "dayOfWeek": "Saturday",
+        "feastDay": null,
+        "liturgicalTitle": "Saturday of the Thirty-second Week in Ordinary Time",
+        "color": "green"
+      },
+      "firstReading": {
+        "reference": "Wisdom 18:14-16; 19:6-9",
+        "citation": "Wis 18:14-16; 19:6-9",
+        "text": "When peaceful silence lay over all,\nand night had run the half of her swift course,\ndown from the heavens, from the royal throne,\nthere leaped your all-powerful Word,\ninto the doomed land,\na warrior bearing the sharp sword of your inexorable decree.\nStanding in the midst, it filled all things with death;\nit touched the heavens, yet stood on the earth.\n\nFor all creation, in its every kind,\nwas being remade anew,\nserving your commands and obeying your decree.\nThe cloud overshadowed their camp;\nand out of what had before been water,\ndry land was seen emerging:\nout of the Red Sea an unobstructed road,\nand a grassy plain out of the mighty flood.\nOver this the whole nation of your protected ones\npassed,\nafter witnessing stupendous wonders.\nFor they ranged about like horses,\nand leaped like lambs,\npraising you, their deliverer.",
+        "title": "First Reading",
+        "audioUrl": null
+      },
+      "psalm": {
+        "reference": "Psalm 105:2-3, 36-37, 42-43",
+        "citation": "Ps 105:2-3, 36-37, 42-43",
+        "text": "R. Sing to the LORD and praise his name.\n\nSing to the LORD, sing his praise;\nproclaim all his wondrous deeds!\nGlory in his holy name;\nrejoice, O hearts that seek the LORD!\n\nR. Sing to the LORD and praise his name.\n\nHe struck down all the firstborn in their land,\nthe first fruits of all their strength.\nHe brought his people forth laden with silver and gold;\nand there was not among his tribes one who stumbled.\n\nR. Sing to the LORD and praise his name.\n\nFor he remembered his holy promise\nto his servant Abraham.\nHe brought forth his people with gladness;\nwith shouts of joy, his chosen ones.\n\nR. Sing to the LORD and praise his name.",
+        "response": "Sing to the LORD and praise his name.",
+        "title": "Responsorial Psalm",
+        "audioUrl": null
+      },
+      "secondReading": null,
+      "gospel": {
+        "reference": "Luke 18:1-8",
+        "citation": "Lk 18:1-8",
+        "text": "Jesus told his disciples a parable\nabout the necessity for them to pray always without becoming weary.\nHe said, \"There was a judge in a certain town\nwho neither feared God nor respected any human being.\nAnd a widow in that town used to come to him and say,\n'Render a just decision for me against my adversary.'\nFor a long time the judge was unwilling, but eventually he thought,\n'While it is true that I neither fear God nor respect any human being,\nbecause this widow keeps bothering me\nI shall deliver a just decision for her\nlest she finally come and strike me.'\"  \nThe Lord said, \"Pay attention to what the dishonest judge says.\nWill not God then secure the rights of his chosen ones\nwho call out to him day and night?\nWill he be slow to answer them?\nI tell you, he will see to it that justice is done for them speedily.\nBut when the Son of Man comes,\nwill he find faith on earth?\"",
+        "title": "Gospel",
+        "audioUrl": null
+      },
+      "metadata": {
+        "source": "USCCB",
+        "validated": true
+      }
+    },
+    "2025-11-09": {
+      "date": "2025-11-09",
+      "liturgicalDate": {
+        "season": "Ordinary Time",
+        "week": 33,
+        "dayOfWeek": "Sunday",
+        "feastDay": null,
+        "liturgicalTitle": "Thirty-third Sunday in Ordinary Time",
+        "color": "green"
+      },
+      "firstReading": {
+        "reference": "Malachi 3:19-20b",
+        "citation": "Mal 3:19-20b",
+        "text": "Lo, the day is coming, blazing like an oven,\nwhen all the proud and all evildoers will be stubble;\nand the day that is coming will set them on fire,\nleaving them neither root nor branch,\nsays the LORD of hosts.\nBut for you who fear my name, there will arise\nthe sun of justice with its healing rays.",
+        "title": "First Reading",
+        "audioUrl": null
+      },
+      "psalm": {
+        "reference": "Psalm 98:5-6, 7-8, 9",
+        "citation": "Ps 98:5-6, 7-8, 9",
+        "text": "R. The Lord comes to rule the earth with justice.\n\nSing praise to the LORD on the harp,\non the harp and melodious song.\nWith trumpets and the sound of the horn\nsing joyfully before the King, the LORD.\n\nR. The Lord comes to rule the earth with justice.\n\nLet the sea and what fills it resound,\nthe world and those who dwell in it;\nLet the rivers clap their hands,\nthe hills ring out their joy\n\nR. The Lord comes to rule the earth with justice.\n\nBefore the LORD, for he comes,\nfor he comes to rule the earth;\nHe will rule the world with justice\nand the peoples with equity.\n\nR. The Lord comes to rule the earth with justice.",
+        "response": "The Lord comes to rule the earth with justice.",
+        "title": "Responsorial Psalm",
+        "audioUrl": null
+      },
+      "secondReading": {
+        "reference": "2 Thessalonians 3:7-12",
+        "citation": "2 Thes 3:7-12",
+        "text": "Brothers and sisters:\nYou know how one must imitate us.\nFor we did not act in a disorderly way among you,\nnor did we eat food received free from anyone.\nInstead, in toil and drudgery, night and day\nwe worked, so as not to burden any of you.\nNot that we do not have the right.\nRather, we wanted to present ourselves as a model for you,\nso that you might imitate us.\nIn fact, when we were with you,\nwe instructed you that if anyone was unwilling to work,\nneither should that one eat.\nWe hear that some are conducting themselves among you in a disorderly way,\nby not keeping busy but meddling in the affairs of others.\nSuch people we instruct and urge in the Lord Jesus Christ\nto work quietly and to eat food they have earned.",
+        "title": "Second Reading",
+        "audioUrl": null
+      },
+      "gospel": {
+        "reference": "Luke 21:5-19",
+        "citation": "Lk 21:5-19",
+        "text": "While some people were speaking about how the temple was adorned with costly stones and votive offerings,\nJesus said, \"All that you see here—the days will come when there will not be left a stone upon another stone.\"\nThen they asked him, \"Teacher, when will this happen? And what sign will there be when all these things are about to happen?\"\nHe answered, \"See that you not be deceived, for many will come in my name, saying, 'I am he,' and 'The time has come.' Do not follow them! When you hear of wars and insurrections, do not be terrified; for such things must happen first, but it will not immediately be the end.\" Then he said to them, \"Nation will rise against nation, and kingdom against kingdom. There will be great earthquakes, famines, and plagues in various places; and there will be awesome sights and mighty signs from the sky. But before all this happens, they will seize and persecute you, they will hand you over to the synagogues and to prisons, and they will have you led before kings and governors because of my name. It will lead to your testimony. Remember, you are not to prepare your defense beforehand, for I myself shall give you a wisdom in speaking that all your adversaries will be powerless to resist or refute. You will even be handed over by parents, brothers, relatives, and friends, and they will put some of you to death. You will be hated by all because of my name, but not a hair on your head will be destroyed. By your perseverance you will secure your lives.",
+        "title": "Gospel",
+        "audioUrl": null
+      },
+      "metadata": {
+        "source": "USCCB",
+        "validated": true
+      }
+    }
+  },
+  "checksums": {
+    "global": "actual-readings-bundle"
+  }
+}

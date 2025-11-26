@@ -28,7 +28,6 @@ import {
   Switch,
   ActivityIndicator,
   Alert,
-  Linking,
 } from 'react-native';
 import { useAuth } from '@/hooks/useAuth';
 import { useProfileStore } from '@/stores/useProfileStore';
@@ -268,28 +267,6 @@ const SettingsScreen: React.FC = () => {
           onPress={handleDeleteAccount}
         >
           <Text style={styles.dangerButtonText}>Delete Account</Text>
-        </TouchableOpacity>
-      </SettingsSection>
-
-      {/* Legal & Compliance Section */}
-      <SettingsSection title="Legal & Compliance">
-        <TouchableOpacity
-          style={styles.settingButton}
-          onPress={() => Linking.openURL('https://raw.githubusercontent.com/louispage/ReadingDaily-Scripture-App/main/docs/legal/LEGAL_CONTENT_PRIVACY_POLICY.md')}
-        >
-          <Text style={styles.settingButtonText}>Privacy Policy</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.settingButton}
-          onPress={() => Linking.openURL('https://raw.githubusercontent.com/louispage/ReadingDaily-Scripture-App/main/docs/legal/LEGAL_CONTENT_TERMS_OF_SERVICE.md')}
-        >
-          <Text style={styles.settingButtonText}>Terms of Service</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.settingButton}
-          onPress={() => Linking.openURL('https://raw.githubusercontent.com/louispage/ReadingDaily-Scripture-App/main/ACCESSIBILITY_STATEMENT.md')}
-        >
-          <Text style={styles.settingButtonText}>Accessibility Statement</Text>
         </TouchableOpacity>
       </SettingsSection>
 

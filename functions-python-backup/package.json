@@ -1,0 +1,32 @@
+{
+  "name": "readingdaily-functions",
+  "version": "1.0.0",
+  "description": "Firebase Cloud Functions for ReadingDaily Scripture App",
+  "main": "lib/index.js",
+  "scripts": {
+    "build": "tsc",
+    "serve": "npm run build && firebase emulators:start --only functions",
+    "shell": "npm run build && firebase functions:shell",
+    "start": "npm run shell",
+    "deploy": "firebase deploy --only functions",
+    "logs": "firebase functions:log"
+  },
+  "engines": {
+    "node": "20"
+  },
+  "dependencies": {
+    "microsoft-cognitiveservices-speech-sdk": "^1.36.0",
+    "dotenv": "^16.0.0",
+    "firebase-admin": "^12.0.0",
+    "firebase-functions": "^5.0.0",
+    "googleapis": "^131.0.0",
+    "node-fetch": "^2.7.0",
+    "stripe": "^14.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "firebase-functions-test": "^3.1.0",
+    "typescript": "^5.3.0"
+  },
+  "private": true
+}

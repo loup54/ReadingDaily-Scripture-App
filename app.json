@@ -1,0 +1,46 @@
+{
+  "expo": {
+    "name": "ReadingDaily Scripture App",
+    "slug": "readingdaily-scripture-app",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#7C3AED"
+    },
+    "ios": {
+      "supportsTabletMode": true,
+      "splash": {
+        "image": "./assets/splash.png",
+        "resizeMode": "contain",
+        "backgroundColor": "#7C3AED"
+      }
+    },
+    "android": {
+      "useNextNotificationChannelOnAndroid": true,
+      "splash": {
+        "image": "./assets/splash.png",
+        "resizeMode": "contain",
+        "backgroundColor": "#7C3AED"
+      }
+    },
+    "plugins": [
+      [
+        "expo-build-properties",
+        {
+          "ios": {
+            "useFrameworks": "static"
+          },
+          "android": {
+            "useNextNotificationChannelOnAndroid": true
+          }
+        }
+      ]
+    ]
+  }
+}

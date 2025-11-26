@@ -1,0 +1,93 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // Purchases collection
+    // Users can only read their own purchases
+    // Only Cloud Functions can write purchases
+    match /purchases/{purchaseId} {
+      // Read: User can read their own purchases
+      allow read: if isAuthenticated() &&
+                     resource.data.userId == request.auth.uid;
+
+      // Write: Only allow from server (Cloud Functions have admin access)
+      // Client cannot create/update/delete purchases
+      allow write: if false;
+    }
+
+    // Trial data collection (if needed)
+    match /trials/{trialId} {
+      // Users can read/write their own trial data
+      allow read, write: if isAuthenticated() &&
+                            resource.data.userId == request.auth.uid;
+    }
+
+    // Readings collection (Daily scripture readings)
+    match /readings/{date} {
+      // Read: Anyone can read readings (public content)
+      allow read: if true;
+      // Write: Only Cloud Functions can write (via admin SDK)
+      allow write: if false;
+
+      // Word timing data for highlighting (subcollection)
+      match /timings/{readingType} {
+        // Read: Anyone can read timing data (needed for word-level highlighting)
+        allow read: if true;
+        // Write: Only Cloud Functions can write (via admin SDK)
+        allow write: if false;
+      }
+    }
+
+    // Users collection (User profiles)
+    match /users/{userId} {
+      // Read/Write: Users can access their own data
+      allow read, write: if isOwner(userId);
+
+      // User progress tracking (streaks, badges)
+      match /progress/{document=**} {
+        allow read, write: if isOwner(userId);
+      }
+
+      // User readings log (individual reading records)
+      // Users record their completed readings here
+      match /readings/{document=**} {
+        allow read, write: if isOwner(userId);
+      }
+
+      // User gift history (received gifts)
+      match /giftHistory/{document=**} {
+        allow read, write: if isOwner(userId);
+      }
+    }
+
+    // Gift codes collection (Subscription gifting system)
+    match /giftCodes/{giftCode} {
+      // Read: Anyone can read gift codes (needed to validate before redemption)
+      allow read: if true;
+      // Write: Only Cloud Functions can write (via admin SDK)
+      allow write: if false;
+    }
+
+    // Redemptions collection (Gift redemption audit trail)
+    match /redemptions/{document=**} {
+      // Read: Only authorized users can read redemption records
+      allow read: if isAuthenticated();
+      // Write: Only Cloud Functions can write (via admin SDK)
+      allow write: if false;
+    }
+
+    // Default: Deny all access to other collections
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

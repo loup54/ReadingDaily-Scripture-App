@@ -1,0 +1,43 @@
+{
+  "functions": [
+    {
+      "source": "functions",
+      "codebase": "default",
+      "ignore": [
+        "node_modules",
+        "venv",
+        "__pycache__",
+        ".git",
+        "firebase-debug.log",
+        "firebase-debug.*.log",
+        "*.local",
+        "test_scraper.py",
+        "populate_readings.py",
+        "main.py",
+        "*.py",
+        "scrapers",
+        "scripts"
+      ]
+    }
+  ],
+  "firestore": {
+    "database": "(default)",
+    "location": "australia-southeast1",
+    "rules": "functions/firestore.rules",
+    "indexes": "firestore.indexes.json"
+  },
+  "storage": {
+    "rules": "storage.rules"
+  },
+  "hosting": {
+    "public": "public",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ]
+  },
+  "database": {
+    "rules": "database.rules.json"
+  }
+}
