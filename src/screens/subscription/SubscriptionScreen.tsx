@@ -196,88 +196,102 @@ export const SubscriptionScreen: React.FC<SubscriptionScreenProps> = ({
           {!hasPurchased && (
             <>
               {/* Lifetime Access Card */}
-              <View style={styles.pricingCard}>
-                <View style={styles.pricingHeader}>
-                  <Text style={styles.pricingTitle}>Lifetime Access</Text>
-                  <View style={styles.priceBadge}>
-                    <Text style={styles.priceAmount}>${lifetimePrice}</Text>
-                    <Text style={styles.priceLabel}>one-time</Text>
+              <LinearGradient
+                colors={[colors.primary + '15', colors.secondary + '15']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.pricingCardGradient}
+              >
+                <View style={[styles.pricingCard, { backgroundColor: colors.card }]}>
+                  <View style={styles.pricingHeader}>
+                    <View style={styles.badgeContainer}>
+                      <View style={[styles.bestValueBadge, { backgroundColor: colors.primary + '20' }]}>
+                        <Text style={[styles.badgeText, { color: colors.primary }]}>BEST VALUE</Text>
+                      </View>
+                    </View>
+                    <Text style={[styles.pricingTitle, { color: colors.text }]}>Lifetime Access</Text>
+                    <View style={styles.priceBadge}>
+                      <Text style={[styles.priceAmount, { color: colors.primary }]}>${lifetimePrice}</Text>
+                      <Text style={[styles.priceLabel, { color: colors.textSecondary }]}>one-time payment</Text>
+                    </View>
                   </View>
-                </View>
 
-                <View style={styles.featuresList}>
-                  <View style={styles.featureRow}>
-                    <Ionicons
-                      name="checkmark-circle"
-                      size={20}
-                      color={Colors.accent.green}
-                    />
-                    <Text style={styles.featureText}>
-                      Unlimited daily scripture readings
-                    </Text>
-                  </View>
-                  <View style={styles.featureRow}>
-                    <Ionicons
-                      name="checkmark-circle"
-                      size={20}
-                      color={Colors.accent.green}
-                    />
-                    <Text style={styles.featureText}>
-                      Audio playback with adjustable speed
-                    </Text>
-                  </View>
-                  <View style={styles.featureRow}>
-                    <Ionicons
-                      name="checkmark-circle"
-                      size={20}
-                      color={Colors.accent.green}
-                    />
-                    <Text style={styles.featureText}>
-                      Multiple translation options
-                    </Text>
-                  </View>
-                  <View style={styles.featureRow}>
-                    <Ionicons
-                      name="checkmark-circle"
-                      size={20}
-                      color={Colors.accent.green}
-                    />
-                    <Text style={styles.featureText}>
-                      Practice mode (coming soon)
-                    </Text>
-                  </View>
-                  <View style={styles.featureRow}>
-                    <Ionicons
-                      name="checkmark-circle"
-                      size={20}
-                      color={Colors.accent.green}
-                    />
-                    <Text style={styles.featureText}>
-                      Progress tracking
-                    </Text>
-                  </View>
-                  <View style={styles.featureRow}>
-                    <Ionicons
-                      name="checkmark-circle"
-                      size={20}
-                      color={Colors.accent.green}
-                    />
-                    <Text style={styles.featureText}>
-                      No subscription fees
-                    </Text>
-                  </View>
-                </View>
+                  <View style={[styles.divider, { backgroundColor: colors.border }]} />
 
-                <Button
-                  title={`Purchase for $${lifetimePrice}`}
-                  variant="accent"
-                  size="lg"
-                  fullWidth
-                  onPress={handlePurchase}
-                  loading={purchasing}
-                  style={styles.purchaseButton}
-                />
-              </View>
+                  <View style={styles.featuresList}>
+                    <View style={styles.featureRow}>
+                      <Ionicons
+                        name="checkmark-circle"
+                        size={20}
+                        color={colors.primary}
+                      />
+                      <Text style={[styles.featureText, { color: colors.text }]}>
+                        Unlimited daily scripture readings
+                      </Text>
+                    </View>
+                    <View style={styles.featureRow}>
+                      <Ionicons
+                        name="checkmark-circle"
+                        size={20}
+                        color={colors.primary}
+                      />
+                      <Text style={[styles.featureText, { color: colors.text }]}>
+                        Audio playback with adjustable speed
+                      </Text>
+                    </View>
+                    <View style={styles.featureRow}>
+                      <Ionicons
+                        name="checkmark-circle"
+                        size={20}
+                        color={colors.primary}
+                      />
+                      <Text style={[styles.featureText, { color: colors.text }]}>
+                        Multiple translation options
+                      </Text>
+                    </View>
+                    <View style={styles.featureRow}>
+                      <Ionicons
+                        name="checkmark-circle"
+                        size={20}
+                        color={colors.primary}
+                      />
+                      <Text style={[styles.featureText, { color: colors.text }]}>
+                        Practice mode (coming soon)
+                      </Text>
+                    </View>
+                    <View style={styles.featureRow}>
+                      <Ionicons
+                        name="checkmark-circle"
+                        size={20}
+                        color={colors.primary}
+                      />
+                      <Text style={[styles.featureText, { color: colors.text }]}>
+                        Progress tracking
+                      </Text>
+                    </View>
+                    <View style={styles.featureRow}>
+                      <Ionicons
+                        name="checkmark-circle"
+                        size={20}
+                        color={colors.primary}
+                      />
+                      <Text style={[styles.featureText, { color: colors.text }]}>
+                        No subscription fees
+                      </Text>
+                    </View>
+                  </View>
+
+                  <Button
+                    title={`Purchase for $${lifetimePrice}`}
+                    variant="accent"
+                    size="lg"
+                    fullWidth
+                    onPress={handlePurchase}
+                    loading={purchasing}
+                    style={styles.purchaseButton}
+                  />
+                </View>
+              </LinearGradient>
 
               {/* Trial Section */}
               {!isActive && !hasExpired && (
@@ -403,23 +417,36 @@ const styles = StyleSheet.create({
     color: Colors.text.secondary,
     textAlign: 'center',
   },
-  pricingCard: {
-    backgroundColor: Colors.background.card,
+  pricingCardGradient: {
     borderRadius: BorderRadius.xl,
-    padding: Spacing.lg,
+    padding: 2,
     marginBottom: Spacing.lg,
     ...Shadows.md,
+  },
+  pricingCard: {
+    borderRadius: BorderRadius.xl,
+    padding: Spacing.lg,
   },
   pricingHeader: {
     alignItems: 'center',
     marginBottom: Spacing.lg,
     paddingBottom: Spacing.lg,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.ui.divider,
+  },
+  badgeContainer: {
+    marginBottom: Spacing.md,
+  },
+  bestValueBadge: {
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.xs,
+    borderRadius: BorderRadius.full,
+  },
+  badgeText: {
+    fontSize: 11,
+    fontWeight: '700',
+    letterSpacing: 0.5,
   },
   pricingTitle: {
     ...Typography.h2,
-    color: Colors.text.primary,
     marginBottom: Spacing.md,
   },
   priceBadge: {
@@ -427,13 +454,15 @@ const styles = StyleSheet.create({
   },
   priceAmount: {
     ...Typography.displayLarge,
-    color: Colors.primary.blue,
     fontWeight: '700',
   },
   priceLabel: {
     ...Typography.caption,
-    color: Colors.text.secondary,
     marginTop: Spacing.xs,
+  },
+  divider: {
+    height: 1,
+    marginBottom: Spacing.lg,
   },
   featuresList: {
     marginBottom: Spacing.lg,
@@ -445,7 +474,6 @@ const styles = StyleSheet.create({
   },
   featureText: {
     ...Typography.body,
-    color: Colors.text.primary,
     marginLeft: Spacing.sm,
     flex: 1,
   },
