@@ -15,6 +15,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { IconButton } from '@/components/common/IconButton';
 import { PracticeSentence } from '@/types/practice.types';
 import { Colors, Typography, Spacing, BorderRadius, Shadows } from '@/constants';
+import { useTheme } from '@/hooks/useTheme';
 
 interface PracticeSentenceDisplayProps {
   sentence: PracticeSentence;
@@ -70,6 +71,8 @@ export const PracticeSentenceDisplay: React.FC<PracticeSentenceDisplayProps> = (
   recordingDisabled = false,
   onModalClose,
 }) => {
+  const { colors } = useTheme();
+
   // Use sentence-level callbacks if available, otherwise fall back to legacy callbacks
   const handlePreviousSentence = onPreviousSentence || onPrevious;
   const handleNextSentence = onNextSentence || onNext;
@@ -112,14 +115,16 @@ export const PracticeSentenceDisplay: React.FC<PracticeSentenceDisplayProps> = (
     <View style={styles.container}>
       {/* TOP HEADER: Left Arrow | Difficulty Badge | Right Arrow | Record Button */}
       {showNavigation && (
-        <View style={styles.topHeaderRow}>
+        <View style={[styles.topHeaderRow, { backgroundColor: colors.card }]}>
           {/* Left Arrow - Navigate readings (LARGER) */}
           <IconButton
             icon="chevron-back"
             onPress={() => handlePreviousReading?.()}
             size="lg"
             variant="default"
+            color={colors.primary}
             disabled={isFirstReading || !handlePreviousReading}
+            accessibilityLabel="Previous reading"
           />
 
           {/* Difficulty Badge - Center (SMALLER) */}
@@ -150,7 +155,9 @@ export const PracticeSentenceDisplay: React.FC<PracticeSentenceDisplayProps> = (
             onPress={() => handleNextReading?.()}
             size="lg"
             variant="default"
+            color={colors.primary}
             disabled={isLastReading || !handleNextReading}
+            accessibilityLabel="Next reading"
           />
 
           {/* Small Record Button - Top Right */}
@@ -234,7 +241,9 @@ export const PracticeSentenceDisplay: React.FC<PracticeSentenceDisplayProps> = (
               onPress={() => handlePreviousSentence?.()}
               size="md"
               variant="default"
+              color={colors.primary}
               disabled={!handlePreviousSentence}
+              accessibilityLabel="Previous sentence"
             />
             <View style={styles.dotsContainer}>
               {Array.from({ length: totalSentences }).map((_, index) => (
@@ -244,7 +253,7 @@ export const PracticeSentenceDisplay: React.FC<PracticeSentenceDisplayProps> = (
                     styles.dot,
                     index === currentIndex && styles.dotActive,
                     index === currentIndex && {
-                      backgroundColor: Colors.primary.blue,
+                      backgroundColor: colors.primary,
                     },
                   ]}
                 />
@@ -255,7 +264,9 @@ export const PracticeSentenceDisplay: React.FC<PracticeSentenceDisplayProps> = (
               onPress={() => handleNextSentence?.()}
               size="md"
               variant="default"
+              color={colors.primary}
               disabled={!handleNextSentence}
+              accessibilityLabel="Next sentence"
             />
           </View>
 
@@ -290,7 +301,6 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.md,
     gap: Spacing.sm,
     marginBottom: Spacing.lg,
-    backgroundColor: Colors.background.secondary,
     borderRadius: BorderRadius.lg,
   },
   difficultyBadge: {
