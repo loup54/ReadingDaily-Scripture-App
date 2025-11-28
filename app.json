@@ -17,6 +17,7 @@
       "bundleIdentifier": "com.readingdaily.scripture",
       "buildNumber": "1",
       "supportsTabletMode": true,
+      "deploymentTarget": "15.1",
       "splash": {
         "image": "./assets/splash.png",
         "resizeMode": "contain",
@@ -39,7 +40,8 @@
         "expo-build-properties",
         {
           "ios": {
-            "useFrameworks": "dynamic"
+            "useFrameworks": "dynamic",
+            "deploymentTarget": "15.1"
           },
           "android": {
             "useNextNotificationChannelOnAndroid": true
