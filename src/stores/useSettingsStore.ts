@@ -25,6 +25,8 @@ import { SyncQueueService } from '@/services/offline/SyncQueueService';
 interface OnboardingState {
   completed: boolean;
   completedAt?: number;
+  legalAccepted: boolean; // First-time users must accept legal documents
+  legalAcceptedAt?: number;
   featuresDiscovered: string[];
   lastSeenFeatureTip?: string;
 }
@@ -58,6 +60,7 @@ interface SettingsStoreState {
 
   // Onboarding actions
   setOnboardingCompleted: () => void;
+  setLegalAccepted: () => void;
   addDiscoveredFeature: (featureName: string) => void;
   hasDiscoveredFeature: (featureName: string) => boolean;
 
@@ -78,6 +81,7 @@ export const useSettingsStore = create<SettingsStoreState>()(
       error: null,
       onboarding: {
         completed: false,
+        legalAccepted: false,
         featuresDiscovered: [],
       },
       settingsMode: {
@@ -386,6 +390,17 @@ export const useSettingsStore = create<SettingsStoreState>()(
             ...state.onboarding,
             completed: true,
             completedAt: Date.now(),
+          },
+        }));
+      },
+
+      // Set legal documents as accepted (required for first-time users)
+      setLegalAccepted: () => {
+        set((state) => ({
+          onboarding: {
+            ...state.onboarding,
+            legalAccepted: true,
+            legalAcceptedAt: Date.now(),
           },
         }));
       },

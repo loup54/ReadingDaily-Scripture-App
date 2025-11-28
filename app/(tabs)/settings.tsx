@@ -26,6 +26,18 @@ export default function SettingsTab() {
     router.push('/(tabs)/help');
   };
 
+  const handleLegalDocuments = () => {
+    router.push('/(tabs)/legal-documents');
+  };
+
+  const handleBackupExport = () => {
+    router.push('/(tabs)/backup-export');
+  };
+
+  const handleComplianceAnalytics = () => {
+    router.push('/(tabs)/compliance-analytics');
+  };
+
   const handleLogout = () => {
     Alert.alert(
       'Log Out',
@@ -77,6 +89,9 @@ export default function SettingsTab() {
       onLogout={handleLogout}
       onDeleteAccount={handleDeleteAccount}
       onHelpFAQ={handleHelpFAQ}
+      onLegalDocuments={handleLegalDocuments}
+      onBackupExport={handleBackupExport}
+      onComplianceAnalytics={handleComplianceAnalytics}
     />
   );
 }

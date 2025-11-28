@@ -117,7 +117,7 @@ export const SubscriptionScreen: React.FC<SubscriptionScreenProps> = ({
       await startTrial();
       Alert.alert(
         'Trial Started!',
-        'Your 10-minute free trial has begun. Enjoy full access!',
+        'Your 7-day free trial has begun. Enjoy full access!',
         [{ text: 'OK', onPress: onBack }]
       );
     } catch (error) {
@@ -155,7 +155,7 @@ export const SubscriptionScreen: React.FC<SubscriptionScreenProps> = ({
 
     return {
       title: 'Trial Available',
-      subtitle: 'Start your 10-minute free trial',
+      subtitle: 'Start your 7-day free trial',
       icon: 'gift' as const,
       color: Colors.accent.green,
     };
@@ -298,7 +298,7 @@ export const SubscriptionScreen: React.FC<SubscriptionScreenProps> = ({
                 <View style={styles.trialCard}>
                   <Text style={styles.trialTitle}>Try Before You Buy</Text>
                   <Text style={styles.trialSubtitle}>
-                    Start a 10-minute free trial to explore all features
+                    Start a 7-day free trial to explore all features
                   </Text>
                   <Button
                     title="Start Free Trial"

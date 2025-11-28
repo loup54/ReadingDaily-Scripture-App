@@ -259,7 +259,7 @@ export const PaywallScreen: React.FC<PaywallScreenProps> = ({
           {/* Fine Print */}
           <Text style={[styles.finePrint, { color: colors.text.white }]}>
             By purchasing, you agree to our Terms of Service and Privacy Policy.
-            Purchase is final and non-refundable. Questions? Contact support@readingdaily.com
+            Purchase is final and non-refundable. Questions? Contact ourenglish2019@gmail.com
           </Text>
         </ScrollView>
       </LinearGradient>

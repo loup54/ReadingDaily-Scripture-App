@@ -26,6 +26,7 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { useTheme } from '@/hooks/useTheme';
 import { useAuthStore } from '@/stores/useAuthStore';
 import {
   useNotificationHistory,
@@ -44,6 +45,7 @@ import { EmptyState } from '@/components/common/EmptyState';
  */
 export function NotificationCenterScreen() {
   const router = useRouter();
+  const { colors } = useTheme();
   const user = useAuthStore((state) => state.user);
   const userId = user?.uid || '';
 
@@ -187,37 +189,37 @@ export function NotificationCenterScreen() {
   const notifications = filteredNotifications();
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.background.primary }]}>
       {/* Header */}
-      <View style={styles.header}>
+      <View style={[styles.header, { backgroundColor: colors.background.secondary, borderBottomColor: colors.ui.border }]}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-          <Ionicons name="chevron-back" size={24} color="#007AFF" />
+          <Ionicons name="chevron-back" size={24} color={colors.primary.blue} />
         </TouchableOpacity>
-        <Text style={styles.title}>Notifications</Text>
+        <Text style={[styles.title, { color: colors.text.primary }]}>Notifications</Text>
         {unreadCount > 0 && (
-          <View style={styles.badgeContainer}>
+          <View style={[styles.badgeContainer, { backgroundColor: colors.accent.red }]}>
             <Text style={styles.badgeText}>{unreadCount}</Text>
           </View>
         )}
       </View>
 
       {/* Search Bar */}
-      <View style={styles.searchContainer}>
+      <View style={[styles.searchContainer, { backgroundColor: colors.background.secondary }]}>
         <TextInput
-          style={styles.searchInput}
+          style={[styles.searchInput, { backgroundColor: colors.background.card, color: colors.text.primary, borderColor: colors.ui.border }]}
           placeholder="Search notifications..."
+          placeholderTextColor={colors.text.secondary}
           value={searchText}
           onChangeText={setSearchText}
-          placeholderTextColor="#999"
         />
       </View>
 
       {/* Filter Toggle */}
       <TouchableOpacity
-        style={styles.filterToggle}
+        style={[styles.filterToggle, { backgroundColor: colors.background.secondary }]}
         onPress={() => setShowFilters(!showFilters)}
       >
-        <Text style={styles.filterToggleText}>
+        <Text style={[styles.filterToggleText, { color: colors.primary.blue }]}>
           {showFilters ? '▼ Hide Filters' : '▶ Show Filters'}
         </Text>
       </TouchableOpacity>
@@ -225,13 +227,13 @@ export function NotificationCenterScreen() {
       {/* Filters */}
       {showFilters && (
         <ScrollView
-          style={styles.filtersContainer}
+          style={[styles.filtersContainer, { backgroundColor: colors.background.secondary }]}
           horizontal
           showsHorizontalScrollIndicator={false}
         >
           {/* Type Filter */}
           <View style={styles.filterGroup}>
-            <Text style={styles.filterLabel}>Type</Text>
+            <Text style={[styles.filterLabel, { color: colors.text.primary }]}>Type</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterOptions}>
               {['all', 'daily_reminder', 'achievement_unlocked', 'performance_insight'].map(
                 (type) => (
@@ -239,14 +241,16 @@ export function NotificationCenterScreen() {
                     key={type}
                     style={[
                       styles.filterButton,
-                      selectedType === type && styles.filterButtonActive,
+                      { backgroundColor: colors.background.card, borderColor: colors.ui.border },
+                      selectedType === type && { backgroundColor: colors.primary.blue },
                     ]}
                     onPress={() => setSelectedType(type as any)}
                   >
                     <Text
                       style={[
                         styles.filterButtonText,
-                        selectedType === type && styles.filterButtonTextActive,
+                        { color: colors.text.primary },
+                        selectedType === type && { color: colors.text.white },
                       ]}
                     >
                       {type === 'all' ? 'All' : type.replace('_', ' ')}
@@ -259,21 +263,23 @@ export function NotificationCenterScreen() {
 
           {/* Status Filter */}
           <View style={styles.filterGroup}>
-            <Text style={styles.filterLabel}>Status</Text>
+            <Text style={[styles.filterLabel, { color: colors.text.primary }]}>Status</Text>
             <View style={styles.filterOptions}>
               {(['all', 'read', 'unread'] as const).map((status) => (
                 <TouchableOpacity
                   key={status}
                   style={[
                     styles.filterButton,
-                    selectedStatus === status && styles.filterButtonActive,
+                    { backgroundColor: colors.background.card, borderColor: colors.ui.border },
+                    selectedStatus === status && { backgroundColor: colors.primary.blue },
                   ]}
                   onPress={() => setSelectedStatus(status)}
                 >
                   <Text
                     style={[
                       styles.filterButtonText,
-                      selectedStatus === status && styles.filterButtonTextActive,
+                      { color: colors.text.primary },
+                      selectedStatus === status && { color: colors.text.white },
                     ]}
                   >
                     {status === 'all' ? 'All' : status}
@@ -285,21 +291,23 @@ export function NotificationCenterScreen() {
 
           {/* Sort */}
           <View style={styles.filterGroup}>
-            <Text style={styles.filterLabel}>Sort</Text>
+            <Text style={[styles.filterLabel, { color: colors.text.primary }]}>Sort</Text>
             <View style={styles.filterOptions}>
               {['date-desc', 'date-asc', 'type'].map((sort) => (
                 <TouchableOpacity
                   key={sort}
                   style={[
                     styles.filterButton,
-                    sortBy === sort && styles.filterButtonActive,
+                    { backgroundColor: colors.background.card, borderColor: colors.ui.border },
+                    sortBy === sort && { backgroundColor: colors.primary.blue },
                   ]}
                   onPress={() => setSortBy(sort as any)}
                 >
                   <Text
                     style={[
                       styles.filterButtonText,
-                      sortBy === sort && styles.filterButtonTextActive,
+                      { color: colors.text.primary },
+                      sortBy === sort && { color: colors.text.white },
                     ]}
                   >
                     {sort === 'date-desc'
@@ -325,10 +333,11 @@ export function NotificationCenterScreen() {
               notification={item}
               onMarkAsRead={() => handleMarkAsRead(item)}
               onDelete={() => handleDelete(item)}
+              colors={colors}
             />
           )}
           refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+            <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor={colors.primary.blue} />
           }
           contentContainerStyle={styles.listContent}
         />
@@ -372,10 +381,12 @@ function NotificationListItem({
   notification,
   onMarkAsRead,
   onDelete,
+  colors,
 }: {
   notification: NotificationHistory;
   onMarkAsRead: () => void;
   onDelete: () => void;
+  colors: any;
 }) {
   const isUnread = !notification.readAt;
   const formattedDate = new Date(notification.sentAt).toLocaleDateString('en-US', {
@@ -385,43 +396,73 @@ function NotificationListItem({
     minute: '2-digit',
   });
 
+  const getNotificationIcon = (type: NotificationType) => {
+    switch (type) {
+      case 'daily_reminder':
+        return 'calendar';
+      case 'achievement_unlocked':
+        return 'trophy';
+      case 'performance_insight':
+        return 'stats-chart';
+      default:
+        return 'notifications';
+    }
+  };
+
+  const getNotificationColor = (type: NotificationType) => {
+    switch (type) {
+      case 'daily_reminder':
+        return colors.primary.blue;
+      case 'achievement_unlocked':
+        return colors.accent.green;
+      case 'performance_insight':
+        return colors.primary.purple;
+      default:
+        return colors.text.secondary;
+    }
+  };
+
+  const notificationType = notification.notificationType as NotificationType;
+  const notifColor = getNotificationColor(notificationType);
+
   return (
-    <View style={[styles.notificationItem, isUnread && styles.notificationItemUnread]}>
+    <View style={[styles.notificationItem, { backgroundColor: colors.background.card, borderLeftColor: notifColor }, isUnread && { backgroundColor: colors.background.secondary }]}>
       <TouchableOpacity
         style={styles.notificationContent}
         onPress={onMarkAsRead}
         activeOpacity={0.7}
       >
-        {/* Unread Indicator */}
-        {isUnread && <View style={styles.unreadDot} />}
+        {/* Icon */}
+        <Ionicons name={getNotificationIcon(notificationType)} size={24} color={notifColor} style={styles.notificationIcon} />
 
         {/* Content */}
         <View style={styles.notificationTextContainer}>
-          <Text style={[styles.notificationTitle, isUnread && styles.notificationTitleUnread]}>
+          <Text style={[styles.notificationTitle, { color: colors.text.primary }, isUnread && { fontWeight: '700' }]}>
             {notification.title}
           </Text>
-          <Text style={styles.notificationBody} numberOfLines={2}>
+          <Text style={[styles.notificationBody, { color: colors.text.secondary }]} numberOfLines={2}>
             {notification.body}
           </Text>
-          <Text style={styles.notificationDate}>{formattedDate}</Text>
+          <Text style={[styles.notificationDate, { color: colors.text.tertiary }]}>{formattedDate}</Text>
         </View>
+
+        {/* Unread Indicator */}
+        {isUnread && <View style={[styles.unreadDot, { backgroundColor: notifColor }]} />}
       </TouchableOpacity>
 
       {/* Actions */}
       <View style={styles.notificationActions}>
         <TouchableOpacity
-          style={styles.actionButton}
+          style={[styles.actionButton, { backgroundColor: colors.background.secondary }]}
           onPress={onMarkAsRead}
         >
-          <Text style={styles.actionButtonText}>
-            {isUnread ? '✓' : '✓✓'}
-          </Text>
+          <Ionicons name={isUnread ? 'checkmark' : 'checkmark-done'} size={16} color={colors.primary.blue} />
         </TouchableOpacity>
         <TouchableOpacity
-          style={[styles.actionButton, styles.deleteButton]}
+          style={[styles.actionButton, { backgroundColor: colors.background.secondary }]}
           onPress={onDelete}
         >
-          <Text style={styles.deleteButtonText}>✕</Text>
+          <Ionicons name="trash" size={16} color={colors.accent.red} />
         </TouchableOpacity>
       </View>
     </View>
@@ -431,7 +472,6 @@ function NotificationListItem({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
   },
   header: {
     flexDirection: 'row',
@@ -440,15 +480,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#F0F0F0',
   },
   title: {
     fontSize: 24,
     fontWeight: '700',
-    color: '#000',
   },
   badgeContainer: {
-    backgroundColor: '#FF3B30',
     borderRadius: 12,
     paddingHorizontal: 8,
     paddingVertical: 4,
@@ -465,35 +502,27 @@ const styles = StyleSheet.create({
   searchContainer: {
     paddingHorizontal: 16,
     paddingVertical: 12,
-    backgroundColor: '#F9F9F9',
   },
   searchInput: {
-    backgroundColor: '#FFFFFF',
     borderWidth: 1,
-    borderColor: '#E0E0E0',
     borderRadius: 8,
     paddingHorizontal: 12,
     paddingVertical: 10,
     fontSize: 14,
-    color: '#000',
   },
   filterToggle: {
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#F0F0F0',
   },
   filterToggleText: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#007AFF',
   },
   filtersContainer: {
     paddingHorizontal: 16,
     paddingVertical: 12,
-    backgroundColor: '#F9F9F9',
     borderBottomWidth: 1,
-    borderBottomColor: '#F0F0F0',
   },
   filterGroup: {
     marginRight: 16,
@@ -501,7 +530,6 @@ const styles = StyleSheet.create({
   filterLabel: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#666',
     marginBottom: 8,
   },
   filterOptions: {
@@ -510,50 +538,42 @@ const styles = StyleSheet.create({
   filterButton: {
     paddingHorizontal: 12,
     paddingVertical: 6,
-    backgroundColor: '#FFFFFF',
     borderWidth: 1,
-    borderColor: '#E0E0E0',
     borderRadius: 6,
     marginRight: 8,
   },
-  filterButtonActive: {
-    backgroundColor: '#007AFF',
-    borderColor: '#007AFF',
-  },
+  filterButtonActive: {},
   filterButtonText: {
     fontSize: 12,
-    color: '#666',
     fontWeight: '500',
   },
-  filterButtonTextActive: {
-    color: '#FFFFFF',
-  },
+  filterButtonTextActive: {},
   listContent: {
     paddingHorizontal: 16,
     paddingVertical: 8,
+  },
+  notificationIcon: {
+    marginRight: 12,
   },
   notificationItem: {
     flexDirection: 'row',
     paddingVertical: 12,
     paddingHorizontal: 12,
     marginVertical: 4,
-    backgroundColor: '#F9F9F9',
     borderRadius: 8,
+    borderLeftWidth: 4,
     alignItems: 'center',
-  },
-  notificationItemUnread: {
-    backgroundColor: '#E6F0FF',
   },
   notificationContent: {
     flex: 1,
     flexDirection: 'row',
+    alignItems: 'center',
   },
   unreadDot: {
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: '#007AFF',
-    marginRight: 12,
+    marginLeft: 12,
     marginTop: 2,
   },
   notificationTextContainer: {
@@ -562,41 +582,32 @@ const styles = StyleSheet.create({
   notificationTitle: {
     fontSize: 14,
     fontWeight: '500',
-    color: '#666',
-  },
-  notificationTitleUnread: {
-    fontWeight: '600',
-    color: '#000',
   },
   notificationBody: {
     fontSize: 13,
-    color: '#666',
     marginTop: 4,
   },
   notificationDate: {
     fontSize: 11,
-    color: '#999',
     marginTop: 4,
   },
   notificationActions: {
     flexDirection: 'row',
     marginLeft: 12,
+    gap: 8,
   },
   actionButton: {
     paddingHorizontal: 8,
     paddingVertical: 6,
+    borderRadius: 6,
   },
   actionButtonText: {
     fontSize: 14,
-    color: '#007AFF',
     fontWeight: '600',
   },
-  deleteButton: {
-    marginLeft: 8,
-  },
+  deleteButton: {},
   deleteButtonText: {
     fontSize: 14,
-    color: '#FF3B30',
     fontWeight: '600',
   },
   emptyContainer: {

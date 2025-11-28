@@ -129,6 +129,22 @@ export const PronunciationPracticeScreen: React.FC<PronunciationPracticeScreenPr
 
   const { readings } = useReadingStore();
 
+  // Debug: Log readings structure
+  useEffect(() => {
+    if (readings) {
+      console.log('[PronunciationPracticeScreen] Readings received:', {
+        hasGospel: !!readings.gospel,
+        hasPsalm: !!readings.psalm,
+        hasFirstReading: !!readings.firstReading,
+        hasSecondReading: !!readings.secondReading,
+        gospelContentLength: readings.gospel?.content?.length || 0,
+        psalmContentLength: readings.psalm?.content?.length || 0,
+        firstReadingContentLength: readings.firstReading?.content?.length || 0,
+        secondReadingContentLength: readings.secondReading?.content?.length || 0,
+      });
+    }
+  }, [readings]);
+
   // Check permissions on mount
   useEffect(() => {
     checkPermissions();
@@ -235,6 +251,15 @@ export const PronunciationPracticeScreen: React.FC<PronunciationPracticeScreenPr
     const readIdx = order.indexOf(current);
     const currentSentences = current ? map.get(current) || [] : [];
 
+    console.log('[Reading structure]', {
+      totalSentences: currentSession.sentences.length,
+      readingOrder: order,
+      currentSentenceSource: current,
+      currentReadingIndex: readIdx,
+      totalReadings: order.length,
+      readingMap: Array.from(map.entries()),
+    });
+
     return {
       readingOrder: order,
       readingMap: map,
@@ -250,22 +275,38 @@ export const PronunciationPracticeScreen: React.FC<PronunciationPracticeScreenPr
 
   // Handle reading navigation - memoized with proper dependencies
   const handlePreviousReading = useCallback(() => {
+    console.log('[handlePreviousReading] Called with:', {
+      currentReadingIndex,
+      totalReadings,
+      readingOrder,
+      canGo: currentReadingIndex > 0,
+    });
     if (currentReadingIndex > 0) {
       const previousReading = readingOrder[currentReadingIndex - 1];
+      console.log('[handlePreviousReading] Going to:', previousReading);
       const sentencesToPrevious = readingMap.get(previousReading) || [];
       if (sentencesToPrevious.length > 0) {
         const targetIndex = sentencesToPrevious[0];
+        console.log('[handlePreviousReading] Target index:', targetIndex);
         goToSentence(targetIndex);
       }
     }
   }, [currentReadingIndex, currentReading, readingOrder, readingMap, goToSentence]);
 
   const handleNextReading = useCallback(() => {
+    console.log('[handleNextReading] Called with:', {
+      currentReadingIndex,
+      totalReadings,
+      readingOrder,
+      canGo: currentReadingIndex < totalReadings - 1,
+    });
     if (currentReadingIndex < totalReadings - 1) {
       const nextReading = readingOrder[currentReadingIndex + 1];
+      console.log('[handleNextReading] Going to:', nextReading);
       const sentencesToNext = readingMap.get(nextReading) || [];
       if (sentencesToNext.length > 0) {
         const targetIndex = sentencesToNext[0];
+        console.log('[handleNextReading] Target index:', targetIndex);
         goToSentence(targetIndex);
       }
     }

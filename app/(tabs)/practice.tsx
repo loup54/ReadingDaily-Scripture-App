@@ -61,7 +61,7 @@ export default function PracticeTab() {
                 <Text style={[styles.sectionTitle, { color: colors.text.primary }]}>
                   Reading Passages for {currentDate.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
                 </Text>
-                <Text style={[styles.sectionSubtitle, { color: colors.text.secondary }]}>
+                <Text style={[styles.sectionSubtitle, { color: colors.text.white }]}>
                   Tap any passage to practice pronunciation
                 </Text>
 

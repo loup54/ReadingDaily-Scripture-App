@@ -117,21 +117,28 @@ export const SendGiftScreen: React.FC<SendGiftScreenProps> = ({
   };
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background.primary }]}>
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* Header */}
-        <View style={styles.header}>
-          <IconButton icon="chevron-back" onPress={onBack} />
-          <Text style={[styles.title, { color: colors.text }]}>Send a Gift</Text>
-          <View style={{ width: 40 }} />
-        </View>
+        {/* Header with Gradient Background */}
+        <LinearGradient
+          colors={[colors.primary.blue, colors.primary.purple]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.headerGradient}
+        >
+          <View style={styles.header}>
+            <IconButton icon="chevron-back" onPress={onBack} color={colors.text.white} />
+            <Text style={[styles.title, { color: colors.text.white }]}>Send a Gift</Text>
+            <View style={{ width: 40 }} />
+          </View>
+        </LinearGradient>
 
         {/* Step Indicator */}
-        <View style={styles.stepIndicator}>
+        <View style={[styles.stepIndicator, { backgroundColor: colors.background.secondary }]}>
           {['Select', 'Details', 'Confirm'].map((stepName, idx) => (
             <View key={stepName} style={styles.stepItem}>
               <View
@@ -140,8 +147,8 @@ export const SendGiftScreen: React.FC<SendGiftScreenProps> = ({
                   {
                     backgroundColor:
                       step === ['select', 'details', 'confirm'][idx]
-                        ? colors.primary
-                        : colors.card,
+                        ? colors.primary.blue
+                        : colors.background.card,
                   },
                 ]}
               >
@@ -151,8 +158,8 @@ export const SendGiftScreen: React.FC<SendGiftScreenProps> = ({
                     {
                       color:
                         step === ['select', 'details', 'confirm'][idx]
-                          ? Colors.white
-                          : colors.textSecondary,
+                          ? colors.text.white
+                          : colors.text.secondary,
                     },
                   ]}
                 >
@@ -165,8 +172,8 @@ export const SendGiftScreen: React.FC<SendGiftScreenProps> = ({
                   {
                     color:
                       step === ['select', 'details', 'confirm'][idx]
-                        ? colors.primary
-                        : colors.textSecondary,
+                        ? colors.primary.blue
+                        : colors.text.secondary,
                   },
                 ]}
               >
@@ -179,7 +186,7 @@ export const SendGiftScreen: React.FC<SendGiftScreenProps> = ({
         {/* Content based on step */}
         {step === 'select' && (
           <View style={styles.content}>
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>
+            <Text style={[styles.sectionTitle, { color: colors.text.primary }]}>
               Choose Subscription Tier
             </Text>
 
@@ -189,23 +196,23 @@ export const SendGiftScreen: React.FC<SendGiftScreenProps> = ({
                 style={[
                   styles.tierCard,
                   {
-                    backgroundColor: colors.card,
+                    backgroundColor: colors.background.card,
                     borderColor:
-                      selectedTier === tier ? colors.primary : colors.border,
+                      selectedTier === tier ? colors.primary.blue : colors.ui.border,
                     borderWidth: selectedTier === tier ? 2 : 1,
                   },
                 ]}
                 onPress={() => handleSelectTier(tier as SubscriptionTier)}
               >
                 <View style={styles.tierHeader}>
-                  <Text style={[styles.tierName, { color: colors.text }]}>
+                  <Text style={[styles.tierName, { color: colors.text.primary }]}>
                     {tierData.name}
                   </Text>
                   {tierData.badge && (
                     <View
                       style={[
                         styles.badge,
-                        { backgroundColor: colors.primary },
+                        { backgroundColor: colors.accent.green },
                       ]}
                     >
                       <Text style={styles.badgeText}>{tierData.badge}</Text>
@@ -213,7 +220,7 @@ export const SendGiftScreen: React.FC<SendGiftScreenProps> = ({
                   )}
                 </View>
 
-                <Text style={[styles.tierPrice, { color: colors.primary }]}>
+                <Text style={[styles.tierPrice, { color: colors.primary.blue }]}>
                   ${tierData.price}
                   {tierData.duration && <Text>{tierData.duration === 1 ? '/month' : '/year'}</Text>}
                 </Text>
@@ -221,7 +228,7 @@ export const SendGiftScreen: React.FC<SendGiftScreenProps> = ({
                 <Text
                   style={[
                     styles.tierDescription,
-                    { color: colors.textSecondary },
+                    { color: colors.text.secondary },
                   ]}
                 >
                   {tierData.description}
@@ -233,13 +240,13 @@ export const SendGiftScreen: React.FC<SendGiftScreenProps> = ({
                       <Ionicons
                         name="checkmark-circle"
                         size={16}
-                        color={colors.primary}
+                        color={colors.accent.green}
                         style={styles.featureIcon}
                       />
                       <Text
                         style={[
                           styles.featureText,
-                          { color: colors.textSecondary },
+                          { color: colors.text.secondary },
                         ]}
                       >
                         {feature}
@@ -254,7 +261,7 @@ export const SendGiftScreen: React.FC<SendGiftScreenProps> = ({
 
         {step === 'details' && (
           <View style={styles.content}>
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>
+            <Text style={[styles.sectionTitle, { color: colors.text.primary }]}>
               Gift Details
             </Text>
 
@@ -263,24 +270,24 @@ export const SendGiftScreen: React.FC<SendGiftScreenProps> = ({
               style={[
                 styles.summary,
                 {
-                  backgroundColor: colors.card,
-                  borderLeftColor: colors.primary,
+                  backgroundColor: colors.background.card,
+                  borderLeftColor: colors.primary.blue,
                 },
               ]}
             >
               <View>
-                <Text style={[styles.summaryLabel, { color: colors.textSecondary }]}>
+                <Text style={[styles.summaryLabel, { color: colors.text.secondary }]}>
                   Selected Tier
                 </Text>
-                <Text style={[styles.summaryValue, { color: colors.text }]}>
+                <Text style={[styles.summaryValue, { color: colors.text.primary }]}>
                   {selectedTierData.name}
                 </Text>
               </View>
               <View>
-                <Text style={[styles.summaryLabel, { color: colors.textSecondary }]}>
+                <Text style={[styles.summaryLabel, { color: colors.text.secondary }]}>
                   Price
                 </Text>
-                <Text style={[styles.summaryValue, { color: colors.primary }]}>
+                <Text style={[styles.summaryValue, { color: colors.primary.blue }]}>
                   ${selectedTierData.price}
                 </Text>
               </View>
@@ -288,25 +295,25 @@ export const SendGiftScreen: React.FC<SendGiftScreenProps> = ({
 
             {/* Recipient Email */}
             <View style={styles.formSection}>
-              <Text style={[styles.label, { color: colors.text }]}>
+              <Text style={[styles.label, { color: colors.text.primary }]}>
                 Recipient Email
               </Text>
               <View
                 style={[
                   styles.inputContainer,
-                  { borderColor: colors.border },
+                  { borderColor: colors.ui.border },
                 ]}
               >
                 <Ionicons
                   name="mail"
                   size={20}
-                  color={colors.textSecondary}
+                  color={colors.text.secondary}
                   style={styles.inputIcon}
                 />
                 <TextInput
-                  style={[styles.input, { color: colors.text }]}
+                  style={[styles.input, { color: colors.text.primary }]}
                   placeholder="recipient@example.com"
-                  placeholderTextColor={colors.textTertiary}
+                  placeholderTextColor={colors.text.tertiary}
                   value={recipientEmail}
                   onChangeText={setRecipientEmail}
                   keyboardType="email-address"
@@ -318,20 +325,20 @@ export const SendGiftScreen: React.FC<SendGiftScreenProps> = ({
 
             {/* Personal Message */}
             <View style={styles.formSection}>
-              <Text style={[styles.label, { color: colors.text }]}>
+              <Text style={[styles.label, { color: colors.text.primary }]}>
                 Personal Message (Optional)
               </Text>
               <TextInput
                 style={[
                   styles.messageInput,
                   {
-                    color: colors.text,
-                    borderColor: colors.border,
-                    backgroundColor: colors.card,
+                    color: colors.text.primary,
+                    borderColor: colors.ui.border,
+                    backgroundColor: colors.background.card,
                   },
                 ]}
                 placeholder="Add a personal message..."
-                placeholderTextColor={colors.textTertiary}
+                placeholderTextColor={colors.text.tertiary}
                 value={personalMessage}
                 onChangeText={setPersonalMessage}
                 multiline
@@ -359,7 +366,7 @@ export const SendGiftScreen: React.FC<SendGiftScreenProps> = ({
 
         {step === 'confirm' && (
           <View style={styles.content}>
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>
+            <Text style={[styles.sectionTitle, { color: colors.text.primary }]}>
               Confirm Gift
             </Text>
 
@@ -368,15 +375,15 @@ export const SendGiftScreen: React.FC<SendGiftScreenProps> = ({
               style={[
                 styles.confirmCard,
                 {
-                  backgroundColor: colors.card,
+                  backgroundColor: colors.background.card,
                 },
               ]}
             >
               <View style={styles.confirmItem}>
-                <Text style={[styles.confirmLabel, { color: colors.textSecondary }]}>
+                <Text style={[styles.confirmLabel, { color: colors.text.secondary }]}>
                   Tier
                 </Text>
-                <Text style={[styles.confirmValue, { color: colors.text }]}>
+                <Text style={[styles.confirmValue, { color: colors.text.primary }]}>
                   {selectedTierData.name}
                 </Text>
               </View>
@@ -384,15 +391,15 @@ export const SendGiftScreen: React.FC<SendGiftScreenProps> = ({
               <View
                 style={[
                   styles.divider,
-                  { backgroundColor: colors.border },
+                  { backgroundColor: colors.ui.border },
                 ]}
               />
 
               <View style={styles.confirmItem}>
-                <Text style={[styles.confirmLabel, { color: colors.textSecondary }]}>
+                <Text style={[styles.confirmLabel, { color: colors.text.secondary }]}>
                   Recipient
                 </Text>
-                <Text style={[styles.confirmValue, { color: colors.text }]}>
+                <Text style={[styles.confirmValue, { color: colors.text.primary }]}>
                   {recipientEmail}
                 </Text>
               </View>
@@ -400,15 +407,15 @@ export const SendGiftScreen: React.FC<SendGiftScreenProps> = ({
               <View
                 style={[
                   styles.divider,
-                  { backgroundColor: colors.border },
+                  { backgroundColor: colors.ui.border },
                 ]}
               />
 
               <View style={styles.confirmItem}>
-                <Text style={[styles.confirmLabel, { color: colors.textSecondary }]}>
+                <Text style={[styles.confirmLabel, { color: colors.text.secondary }]}>
                   Total Price
                 </Text>
-                <Text style={[styles.confirmValue, { color: colors.primary }]}>
+                <Text style={[styles.confirmValue, { color: colors.primary.blue }]}>
                   ${selectedTierData.price}
                 </Text>
               </View>
@@ -418,14 +425,14 @@ export const SendGiftScreen: React.FC<SendGiftScreenProps> = ({
                   <View
                     style={[
                       styles.divider,
-                      { backgroundColor: colors.border },
+                      { backgroundColor: colors.ui.border },
                     ]}
                   />
                   <View style={styles.confirmItem}>
-                    <Text style={[styles.confirmLabel, { color: colors.textSecondary }]}>
+                    <Text style={[styles.confirmLabel, { color: colors.text.secondary }]}>
                       Message
                     </Text>
-                    <Text style={[styles.confirmValue, { color: colors.text }]}>
+                    <Text style={[styles.confirmValue, { color: colors.text.primary }]}>
                       {personalMessage}
                     </Text>
                   </View>
@@ -437,15 +444,15 @@ export const SendGiftScreen: React.FC<SendGiftScreenProps> = ({
             <View
               style={[
                 styles.infoBox,
-                { backgroundColor: colors.card },
+                { backgroundColor: colors.background.card },
               ]}
             >
               <Ionicons
                 name="information-circle"
                 size={20}
-                color={colors.primary}
+                color={colors.primary.blue}
               />
-              <Text style={[styles.infoText, { color: colors.textSecondary }]}>
+              <Text style={[styles.infoText, { color: colors.text.secondary }]}>
                 A gift code and invitation will be sent to the recipient via email
               </Text>
             </View>
@@ -470,9 +477,9 @@ export const SendGiftScreen: React.FC<SendGiftScreenProps> = ({
 
         {/* Loading Overlay */}
         {loading && (
-          <View style={[styles.loadingOverlay, { backgroundColor: colors.overlay }]}>
-            <ActivityIndicator size="large" color={colors.primary} />
-            <Text style={[styles.loadingText, { color: colors.text }]}>
+          <View style={[styles.loadingOverlay, { backgroundColor: colors.background.overlay }]}>
+            <ActivityIndicator size="large" color={colors.primary.blue} />
+            <Text style={[styles.loadingText, { color: colors.text.primary }]}>
               Processing your gift...
             </Text>
           </View>
@@ -492,6 +499,9 @@ const styles = StyleSheet.create({
   scrollContent: {
     flexGrow: 1,
   },
+  headerGradient: {
+    paddingVertical: Spacing.lg,
+  },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -509,7 +519,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-around',
     paddingHorizontal: Spacing.lg,
-    paddingVertical: Spacing.md,
+    paddingVertical: Spacing.lg,
     marginBottom: Spacing.lg,
   },
   stepItem: {

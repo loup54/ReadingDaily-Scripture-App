@@ -227,7 +227,7 @@ export const ReadingCalendar: React.FC<ReadingCalendarProps> = ({
             styles.dayNumber,
             {
               color:
-                day.hasReading && day.isCurrentMonth
+                day.hasReading
                   ? colors.text.white
                   : day.isCurrentMonth
                   ? colors.text.primary
@@ -323,7 +323,7 @@ export const ReadingCalendar: React.FC<ReadingCalendarProps> = ({
       </View>
 
       {/* Calendar Grid */}
-      <View style={styles.calendarGrid}>
+      <View style={[styles.calendarGrid, { backgroundColor: colors.background.card }]}>
         {calendarDays.map((day) => (
           <View key={day.date} style={styles.dayWrapper}>
             {renderDay(day)}
@@ -432,7 +432,7 @@ export const ReadingCalendar: React.FC<ReadingCalendarProps> = ({
             style={[
               styles.statValue,
               {
-                color: colors.primary.main,
+                color: colors.primary.blue,
               },
             ]}
           >
@@ -459,7 +459,7 @@ export const ReadingCalendar: React.FC<ReadingCalendarProps> = ({
             style={[
               styles.statValue,
               {
-                color: colors.text.primary,
+                color: colors.primary.blue,
               },
             ]}
           >
@@ -484,7 +484,7 @@ export const ReadingCalendar: React.FC<ReadingCalendarProps> = ({
             style={[
               styles.statValue,
               {
-                color: colors.primary.main,
+                color: colors.primary.blue,
               },
             ]}
           >
@@ -550,7 +550,6 @@ const styles = StyleSheet.create({
   calendarGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    backgroundColor: Colors.background.card,
   },
 
   dayWrapper: {
@@ -647,6 +646,7 @@ const styles = StyleSheet.create({
   statItem: {
     flex: 1,
     alignItems: 'center',
+    justifyContent: 'center',
   },
 
   statLabel: {

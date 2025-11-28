@@ -45,6 +45,9 @@ interface SettingsScreenProps {
   onLogout?: () => void;
   onDeleteAccount?: () => void;
   onHelpFAQ?: () => void;
+  onLegalDocuments?: () => void;
+  onBackupExport?: () => void;
+  onComplianceAnalytics?: () => void;
 }
 
 export const SettingsScreen: React.FC<SettingsScreenProps> = ({
@@ -55,6 +58,9 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
   onLogout,
   onDeleteAccount,
   onHelpFAQ,
+  onLegalDocuments,
+  onBackupExport,
+  onComplianceAnalytics,
 }) => {
   const { user } = useAuthStore();
   const { hasPurchased, isActive, getFormattedTimeRemaining, remainingMinutes } = useTrialStore();
@@ -96,6 +102,10 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
   // Phase 10B Notification hooks
   const notificationPreferences = useNotificationPreferences();
   const updateNotificationPreferences = useUpdateNotificationPreferences();
+
+  // Scroll view ref for auto-scrolling when selector expands
+  const scrollViewRef = useRef<ScrollView>(null);
+  const languageSelectorRef = useRef<View>(null);
 
   // Language and accent options
   const LANGUAGE_OPTIONS = [
@@ -283,7 +293,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
                   { text: 'Dismiss', style: 'cancel' },
                   { text: 'Retry', style: 'default', onPress: handleClearCache },
                   { text: 'Contact Support', style: 'default', onPress: () => {
-                    Linking.openURL('mailto:support@readingdaily.com');
+                    Linking.openURL('mailto:ourenglish2019@gmail.com');
                   }},
                 ]
               );
@@ -349,7 +359,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
           { text: 'Dismiss', style: 'cancel' },
           { text: 'Try Again', style: 'default', onPress: handleOpenEditProfile },
           { text: 'Contact Support', style: 'default', onPress: () => {
-            Linking.openURL('mailto:support@readingdaily.com?subject=Profile%20Update%20Help');
+            Linking.openURL('mailto:ourenglish2019@gmail.com?subject=Profile%20Update%20Help');
           }},
         ]
       );
@@ -444,7 +454,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
           { text: 'Dismiss', style: 'cancel' },
           { text: 'Try Again', style: 'default', onPress: handleOpenChangePassword },
           { text: 'Contact Support', style: 'default', onPress: () => {
-            Linking.openURL('mailto:support@readingdaily.com?subject=Password%20Change%20Help');
+            Linking.openURL('mailto:ourenglish2019@gmail.com?subject=Password%20Change%20Help');
           }},
         ]
       );
@@ -500,7 +510,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
           [
             { text: 'Dismiss', style: 'cancel' },
             { text: 'Contact Support', style: 'default', onPress: () => {
-              Linking.openURL('mailto:support@readingdaily.com?subject=Purchase%20Restore%20Help');
+              Linking.openURL('mailto:ourenglish2019@gmail.com?subject=Purchase%20Restore%20Help');
             }},
           ]
         );
@@ -533,7 +543,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
           { text: 'Dismiss', style: 'cancel' },
           { text: 'Retry', style: 'default', onPress: handleRestorePurchase },
           { text: 'Contact Support', style: 'default', onPress: () => {
-            Linking.openURL('mailto:support@readingdaily.com?subject=Purchase%20Restore%20Failed');
+            Linking.openURL('mailto:ourenglish2019@gmail.com?subject=Purchase%20Restore%20Failed');
           }},
         ]
       );
@@ -588,7 +598,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
     if (isActive) {
       return `${remainingMinutes} min remaining`;
     }
-    return 'Start your 10-minute trial';
+    return 'Start your 7-day free trial';
   };
 
   // Create dynamic styles based on theme
@@ -653,6 +663,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
         </View>
 
         <ScrollView
+          ref={scrollViewRef}
           style={styles.scrollView}
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
@@ -1046,8 +1057,24 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
                 <TouchableOpacity
                   style={styles.settingRow}
                   onPress={() => {
-                    setShowLanguageSelector(!showLanguageSelector);
+                    const newShowState = !showLanguageSelector;
+                    setShowLanguageSelector(newShowState);
                     setShowAccentSelector(false);
+                    // Auto-scroll to selector when expanding
+                    if (newShowState) {
+                      setTimeout(() => {
+                        languageSelectorRef.current?.measureLayout(
+                          scrollViewRef.current as any,
+                          (x, y) => {
+                            scrollViewRef.current?.scrollTo({ y: y - 50, animated: true });
+                          },
+                          () => {
+                            // Fallback: scroll to end if measureLayout fails
+                            scrollViewRef.current?.scrollToEnd({ animated: true });
+                          }
+                        );
+                      }, 100);
+                    }
                   }}
                   activeOpacity={0.7}
                 >
@@ -1073,7 +1100,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
 
                 {/* Language Selector */}
                 {showLanguageSelector && (
-                  <View style={[styles.selectorContainer, { backgroundColor: colors.background.card }]}>
+                  <View ref={languageSelectorRef} style={[styles.selectorContainer, { backgroundColor: colors.background.card }]}>
                     <Text style={[styles.selectorTitle, { color: colors.text.primary }]}>Select Language</Text>
                     {LANGUAGE_OPTIONS.map((lang) => (
                       <TouchableOpacity
@@ -1307,18 +1334,42 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
             </View>
           </View>
 
-          {/* Legal & Compliance */}
+          {/* Legal & Compliance - Now with in-app documents */}
           <View style={styles.section}>
             <Text style={dynamicStyles.sectionTitle}>Legal & Compliance</Text>
             <View style={dynamicStyles.card}>
+              {/* View All Legal Documents */}
+              <TouchableOpacity
+                style={styles.settingRow}
+                onPress={onLegalDocuments}
+                activeOpacity={0.7}
+              >
+                <View style={styles.settingLeft}>
+                  <Ionicons
+                    name="document-text"
+                    size={22}
+                    color={colors.primary.blue}
+                  />
+                  <View style={styles.settingTextContainer}>
+                    <Text style={dynamicStyles.settingLabel}>All Legal Documents</Text>
+                    <Text style={dynamicStyles.settingValue}>
+                      View in-app • Always updated
+                    </Text>
+                  </View>
+                </View>
+                <Ionicons
+                  name="chevron-forward"
+                  size={20}
+                  color={colors.text.tertiary}
+                />
+              </TouchableOpacity>
+
+              <View style={dynamicStyles.divider} />
+
               {/* Privacy Policy */}
               <TouchableOpacity
                 style={styles.settingRow}
-                onPress={() => {
-                  Linking.openURL('mailto:support@readingdaily.com?subject=Request:%20Privacy%20Policy').catch(err =>
-                    Alert.alert('Error', 'Could not open email. Please contact support@readingdaily.com')
-                  );
-                }}
+                onPress={onLegalDocuments}
                 activeOpacity={0.7}
               >
                 <View style={styles.settingLeft}>
@@ -1330,8 +1381,8 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
                   <Text style={dynamicStyles.settingLabel}>Privacy Policy</Text>
                 </View>
                 <Ionicons
-                  name="mail-outline"
-                  size={18}
+                  name="chevron-forward"
+                  size={20}
                   color={colors.text.tertiary}
                 />
               </TouchableOpacity>
@@ -1341,11 +1392,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
               {/* Terms of Service */}
               <TouchableOpacity
                 style={styles.settingRow}
-                onPress={() => {
-                  Linking.openURL('mailto:support@readingdaily.com?subject=Request:%20Terms%20of%20Service').catch(err =>
-                    Alert.alert('Error', 'Could not open email. Please contact support@readingdaily.com')
-                  );
-                }}
+                onPress={onLegalDocuments}
                 activeOpacity={0.7}
               >
                 <View style={styles.settingLeft}>
@@ -1357,7 +1404,34 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
                   <Text style={dynamicStyles.settingLabel}>Terms of Service</Text>
                 </View>
                 <Ionicons
-                  name="mail-outline"
+                  name="chevron-forward"
+                  size={20}
+                  color={colors.text.tertiary}
+                />
+              </TouchableOpacity>
+
+              <View style={dynamicStyles.divider} />
+
+              {/* Contact Support */}
+              <TouchableOpacity
+                style={styles.settingRow}
+                onPress={() => {
+                  Linking.openURL('mailto:ourenglish2019@gmail.com?subject=Support%20Request').catch(err =>
+                    Alert.alert('Error', 'Could not open email. Please contact ourenglish2019@gmail.com')
+                  );
+                }}
+                activeOpacity={0.7}
+              >
+                <View style={styles.settingLeft}>
+                  <Ionicons
+                    name="mail-outline"
+                    size={22}
+                    color={colors.primary.blue}
+                  />
+                  <Text style={dynamicStyles.settingLabel}>Contact Support</Text>
+                </View>
+                <Ionicons
+                  name="open-outline"
                   size={18}
                   color={colors.text.tertiary}
                 />
@@ -1365,108 +1439,55 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
 
               <View style={dynamicStyles.divider} />
 
-              {/* Accessibility Statement */}
+              {/* Backup & Export */}
               <TouchableOpacity
                 style={styles.settingRow}
-                onPress={() => {
-                  Linking.openURL('mailto:accessibility@readingdaily.com?subject=Request:%20Accessibility%20Statement').catch(err =>
-                    Alert.alert('Error', 'Could not open email. Please contact accessibility@readingdaily.com')
-                  );
-                }}
+                onPress={onBackupExport}
                 activeOpacity={0.7}
               >
                 <View style={styles.settingLeft}>
                   <Ionicons
-                    name="accessibility-outline"
+                    name="cloud-upload-outline"
                     size={22}
                     color={colors.primary.blue}
                   />
-                  <Text style={dynamicStyles.settingLabel}>Accessibility</Text>
+                  <View style={styles.settingTextContainer}>
+                    <Text style={dynamicStyles.settingLabel}>Backup & Export</Text>
+                    <Text style={dynamicStyles.settingValue}>
+                      Manage backups • Auto-sync
+                    </Text>
+                  </View>
                 </View>
                 <Ionicons
-                  name="mail-outline"
-                  size={18}
+                  name="chevron-forward"
+                  size={20}
                   color={colors.text.tertiary}
                 />
               </TouchableOpacity>
-
               <View style={dynamicStyles.divider} />
 
-              {/* Copyright & Attribution */}
+              {/* Compliance & Analytics */}
               <TouchableOpacity
                 style={styles.settingRow}
-                onPress={() => {
-                  Linking.openURL('mailto:support@readingdaily.com?subject=Request:%20Copyright%20&%20Attribution').catch(err =>
-                    Alert.alert('Error', 'Could not open email. Please contact support@readingdaily.com')
-                  );
-                }}
+                onPress={onComplianceAnalytics}
                 activeOpacity={0.7}
               >
                 <View style={styles.settingLeft}>
                   <Ionicons
-                    name="information-circle-outline"
+                    name="shield-checkmark-outline"
                     size={22}
                     color={colors.primary.blue}
                   />
-                  <Text style={dynamicStyles.settingLabel}>Copyright</Text>
+                  <View style={styles.settingTextContainer}>
+                    <Text style={dynamicStyles.settingLabel}>Compliance & Analytics</Text>
+                    <Text style={dynamicStyles.settingValue}>
+                      View status • Generate reports
+                    </Text>
+                  </View>
                 </View>
                 <Ionicons
-                  name="mail-outline"
-                  size={18}
-                  color={colors.text.tertiary}
-                />
-              </TouchableOpacity>
-
-              <View style={dynamicStyles.divider} />
-
-              {/* Consumer Rights */}
-              <TouchableOpacity
-                style={styles.settingRow}
-                onPress={() => {
-                  Linking.openURL('mailto:support@readingdaily.com?subject=Request:%20Consumer%20Rights%20Guide').catch(err =>
-                    Alert.alert('Error', 'Could not open email. Please contact support@readingdaily.com')
-                  );
-                }}
-                activeOpacity={0.7}
-              >
-                <View style={styles.settingLeft}>
-                  <Ionicons
-                    name="hand-right-outline"
-                    size={22}
-                    color={colors.primary.blue}
-                  />
-                  <Text style={dynamicStyles.settingLabel}>Consumer Rights</Text>
-                </View>
-                <Ionicons
-                  name="mail-outline"
-                  size={18}
-                  color={colors.text.tertiary}
-                />
-              </TouchableOpacity>
-
-              <View style={dynamicStyles.divider} />
-
-              {/* Report a Bug / Contact Support */}
-              <TouchableOpacity
-                style={styles.settingRow}
-                onPress={() => {
-                  Linking.openURL('mailto:support@readingdaily.com?subject=Report%20Issue%20or%20Feedback').catch(err =>
-                    Alert.alert('Error', 'Could not open email. Please contact support@readingdaily.com')
-                  );
-                }}
-                activeOpacity={0.7}
-              >
-                <View style={styles.settingLeft}>
-                  <Ionicons
-                    name="bug-outline"
-                    size={22}
-                    color={colors.primary.blue}
-                  />
-                  <Text style={dynamicStyles.settingLabel}>Report a Bug</Text>
-                </View>
-                <Ionicons
-                  name="mail-outline"
-                  size={18}
+                  name="chevron-forward"
+                  size={20}
                   color={colors.text.tertiary}
                 />
               </TouchableOpacity>

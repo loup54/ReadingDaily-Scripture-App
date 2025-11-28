@@ -203,7 +203,7 @@ export const HelpScreen: React.FC<HelpScreenProps> = ({ onBack }) => {
             For technical issues, bugs, or feature requests, please contact us at:
           </Text>
           <Text style={[styles.contactText, { color: colors.primary.blue, fontWeight: '600', marginTop: Spacing.xs }]}>
-            support@ourengltd.best
+            ourenglish2019@gmail.com
           </Text>
           <Text style={[styles.contactText, { color: colors.text.secondary, marginTop: Spacing.sm }]}>
             We aim to respond to all inquiries within 24 hours.

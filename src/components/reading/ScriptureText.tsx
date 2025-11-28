@@ -8,7 +8,7 @@ import { LoadingState } from '@/components/common/LoadingState';
 import { useTranslationStore } from '@/stores/useTranslationStore';
 import { WordTranslation } from '@/components/translation';
 import { PronunciationPractice } from '@/screens/PronunciationPractice';
-import { getTranslationService, TranslationResult } from '@/services/translation/TranslationService';
+import { getTranslationService, TranslationResult, TranslationService } from '@/services/translation/TranslationService';
 
 interface ScriptureTextProps {
   reading: Reading;
@@ -168,7 +168,7 @@ export const ScriptureText: React.FC<ScriptureTextProps> = ({ reading }) => {
               <View style={styles.translationSection}>
                 <View style={[styles.textSectionHeader, { backgroundColor: colors.background.secondary }]}>
                   <Text style={[styles.sectionLabel, { color: colors.text.secondary }]}>
-                    Translation
+                    {TranslationService.SUPPORTED_LANGUAGES.find(lang => lang.code === preferredLanguage)?.nativeName || preferredLanguage.toUpperCase()}
                   </Text>
                 </View>
                 <Text style={[styles.translationContent, { color: colors.text.primary }]}>

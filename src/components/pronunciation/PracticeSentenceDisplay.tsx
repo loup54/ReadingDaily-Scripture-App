@@ -111,6 +111,16 @@ export const PracticeSentenceDisplay: React.FC<PracticeSentenceDisplayProps> = (
   const isFirstSentence = currentIndex === 0;
   const isLastSentence = currentIndex === totalSentences - 1;
 
+  // Debug logging
+  console.log('[PracticeSentenceDisplay] Reading nav:', {
+    currentReadingIndex,
+    totalReadings,
+    canGoPrev: currentReadingIndex > 0,
+    canGoNext: currentReadingIndex < totalReadings - 1,
+    hasPrevHandler: !!handlePreviousReading,
+    hasNextHandler: !!handleNextReading,
+  });
+
   return (
     <View style={styles.container}>
       {/* TOP HEADER: Left Arrow | Difficulty Badge | Right Arrow | Record Button */}
@@ -119,11 +129,14 @@ export const PracticeSentenceDisplay: React.FC<PracticeSentenceDisplayProps> = (
           {/* Left Arrow - Navigate readings (LARGER) */}
           <IconButton
             icon="chevron-back"
-            onPress={() => handlePreviousReading?.()}
+            onPress={() => {
+              console.log('[Arrow] Previous reading pressed');
+              handlePreviousReading?.();
+            }}
             size="lg"
             variant="default"
-            color={colors.primary}
-            disabled={isFirstReading || !handlePreviousReading}
+            color={colors.text.primary}
+            disabled={currentReadingIndex <= 0 || !handlePreviousReading}
             accessibilityLabel="Previous reading"
           />
 
@@ -152,11 +165,14 @@ export const PracticeSentenceDisplay: React.FC<PracticeSentenceDisplayProps> = (
           {/* Right Arrow - Navigate readings (LARGER) */}
           <IconButton
             icon="chevron-forward"
-            onPress={() => handleNextReading?.()}
+            onPress={() => {
+              console.log('[Arrow] Next reading pressed');
+              handleNextReading?.();
+            }}
             size="lg"
             variant="default"
-            color={colors.primary}
-            disabled={isLastReading || !handleNextReading}
+            color={colors.text.primary}
+            disabled={currentReadingIndex >= totalReadings - 1 || !handleNextReading}
             accessibilityLabel="Next reading"
           />
 

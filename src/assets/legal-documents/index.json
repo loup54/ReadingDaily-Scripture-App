@@ -1,0 +1,224 @@
+{
+  "documents": [
+    {
+      "id": "privacy-policy",
+      "title": "Privacy Policy",
+      "filename": "privacy-policy.md",
+      "version": "1.0.0",
+      "lastUpdated": "2025-01-15",
+      "effectiveDate": "2025-01-01",
+      "description": "Explains how we collect, use, and protect your personal information",
+      "contentLength": 8234,
+      "sections": [
+        "Introduction",
+        "Information We Collect",
+        "How We Use Your Information",
+        "Data Sharing and Disclosure",
+        "Data Retention",
+        "Data Security",
+        "Your Privacy Rights",
+        "Children's Privacy",
+        "Third-Party Links",
+        "International Data Transfers",
+        "Cookies and Similar Technologies",
+        "Contact Us"
+      ],
+      "category": "privacy",
+      "requiresAcceptance": true,
+      "contactEmail": "ourenglish2019@gmail.com"
+    },
+    {
+      "id": "terms-of-service",
+      "title": "Terms of Service",
+      "filename": "terms-of-service.md",
+      "version": "1.0.0",
+      "lastUpdated": "2025-01-15",
+      "effectiveDate": "2025-01-01",
+      "description": "Legal terms and conditions for using the ReadingDaily Scripture App",
+      "contentLength": 11456,
+      "sections": [
+        "Acceptance of Terms",
+        "Description of Service",
+        "User Accounts",
+        "User Responsibilities and Conduct",
+        "Intellectual Property Rights",
+        "Subscription and Payments",
+        "Disclaimers and Limitations",
+        "Limitation of Liability",
+        "Indemnification",
+        "Service Interruptions",
+        "Data Backup and Loss",
+        "Third-Party Content and Links",
+        "Accessibility",
+        "Modifications to the App",
+        "Dispute Resolution",
+        "Contact Information"
+      ],
+      "category": "legal",
+      "requiresAcceptance": true,
+      "requiresSignature": true,
+      "signatureExpiry": 365,
+      "contactEmail": "ourenglish2019@gmail.com"
+    },
+    {
+      "id": "accessibility",
+      "title": "Accessibility Statement",
+      "filename": "accessibility.md",
+      "version": "1.0.0",
+      "lastUpdated": "2025-01-15",
+      "effectiveDate": "2025-01-01",
+      "description": "Our commitment to making the app accessible for people with disabilities",
+      "contentLength": 6789,
+      "sections": [
+        "Commitment to Accessibility",
+        "Accessibility Features",
+        "Known Accessibility Limitations",
+        "Accessibility Testing",
+        "Feedback and Accessibility Support",
+        "Accessible Alternative Services",
+        "Assistive Technology Compatibility",
+        "Continuous Improvement",
+        "Third-Party Components",
+        "Documentation and Support Materials",
+        "Accessibility Roadmap",
+        "Legal Compliance",
+        "Contact Information for Accessibility Concerns"
+      ],
+      "category": "compliance",
+      "requiresAcceptance": false,
+      "contactEmail": "ourenglish2019@gmail.com"
+    },
+    {
+      "id": "copyright",
+      "title": "Copyright & Attribution",
+      "filename": "copyright.md",
+      "version": "1.0.0",
+      "lastUpdated": "2025-01-15",
+      "effectiveDate": "2025-01-01",
+      "description": "Copyright ownership, licensing, and attribution for app content and third-party materials",
+      "contentLength": 9234,
+      "sections": [
+        "Copyright Ownership",
+        "Scripture Content Attribution",
+        "Third-Party Licenses and Attributions",
+        "User-Generated Content Rights",
+        "Trademark Notice",
+        "Educational Use",
+        "Audio and Voice Content",
+        "Visual Design and Branding",
+        "Screenshot and Review Rights",
+        "Content Restrictions",
+        "DMCA Compliance",
+        "License to Use the App",
+        "Disclaimer of Warranties",
+        "Limitation of Liability",
+        "Questions About Copyright and Attribution"
+      ],
+      "category": "legal",
+      "requiresAcceptance": false,
+      "contactEmail": "ourenglish2019@gmail.com"
+    },
+    {
+      "id": "consumer-rights",
+      "title": "Consumer Rights Guide",
+      "filename": "consumer-rights.md",
+      "version": "1.0.0",
+      "lastUpdated": "2025-01-15",
+      "effectiveDate": "2025-01-01",
+      "description": "Your consumer rights and protections when using our app and services",
+      "contentLength": 10123,
+      "sections": [
+        "Your Consumer Rights",
+        "Purchase and Subscription Rights",
+        "Quality and Conformity Rights",
+        "Privacy and Data Protection Rights",
+        "Accessibility Rights",
+        "Communication and Support Rights",
+        "Consumer Protection Laws by Region",
+        "Limitation of Liability and Disclaimers",
+        "Product Liability",
+        "Warranties and Guarantees",
+        "Dispute Resolution",
+        "Your Right to Complain",
+        "Consumer Rights Not Waivable",
+        "Your Responsibilities",
+        "Frequently Asked Questions",
+        "Resources and Support"
+      ],
+      "category": "compliance",
+      "requiresAcceptance": false,
+      "contactEmail": "ourenglish2019@gmail.com"
+    },
+    {
+      "id": "help-faq",
+      "title": "Help & FAQ",
+      "filename": "help-faq.md",
+      "version": "1.0.0",
+      "lastUpdated": "2025-01-15",
+      "effectiveDate": "2025-01-01",
+      "description": "Frequently asked questions and help documentation for using the app",
+      "contentLength": 8945,
+      "sections": [
+        "Getting Started",
+        "Account and Subscription",
+        "Features and Usage",
+        "Troubleshooting",
+        "Accessibility and Accessibility Features",
+        "Privacy and Security",
+        "Billing and Payments",
+        "Getting Help"
+      ],
+      "category": "help",
+      "requiresAcceptance": false,
+      "contactEmail": "ourenglish2019@gmail.com"
+    }
+  ],
+  "categories": {
+    "privacy": {
+      "name": "Privacy",
+      "icon": "shield-checkmark",
+      "documents": ["privacy-policy"]
+    },
+    "legal": {
+      "name": "Legal",
+      "icon": "document-text",
+      "documents": ["terms-of-service", "copyright"]
+    },
+    "compliance": {
+      "name": "Compliance",
+      "icon": "checkmark-circle",
+      "documents": ["accessibility", "consumer-rights"]
+    },
+    "help": {
+      "name": "Help & Support",
+      "icon": "help-circle",
+      "documents": ["help-faq"]
+    }
+  },
+  "requiredAcceptances": [
+    {
+      "documentId": "terms-of-service",
+      "label": "I agree to the Terms of Service",
+      "mandatory": true
+    },
+    {
+      "documentId": "privacy-policy",
+      "label": "I agree to the Privacy Policy",
+      "mandatory": true
+    }
+  ],
+  "metadata": {
+    "appVersion": "1.0.0",
+    "bundleVersion": "1.0.0",
+    "lastUpdated": "2025-01-15",
+    "totalDocuments": 6,
+    "totalSize": 54821,
+    "estimatedCompressedSize": 18273,
+    "compressionRatio": 0.33,
+    "languages": ["en"],
+    "supportEmail": "ourenglish2019@gmail.com",
+    "privacyEmail": "ourenglish2019@gmail.com",
+    "accessibilityEmail": "ourenglish2019@gmail.com",
+    "copyrightEmail": "ourenglish2019@gmail.com"
+  }
+}

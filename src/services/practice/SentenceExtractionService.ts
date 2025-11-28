@@ -10,8 +10,8 @@ import { PracticeSentence } from '@/types/practice.types';
 
 class SentenceExtractionService {
   // Sentence selection criteria
-  private static readonly MIN_WORDS = 20;  // At least 20 words per chunk
-  private static readonly MAX_WORDS = 30;  // At most 30 words per chunk
+  private static readonly MIN_WORDS = 5;   // At least 5 words per chunk (psalms have short verses)
+  private static readonly MAX_WORDS = 100; // At most 100 words per chunk (allows longer scripture verses)
   private static readonly TARGET_SENTENCE_COUNT = 4;  // One per reading type (First, Psalm, 2nd, Gospel)
 
   /**
@@ -31,11 +31,24 @@ class SentenceExtractionService {
       ? this.extractFromReading(readings.secondReading, 'second-reading')
       : [];
 
+    console.log('[SentenceExtractionService] Extracted sentences:', {
+      gospelCount: gospel.length,
+      firstReadingCount: firstReading.length,
+      psalmCount: psalm.length,
+      secondReadingCount: secondReading.length,
+      totalBefore: gospel.length + firstReading.length + psalm.length + secondReading.length,
+    });
+
     // Combine in liturgical order: First Reading → Psalm → Second Reading → Gospel
     const allSentences = [...firstReading, ...psalm, ...secondReading, ...gospel];
 
     // Select diverse sentences (mix from different sources)
     const selected = this.selectDiverseSentences(allSentences, this.TARGET_SENTENCE_COUNT);
+
+    console.log('[SentenceExtractionService] Selected sentences:', {
+      totalSelected: selected.length,
+      sources: selected.map(s => s.source),
+    });
 
     return selected;
   }
@@ -47,12 +60,19 @@ class SentenceExtractionService {
     const sentences = this.splitIntoSentences(reading.content);
     const source = this.formatReadingSource(type);
 
+    console.log(`[${source}] Extraction:`, {
+      contentLength: reading.content?.length || 0,
+      sentencesCount: sentences.length,
+      sentenceSamples: sentences.slice(0, 2).map(s => s.substring(0, 50) + '...'),
+    });
+
     const filtered = sentences
       .map((text, index) => {
         const wordCount = this.countWords(text);
 
         // Filter by word count
         if (wordCount < this.MIN_WORDS || wordCount > this.MAX_WORDS) {
+          console.log(`[${source}] Sentence ${index} filtered out: ${wordCount} words (${text.substring(0, 40)}...)`);
           return null;
         }
 
@@ -68,6 +88,11 @@ class SentenceExtractionService {
       })
       .filter((s): s is PracticeSentence => s !== null);
 
+    console.log(`[${source}] After filtering:`, {
+      filtered: filtered.length,
+      kept: filtered.map(s => ({ words: s.wordCount, text: s.text.substring(0, 40) })),
+    });
+
     return filtered;
   }
 
@@ -82,8 +107,8 @@ class SentenceExtractionService {
       .replace(/\n/g, ' ') // Remove newlines
       .trim();
 
-    // Split on sentence-ending punctuation
-    const sentences = cleaned.split(/([.!?]+)\s+/).reduce((acc: string[], curr, i, arr) => {
+    // Split on sentence-ending punctuation and clause separators (scripture often uses semicolons, colons, commas)
+    const sentences = cleaned.split(/([.!?;:,]+)\s+/).reduce((acc: string[], curr, i, arr) => {
       if (i % 2 === 0 && curr.trim()) {
         const sentence = curr + (arr[i + 1] || '');
         acc.push(sentence.trim());

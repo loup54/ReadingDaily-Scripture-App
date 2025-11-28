@@ -58,7 +58,7 @@ export const TrialExpiredModal: React.FC<TrialExpiredModalProps> = ({
               {/* Title */}
               <Text style={[styles.title, { color: colors.text.white }]}>Trial Expired</Text>
               <Text style={[styles.subtitle, { color: colors.text.white }]}>
-                Your 10-minute free trial has ended.{'\n'}
+                Your 7-day free trial has ended.{'\n'}
                 Continue reading scripture daily with{'\n'}
                 lifetime access!
               </Text>

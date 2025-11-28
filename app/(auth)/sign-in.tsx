@@ -1,5 +1,5 @@
 import React from 'react';
-import { Alert } from 'react-native';
+import { Alert, Linking } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SignInScreen } from '@/screens/auth/SignInScreen';
 import { useAuthStore } from '@/stores/useAuthStore';
@@ -32,10 +32,27 @@ export default function SignInPage() {
   };
 
   const handleNeedHelp = () => {
-    Alert.alert(
-      'Need Help?',
-      'Contact support at support@ourengltd.best for assistance with signing in.'
-    );
+    const email = 'ourenglish2019@gmail.com';
+    const subject = 'Help with Sign In';
+    const body = 'I need help signing into the Reading Daily Scripture App.%0A%0AError or Issue:%0A';
+    const mailto = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+
+    Linking.openURL(mailto).catch(() => {
+      Alert.alert(
+        'Contact Support',
+        `For help signing in, please email us at:\n${email}\n\nSubject: Help with Sign In`,
+        [
+          {
+            text: 'Copy Email',
+            onPress: () => {
+              // Copy email to clipboard (you may need to use a library for this)
+              Alert.alert('Email Copied', `Support email copied: ${email}`);
+            },
+          },
+          { text: 'OK', style: 'cancel' },
+        ]
+      );
+    });
   };
 
   const handleCommonIssues = () => {

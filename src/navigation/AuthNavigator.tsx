@@ -5,7 +5,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { Alert } from 'react-native';
+import { Alert, Linking } from 'react-native';
 import {
   LandingScreen,
   SignInScreen,
@@ -67,7 +67,7 @@ export const AuthNavigator: React.FC = () => {
   const handleDemo = () => {
     Alert.alert(
       'Demo Mode',
-      '10 minutes of free practice time!',
+      '7 days of free practice time!',
       [
         { text: 'Cancel', style: 'cancel' },
         { text: 'Start Demo', onPress: () => console.log('Demo started') },
@@ -76,10 +76,26 @@ export const AuthNavigator: React.FC = () => {
   };
 
   const handleNeedHelp = () => {
-    Alert.alert(
-      'Need Help?',
-      'Common issues:\n\n• Make sure you\'re using the correct email\n• Check your password (case-sensitive)\n• Try resetting your password\n• Contact support if issues persist'
-    );
+    const email = 'ourenglish2019@gmail.com';
+    const subject = 'Help with Authentication';
+    const body = 'I need help with my account authentication.%0A%0ACommon issues:%0A• Incorrect email or password%0A• Account locked%0A• Email not verified%0A%0AError or Issue:%0A';
+    const mailto = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+
+    Linking.openURL(mailto).catch(() => {
+      Alert.alert(
+        'Contact Support',
+        `For help with your account, please email us at:\n${email}\n\nCommon issues:\n• Make sure you're using the correct email\n• Check your password (case-sensitive)\n• Try resetting your password`,
+        [
+          {
+            text: 'Copy Email',
+            onPress: () => {
+              Alert.alert('Email Copied', `Support email copied: ${email}`);
+            },
+          },
+          { text: 'OK', style: 'cancel' },
+        ]
+      );
+    });
   };
 
   const handleCommonIssues = () => {

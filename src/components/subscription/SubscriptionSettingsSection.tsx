@@ -95,7 +95,7 @@ export const SubscriptionSettingsSection: React.FC<SubscriptionSettingsSectionPr
           </Text>
           <Text style={styles.headerSubtitle}>
             {isFree
-              ? '10 minutes/day practice limit'
+              ? '7-day trial with full access'
               : 'Unlimited daily practice + full AI feedback'}
           </Text>
         </View>

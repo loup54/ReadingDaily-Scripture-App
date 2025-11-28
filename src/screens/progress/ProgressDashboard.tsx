@@ -183,7 +183,7 @@ export const ProgressDashboard: React.FC<ProgressDashboardProps> = ({
   // Loading state
   if (!progressData && loading) {
     return (
-      <SafeAreaView style={[styles.container, { backgroundColor: colors.background.main }]}>
+      <SafeAreaView style={[styles.container, { backgroundColor: colors.background.primary }]}>
         <DashboardSkeleton />
       </SafeAreaView>
     );
@@ -192,7 +192,7 @@ export const ProgressDashboard: React.FC<ProgressDashboardProps> = ({
   // Error state
   if (error && !progressData) {
     return (
-      <SafeAreaView style={[styles.container, { backgroundColor: colors.background.main }]}>
+      <SafeAreaView style={[styles.container, { backgroundColor: colors.background.primary }]}>
         <View style={styles.errorContainer}>
           <Ionicons
             name="alert-circle-outline"
@@ -221,7 +221,7 @@ export const ProgressDashboard: React.FC<ProgressDashboardProps> = ({
   // No data state
   if (!progressData) {
     return (
-      <SafeAreaView style={[styles.container, { backgroundColor: colors.background.main }]}>
+      <SafeAreaView style={[styles.container, { backgroundColor: colors.background.primary }]}>
         <EmptyState
           icon="stats-chart-outline"
           title="No Progress Yet"
@@ -245,7 +245,7 @@ export const ProgressDashboard: React.FC<ProgressDashboardProps> = ({
   const upcomingBadges = getUpcomingBadges();
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.background.main }]}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background.primary }]}>
       <ScrollView
         style={styles.scrollView}
         refreshControl={
@@ -258,7 +258,7 @@ export const ProgressDashboard: React.FC<ProgressDashboardProps> = ({
         showsVerticalScrollIndicator={false}
       >
         {/* Header with User Avatar and Personalized Greeting */}
-        <View style={styles.headerSection}>
+        <View style={[styles.headerSection, { backgroundColor: colors.background.secondary }]}>
           <View style={styles.headerContent}>
             {/* User Avatar */}
             <View
@@ -301,20 +301,6 @@ export const ProgressDashboard: React.FC<ProgressDashboardProps> = ({
                 name="refresh"
                 size={20}
                 color={colors.primary.main}
-              />
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[
-                styles.refreshButton,
-                { backgroundColor: colors.background.secondary, marginLeft: 8 },
-              ]}
-              onPress={handleLogout}
-            >
-              <Ionicons
-                name="log-out"
-                size={20}
-                color={colors.ui.error}
               />
             </TouchableOpacity>
           </View>
@@ -367,7 +353,7 @@ export const ProgressDashboard: React.FC<ProgressDashboardProps> = ({
               style={[
                 styles.statValue,
                 {
-                  color: colors.primary.main,
+                  color: colors.primary.blue,
                 },
               ]}
             >
@@ -387,7 +373,7 @@ export const ProgressDashboard: React.FC<ProgressDashboardProps> = ({
             <Ionicons
               name="calendar-outline"
               size={24}
-              color={colors.primary.main}
+              color={colors.primary.blue}
             />
             <Text
               style={[
@@ -403,7 +389,7 @@ export const ProgressDashboard: React.FC<ProgressDashboardProps> = ({
               style={[
                 styles.statValue,
                 {
-                  color: colors.primary.main,
+                  color: colors.primary.blue,
                 },
               ]}
             >
@@ -423,7 +409,7 @@ export const ProgressDashboard: React.FC<ProgressDashboardProps> = ({
             <Ionicons
               name="medal-outline"
               size={24}
-              color={colors.primary.main}
+              color={colors.primary.blue}
             />
             <Text
               style={[
@@ -439,7 +425,7 @@ export const ProgressDashboard: React.FC<ProgressDashboardProps> = ({
               style={[
                 styles.statValue,
                 {
-                  color: colors.primary.main,
+                  color: colors.primary.blue,
                 },
               ]}
             >
