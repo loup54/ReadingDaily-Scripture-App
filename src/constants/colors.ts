@@ -24,6 +24,7 @@ const lightTheme = {
     greenDark: '#45A049', // For darker green variant
     greenForText: '#388E3C', // For text on white (4.52:1 WCAG AA)
     red: '#E53935', // Use for backgrounds/large text (4.23:1 on white)
+    orange: '#FF9800', // Orange accent color for UI elements
   },
 
   // Background colors
@@ -32,6 +33,7 @@ const lightTheme = {
     secondary: '#F5F5F7',
     card: '#FFFFFF',
     overlay: 'rgba(0, 0, 0, 0.5)',
+    tertiary: '#E8E8E8', // Light gray background for secondary elements
   },
 
   // Text colors
@@ -41,6 +43,7 @@ const lightTheme = {
     tertiary: '#757575', // Updated for WCAG AA (4.54:1 contrast on white)
     white: '#FFFFFF',
     placeholder: '#767676', // Updated for WCAG AA (4.51:1 contrast on white)
+    black: '#000000', // Pure black for high contrast text
   },
 
   // UI element colors
@@ -91,6 +94,7 @@ const darkTheme = {
     greenDark: '#4DAF51',
     greenForText: '#5DBF61', // Same as primary green - already AAA compliant
     red: '#EF5350', // Good contrast on dark backgrounds
+    orange: '#FFB74D', // Orange accent for dark theme
   },
 
   // Background colors
@@ -99,6 +103,7 @@ const darkTheme = {
     secondary: '#1E1E1E',
     card: '#2C2C2C',
     overlay: 'rgba(0, 0, 0, 0.7)',
+    tertiary: '#2A2A2A', // Dark gray background for secondary elements
   },
 
   // Text colors
@@ -108,6 +113,7 @@ const darkTheme = {
     tertiary: '#909090', // Updated for WCAG AA (5.30:1 contrast on dark bg)
     white: '#FFFFFF',
     placeholder: '#8A8A8A', // Updated for WCAG AA (4.63:1 contrast on dark bg)
+    black: '#000000', // Pure black for high contrast text (AAA on dark)
   },
 
   // UI element colors

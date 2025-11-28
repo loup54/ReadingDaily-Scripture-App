@@ -128,7 +128,7 @@ const ControlBar: React.FC<{
       {/* Rewind button */}
       <TouchableOpacity onPress={onRewind} disabled={isLoading}>
         <Ionicons
-          name="play-back-10"
+          name="play-skip-back"
           size={28}
           color={isLoading ? Colors.text.tertiary : Colors.primary.blue}
         />
@@ -154,7 +154,7 @@ const ControlBar: React.FC<{
       {/* Forward button */}
       <TouchableOpacity onPress={onForward} disabled={isLoading}>
         <Ionicons
-          name="play-forward-10"
+          name="play-skip-forward"
           size={28}
           color={isLoading ? Colors.text.tertiary : Colors.primary.blue}
         />
