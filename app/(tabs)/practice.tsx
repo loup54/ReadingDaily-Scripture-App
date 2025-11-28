@@ -22,9 +22,6 @@ export default function PracticeTab() {
     return (
       <PronunciationPracticeScreen
         onBack={() => setShowingPractice(false)}
-        onSettingsPress={() => {
-          // Settings handler can be added later
-        }}
       />
     );
   }

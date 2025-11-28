@@ -8,7 +8,7 @@ export default function SendGiftPage() {
   return (
     <SendGiftScreen
       onBack={() => router.back()}
-      onSendSuccess={() => router.back()}
+      onGiftSent={() => router.back()}
     />
   );
 }

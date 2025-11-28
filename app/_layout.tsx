@@ -197,7 +197,7 @@ export default function RootLayout() {
 
         // Subscribe to network changes
         let wasOffline = !isOnline;
-        let syncRetryTimeout: number | null = null;
+        let syncRetryTimeout: NodeJS.Timeout | null = null;
 
         const triggerSync = async () => {
           try {
@@ -297,7 +297,7 @@ export default function RootLayout() {
 
         // Check if auto-download should happen
         const settings = useSettingsStore.getState().settings;
-        const offlineSettings = settings?.offline || {};
+        const offlineSettings = (settings?.offline as any) || {};
 
         const downloadConfig = {
           autoDownloadEnabled: offlineSettings.autoDownloadEnabled ?? true,
