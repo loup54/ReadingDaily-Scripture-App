@@ -16,8 +16,6 @@
     "ios": {
       "bundleIdentifier": "com.readingdaily.scripture",
       "buildNumber": "1",
-      "supportsTabletMode": true,
-      "deploymentTarget": "15.1",
       "splash": {
         "image": "./assets/splash.png",
         "resizeMode": "contain",
@@ -28,7 +26,6 @@
       }
     },
     "android": {
-      "useNextNotificationChannelOnAndroid": true,
       "splash": {
         "image": "./assets/splash.png",
         "resizeMode": "contain",
