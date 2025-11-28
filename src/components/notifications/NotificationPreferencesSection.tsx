@@ -133,9 +133,9 @@ export function NotificationPreferencesSection({
           <PreferenceItem
             label="Daily Reminders"
             description="Remind me to read scripture daily"
-            value={preferences.dailyRemindersEnabled ?? true}
+            value={preferences.dailyReminderEnabled ?? true}
             onChange={(value) =>
-              onPreferenceChange('dailyRemindersEnabled', value)
+              onPreferenceChange('dailyReminderEnabled', value)
             }
             icon="🔔"
           />
@@ -143,9 +143,9 @@ export function NotificationPreferencesSection({
           <PreferenceItem
             label="Achievements"
             description="Celebrate milestones and unlocked achievements"
-            value={preferences.achievementNotificationsEnabled ?? true}
+            value={preferences.achievementNotifications ?? true}
             onChange={(value) =>
-              onPreferenceChange('achievementNotificationsEnabled', value)
+              onPreferenceChange('achievementNotifications', value)
             }
             icon="🏆"
           />
@@ -153,9 +153,9 @@ export function NotificationPreferencesSection({
           <PreferenceItem
             label="Performance Insights"
             description="Weekly stats and reading progress analysis"
-            value={preferences.performanceInsightNotificationsEnabled ?? true}
+            value={preferences.performanceInsights ?? true}
             onChange={(value) =>
-              onPreferenceChange('performanceInsightNotificationsEnabled', value)
+              onPreferenceChange('performanceInsights', value)
             }
             icon="📊"
           />
@@ -163,14 +163,14 @@ export function NotificationPreferencesSection({
       )}
 
       {/* Sound Preference */}
-      {showSound && (
+      {showSound && preferences.trackingEnabled !== undefined && (
         <View style={styles.subsection}>
           <PreferenceItem
             label="Notification Sound"
             description="Play sound for notifications"
-            value={preferences.notificationSoundEnabled ?? true}
+            value={preferences.trackingEnabled ?? true}
             onChange={(value) =>
-              onPreferenceChange('notificationSoundEnabled', value)
+              onPreferenceChange('trackingEnabled', value)
             }
             icon="🔊"
           />

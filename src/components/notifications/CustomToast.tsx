@@ -79,13 +79,9 @@ const getIconName = (type: string): any => {
 /**
  * Custom Toast Component with action buttons
  */
-export const CustomToast: React.FC<CustomToastProps> = ({
-  text1,
-  text2,
-  type = 'info',
-  onPress,
-  actions,
-}) => {
+export const CustomToast: React.FC<CustomToastProps> = (props) => {
+  const { text1, text2, onPress, actions } = props;
+  const type = (props as any).type || 'info';
   const isDark = useColorScheme() === 'dark';
   const colors = getToastColors(type, isDark);
   const iconName = getIconName(type);

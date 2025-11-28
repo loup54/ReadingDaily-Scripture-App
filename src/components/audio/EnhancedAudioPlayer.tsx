@@ -136,8 +136,8 @@ export const EnhancedAudioPlayer: React.FC<EnhancedAudioPlayerProps> = ({
               await audioHighlightingService.startHighlighting({
                 readingId: reading.id,
                 readingType: reading.type as 'gospel' | 'first-reading' | 'psalm' | 'second-reading',
-                onWordChange: (event) => {
-                  console.log('[EnhancedAudioPlayer] Word changed:', event.word.word);
+                onWordChange: (wordIndex, word) => {
+                  console.log('[EnhancedAudioPlayer] Word changed:', word.word);
                 },
                 onError: (error) => {
                   console.error('[EnhancedAudioPlayer] Highlighting error:', error);

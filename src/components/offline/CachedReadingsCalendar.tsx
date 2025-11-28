@@ -155,33 +155,33 @@ export const CachedReadingsCalendar: React.FC<CachedReadingsCalendarProps> = ({
             day.getFullYear() === selectedDate.getFullYear();
           const today = isToday(day);
 
-          let dayStyle = styles.day;
-          let textStyle = [styles.dayText];
+          const dayStyleArray: any[] = [styles.day];
+          const textStyleArray: any[] = [styles.dayText];
 
           if (selected) {
-            dayStyle = [dayStyle, styles.selectedDay];
-            textStyle.push({
+            dayStyleArray.push(styles.selectedDay);
+            textStyleArray.push({
               color: Colors.text.white,
               fontWeight: '700',
             });
           } else if (cached) {
-            dayStyle = [dayStyle, styles.cachedDay];
-            textStyle.push({ color: Colors.primary.blue, fontWeight: '600' });
+            dayStyleArray.push(styles.cachedDay);
+            textStyleArray.push({ color: Colors.primary.blue, fontWeight: '600' });
           } else if (today) {
-            dayStyle = [dayStyle, styles.todayDay];
-            textStyle.push({ color: isDark ? Colors.text.white : Colors.text.primary });
+            dayStyleArray.push(styles.todayDay);
+            textStyleArray.push({ color: isDark ? Colors.text.white : Colors.text.primary });
           } else {
-            textStyle.push({ color: isDark ? Colors.text.white : Colors.text.primary });
+            textStyleArray.push({ color: isDark ? Colors.text.white : Colors.text.primary });
           }
 
           return (
             <TouchableOpacity
               key={`day-${day.getTime()}`}
-              style={dayStyle}
+              style={dayStyleArray}
               onPress={() => onDateSelect(day)}
               activeOpacity={0.7}
             >
-              <Text style={textStyle}>{day.getDate()}</Text>
+              <Text style={textStyleArray}>{day.getDate()}</Text>
 
               {/* Indicator for cached dates */}
               {cached && !selected && (

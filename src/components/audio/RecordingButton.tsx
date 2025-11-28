@@ -261,7 +261,7 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   durationText: {
-    ...Typography.title,
+    ...Typography.h3,
     fontVariant: ['tabular-nums'],
   },
   labelText: {

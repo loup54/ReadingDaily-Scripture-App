@@ -324,9 +324,9 @@ export const LegalDocumentViewer: React.FC<LegalDocumentViewerProps> = ({
 
   if (loading) {
     return (
-      <View style={[styles.container, { backgroundColor: colors.background.primary }]}>
+      <View style={[styles.container, styles.loadingContainer, { backgroundColor: colors.background.primary }]}>
         <ActivityIndicator size="large" color={colors.primary.blue} />
-        <Text style={[styles.loadingText, { color: colors.text.secondary }]}>
+        <Text style={[styles.emptyStateText, { color: colors.text.secondary }]}>
           Loading document...
         </Text>
       </View>
@@ -567,6 +567,11 @@ export const LegalDocumentViewer: React.FC<LegalDocumentViewerProps> = ({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  loadingContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: Spacing.md,
   },
   header: {
     flexDirection: 'row',

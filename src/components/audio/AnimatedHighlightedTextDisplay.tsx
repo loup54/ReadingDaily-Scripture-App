@@ -9,15 +9,8 @@
  * - Fade-out effects for previous words
  */
 
-import React, { useCallback, useMemo } from 'react';
-import { View, StyleSheet, useColorScheme } from 'react-native';
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withTiming,
-  Easing,
-  useAnimatedReaction,
-} from 'react-native-reanimated';
+import React, { useCallback, useMemo, useEffect, useRef } from 'react';
+import { View, StyleSheet, useColorScheme, Animated } from 'react-native';
 import { WordTiming, HighlightingConfig } from '@/types';
 import { Colors, Typography, Spacing } from '@/constants';
 
@@ -58,57 +51,53 @@ const AnimatedWordSegment: React.FC<{
 }) => {
   const isDark = useColorScheme() === 'dark';
 
-  // Shared values for animation
-  const scaleValue = useSharedValue(isCurrentWord ? 1.1 : 1.0);
-  const opacityValue = useSharedValue(
+  // Animated values for React Native Animated API
+  const scaleAnim = useRef(new Animated.Value(isCurrentWord ? 1.1 : 1.0)).current;
+  const opacityAnim = useRef(new Animated.Value(
     isCurrentWord ? 1.0 : isPreviousWord && enableFadeOut ? 0.3 : 1.0
-  );
-  const backgroundOpacityValue = useSharedValue(isCurrentWord ? 1.0 : 0.0);
+  )).current;
+  const backgroundOpacityAnim = useRef(new Animated.Value(isCurrentWord ? 1.0 : 0.0)).current;
 
   // Animate when word changes
-  useAnimatedReaction(
-    () => ({
-      isCurrent: isCurrentWord,
-      isPrevious: isPreviousWord,
-    }),
-    ({ isCurrent, isPrevious }) => {
-      // Scale animation
-      scaleValue.value = withTiming(isCurrent ? 1.1 : 1.0, {
-        duration: 200,
-        easing: Easing.out(Easing.cubic),
-      });
+  useEffect(() => {
+    // Scale animation
+    Animated.timing(scaleAnim, {
+      toValue: isCurrentWord ? 1.1 : 1.0,
+      duration: 200,
+      useNativeDriver: true,
+    }).start();
 
-      // Opacity animation
-      let targetOpacity = 1.0;
-      if (isCurrent) {
-        targetOpacity = 1.0;
-      } else if (isPrevious && enableFadeOut) {
-        targetOpacity = 0.3;
-      }
+    // Opacity animation
+    let targetOpacity = 1.0;
+    if (isCurrentWord) {
+      targetOpacity = 1.0;
+    } else if (isPreviousWord && enableFadeOut) {
+      targetOpacity = 0.3;
+    }
 
-      opacityValue.value = withTiming(targetOpacity, {
-        duration: 150,
-        easing: Easing.linear,
-      });
+    Animated.timing(opacityAnim, {
+      toValue: targetOpacity,
+      duration: 150,
+      useNativeDriver: true,
+    }).start();
 
-      // Background opacity animation
-      backgroundOpacityValue.value = withTiming(isCurrent ? 1.0 : 0.0, {
-        duration: 200,
-        easing: Easing.out(Easing.cubic),
-      });
-    },
-    [isCurrentWord, isPreviousWord, enableFadeOut]
-  );
+    // Background opacity animation
+    Animated.timing(backgroundOpacityAnim, {
+      toValue: isCurrentWord ? 1.0 : 0.0,
+      duration: 200,
+      useNativeDriver: true,
+    }).start();
+  }, [isCurrentWord, isPreviousWord, enableFadeOut, scaleAnim, opacityAnim, backgroundOpacityAnim]);
 
   // Animated styles
-  const animatedTextStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: scaleValue.value }],
-    opacity: opacityValue.value,
-  }));
+  const animatedTextStyle = {
+    transform: [{ scale: scaleAnim }],
+    opacity: opacityAnim,
+  };
 
-  const animatedBackgroundStyle = useAnimatedStyle(() => ({
-    opacity: backgroundOpacityValue.value,
-  }));
+  const animatedBackgroundStyle = {
+    opacity: backgroundOpacityAnim,
+  };
 
   return (
     <View style={styles.wordContainer}>
@@ -210,14 +199,7 @@ export const AnimatedHighlightedTextDisplay: React.FC<
         style,
       ]}
     >
-      <View
-        style={[
-          styles.textContainer,
-          {
-            lineHeight,
-          },
-        ]}
-      >
+      <View style={styles.textContainer}>
         {wordSegments}
       </View>
     </View>
@@ -292,14 +274,7 @@ export const AnimatedCompactHighlightedTextDisplay: React.FC<
         style,
       ]}
     >
-      <View
-        style={[
-          styles.compactTextContainer,
-          {
-            lineHeight,
-          },
-        ]}
-      >
+      <View style={styles.compactTextContainer}>
         {wordSegments}
       </View>
     </View>

@@ -105,7 +105,7 @@ export const SuccessCelebration: React.FC<SuccessCelebrationProps> = ({
         onComplete();
       }
     });
-  }, [isVisible, prefersReducedMotion, scaleAnim, opacityAnim, onComplete, hapticPattern, disableHaptic, triggerHaptic]);
+  }, [isVisible, prefersReducedMotion, scaleAnim, opacityAnim, onComplete]);
 
   if (!isVisible) {
     return null;
