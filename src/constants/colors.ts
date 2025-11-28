@@ -57,6 +57,11 @@ const lightTheme = {
     warning: '#FFC107',
   },
 
+  // Direct color shortcuts for backward compatibility
+  error: '#E53935',
+  success: '#4CAF50',
+  warning: '#FFC107',
+
   // Status colors
   status: {
     error: '#E53935',

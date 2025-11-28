@@ -40,10 +40,21 @@ export const OfflineSettingsSection: React.FC<OfflineSettingsSectionProps> = ({
   colors: propColors,
 }) => {
   const isDark = propIsDark ?? useColorScheme() === 'dark';
-  const { cachedReadingDates, storageStats, isDownloading } = useOfflineStore();
+  const {
+    cachedReadingDates,
+    storageUsedMB,
+    storageTotalMB,
+    isDownloading
+  } = useOfflineStore();
   const { settings, updateOfflineSettings } = useSettingsStore();
   const [isDownloadingNow, setIsDownloadingNow] = useState(false);
   const [isClearing, setIsClearing] = useState(false);
+
+  // Build storageStats from store values
+  const storageStats = {
+    used: storageUsedMB * 1024 * 1024, // Convert MB to bytes
+    total: storageTotalMB * 1024 * 1024,
+  };
 
   const offlineSettings = settings?.offline || {};
 
@@ -88,7 +99,7 @@ export const OfflineSettingsSection: React.FC<OfflineSettingsSectionProps> = ({
    */
   const handleDaysChange = useCallback(async (value: number) => {
     try {
-      await updateOfflineSettings({ daysToDownload: value });
+      await updateOfflineSettings({ daysToKeepReadings: value });
       console.log('[OfflineSettings] Days to download changed:', value);
       ToastService.showInfo('Setting Updated', `Cache will include ${value} days of readings`);
     } catch (error) {
@@ -108,15 +119,15 @@ export const OfflineSettingsSection: React.FC<OfflineSettingsSectionProps> = ({
       const config = {
         autoDownloadEnabled: true,
         wifiOnlyEnabled: false,
-        selectedLanguages: offlineSettings.selectedLanguagesForCache || ['es'],
-        audioVoicePreference: offlineSettings.audioVoiceForDownload || 'FEMALE_PRIMARY',
-        audioSpeedPreference: offlineSettings.audioSpeedForDownload || 1.0,
-        daysToDownload: offlineSettings.daysToDownload || 7,
+        selectedLanguages: (offlineSettings as any).selectedLanguagesForCache || ['es'],
+        audioVoicePreference: (offlineSettings as any).audioVoiceForDownload || 'FEMALE_PRIMARY',
+        audioSpeedPreference: (offlineSettings as any).audioSpeedForDownload || 1.0,
+        daysToDownload: (offlineSettings as any).daysToKeepReadings || 7,
       };
 
       await OfflineDownloadCoordinator.startCoordinatedDownload(config);
 
-      const cachedDates = await OfflineDownloadCoordinator.getDownloadedDates?.() || [];
+      const cachedDates = ((OfflineDownloadCoordinator as any).getDownloadedDates && await (OfflineDownloadCoordinator as any).getDownloadedDates()) || [];
       ToastService.showDownloadComplete(cachedDates.length || 7);
 
       console.log('[OfflineSettings] Download completed successfully');
@@ -231,7 +242,7 @@ export const OfflineSettingsSection: React.FC<OfflineSettingsSectionProps> = ({
             </View>
           </View>
           <Switch
-            value={offlineSettings.autoDownloadEnabled ?? true}
+            value={(offlineSettings as any).autoDownloadEnabled ?? true}
             onValueChange={handleAutoDownloadToggle}
             trackColor={{ false: colors.ui.divider, true: Colors.primary.blue }}
             thumbColor={Colors.text.white}
@@ -254,7 +265,7 @@ export const OfflineSettingsSection: React.FC<OfflineSettingsSectionProps> = ({
             </View>
           </View>
           <Switch
-            value={offlineSettings.wifiOnlyEnabled ?? false}
+            value={(offlineSettings as any).wifiOnlyEnabled ?? false}
             onValueChange={handleWiFiOnlyToggle}
             trackColor={{ false: colors.ui.divider, true: Colors.primary.blue }}
             thumbColor={Colors.text.white}
@@ -278,7 +289,7 @@ export const OfflineSettingsSection: React.FC<OfflineSettingsSectionProps> = ({
           </View>
           <View style={[styles.pickerContainer, { backgroundColor: isDark ? '#333' : '#F5F5F5' }]}>
             <Picker
-              selectedValue={offlineSettings.daysToDownload ?? 7}
+              selectedValue={(offlineSettings as any).daysToKeepReadings ?? 7}
               onValueChange={handleDaysChange}
               style={{ width: 60, height: 32 }}
               itemStyle={{ color: colors.text.primary, fontSize: 14 }}

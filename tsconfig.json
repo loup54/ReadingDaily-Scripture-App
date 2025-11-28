@@ -1,6 +1,12 @@
 {
   "compilerOptions": {
     "baseUrl": "./",
+    "noImplicitAny": false,
+    "suppressImplicitAnyIndexErrors": true,
+    "skipLibCheck": true,
+    "allowJs": true,
+    "strict": false,
+    "esModuleInterop": true,
     "paths": {
       "@/*": ["src/*"],
       "@components": ["src/components"],

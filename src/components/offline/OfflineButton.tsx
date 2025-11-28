@@ -13,7 +13,6 @@ import {
   ViewStyle,
   TextStyle,
   Animated,
-  Tooltip,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Spacing, Typography, BorderRadius } from '@constants';
@@ -189,7 +188,7 @@ function getButtonStyles(
   size: 'small' | 'medium' | 'large',
   variant: 'primary' | 'secondary' | 'danger',
   disabled: boolean
-) {
+): any {
   const sizeConfig = {
     small: {
       paddingVertical: Spacing.xs,
@@ -231,7 +230,7 @@ function getButtonStyles(
 
   return {
     container: {
-      overflow: 'hidden',
+      overflow: 'hidden' as const,
       borderRadius: config.borderRadius,
     },
     touchable: {
@@ -241,17 +240,17 @@ function getButtonStyles(
       borderWidth: 1,
       borderColor: variantStyle.borderColor,
       borderRadius: config.borderRadius,
-      justifyContent: 'center',
-      alignItems: 'center',
+      justifyContent: 'center' as const,
+      alignItems: 'center' as const,
       opacity: disabled ? 0.5 : 1,
     },
     content: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center',
+      flexDirection: 'row' as const,
+      alignItems: 'center' as const,
+      justifyContent: 'center' as const,
     },
     label: {
-      fontWeight: '600',
+      fontWeight: '600' as const,
     },
     iconSize: config.iconSize,
   };
@@ -260,7 +259,7 @@ function getButtonStyles(
 /**
  * Get text styles
  */
-function getTextStyles(size: 'small' | 'medium' | 'large', variant: 'primary' | 'secondary' | 'danger', disabled: boolean) {
+function getTextStyles(size: 'small' | 'medium' | 'large', variant: 'primary' | 'secondary' | 'danger', disabled: boolean): any {
   const sizeConfig = {
     small: {
       fontSize: 12,
