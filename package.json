@@ -87,5 +87,8 @@
   "private": true,
   "engines": {
     "node": ">=18.0.0"
+  },
+  "overrides": {
+    "react-native-safe-area-context": "~5.6.0"
   }
 }
