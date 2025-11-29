@@ -30,15 +30,16 @@
         "image": "./assets/splash.png",
         "resizeMode": "contain",
         "backgroundColor": "#7C3AED"
-      }
+      },
+      "package": "com.readingdaily.scripture"
     },
     "plugins": [
       [
         "expo-build-properties",
         {
           "ios": {
-            "useFrameworks": "dynamic",
-            "deploymentTarget": "15.1"
+            "deploymentTarget": "15.1",
+            "flipper": false
           },
           "android": {
             "useNextNotificationChannelOnAndroid": true
