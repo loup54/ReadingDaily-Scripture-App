@@ -16,7 +16,7 @@
     },
     "ios": {
       "bundleIdentifier": "com.readingdaily.scripture",
-      "buildNumber": "3",
+      "buildNumber": "4",
       "splash": {
         "image": "./assets/splash.png",
         "resizeMode": "contain",
