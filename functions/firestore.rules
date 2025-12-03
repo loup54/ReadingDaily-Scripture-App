@@ -49,6 +49,8 @@ service cloud.firestore {
 
     // Users collection (User profiles)
     match /users/{userId} {
+      // Create: Users can create their own profile on signup
+      allow create: if isAuthenticated() && request.auth.uid == userId;
       // Read/Write: Users can access their own data
       allow read, write: if isOwner(userId);
 
