@@ -11,7 +11,6 @@ import { getAnalytics, isSupported } from 'firebase/analytics';
 import ReactNativeAsyncStorage from '@react-native-async-storage/async-storage';
 
 // Firebase configuration
-// TODO: Replace with actual Firebase project config
 const firebaseConfig = {
   apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY || 'your-api-key',
   authDomain: process.env.EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN || 'your-app.firebaseapp.com',
@@ -22,12 +21,24 @@ const firebaseConfig = {
   measurementId: process.env.EXPO_PUBLIC_FIREBASE_MEASUREMENT_ID || 'G-XXXXXXXXXX',
 };
 
+console.log('[Firebase Config] Initializing with:', {
+  projectId: firebaseConfig.projectId,
+  authDomain: firebaseConfig.authDomain,
+  apiKeyExists: !!firebaseConfig.apiKey && firebaseConfig.apiKey !== 'your-api-key',
+});
+
 // Initialize Firebase
 let app;
 try {
+  console.log('[Firebase] Starting initialization...');
   app = initializeApp(firebaseConfig);
+  console.log('[Firebase] ✅ Initialized successfully');
 } catch (error) {
-  console.warn('Firebase initialization failed:', error);
+  console.error('[Firebase] 🔴 INITIALIZATION FAILED:', error);
+  console.error('[Firebase] Error details:', {
+    message: error instanceof Error ? error.message : String(error),
+    code: error instanceof Error && 'code' in error ? (error as any).code : 'unknown',
+  });
   // Create a dummy app for development
   app = null as any;
 }
