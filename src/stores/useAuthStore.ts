@@ -169,7 +169,9 @@ export const useAuthStore = create<AuthStoreState>((set, get) => {
       set({ state: 'loading', error: null });
 
       try {
+        console.log('[useAuthStore] signUp: Starting signup for:', data.email);
         const response = await AuthService.signUp(data);
+        console.log('[useAuthStore] signUp: Success');
 
         set({
           user: response.user,
@@ -178,6 +180,7 @@ export const useAuthStore = create<AuthStoreState>((set, get) => {
           error: null,
         });
       } catch (error) {
+        console.error('[useAuthStore] signUp: Error caught:', error);
         set({
           state: 'error',
           error: error as AuthError,
