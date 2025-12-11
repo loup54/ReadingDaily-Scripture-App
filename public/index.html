@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ReadingDaily Scripture App - Auth</title>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .container {
+      background: white;
+      border-radius: 16px;
+      padding: 40px;
+      max-width: 500px;
+      width: 100%;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+    }
+
+    .logo {
+      text-align: center;
+      font-size: 48px;
+      margin-bottom: 20px;
+    }
+
+    h1 {
+      font-size: 28px;
+      color: #333;
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .message {
+      text-align: center;
+      color: #666;
+      margin-bottom: 30px;
+      line-height: 1.6;
+    }
+
+    .button {
+      display: block;
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      text-align: center;
+      text-decoration: none;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 16px;
+      margin-top: 20px;
+    }
+
+    .button:hover {
+      opacity: 0.9;
+    }
+
+    .success {
+      color: #10b981;
+      font-weight: 600;
+    }
+
+    .error {
+      color: #ef4444;
+      font-weight: 600;
+    }
+
+    .loading {
+      text-align: center;
+      color: #667eea;
+      font-weight: 600;
+    }
+  </style>
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+</head>
+<body>
+  <div class="container">
+    <div class="logo">📖</div>
+    <h1>ReadingDaily Scripture App</h1>
+    <div id="message" class="message loading">Processing your request...</div>
+    <div id="button-container"></div>
+  </div>
+
+  <script>
+    // Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyDJIfZfHCif6ohNG_J-_NkaNPY2A-Ek2fc",
+      authDomain: "readingdaily-scripture-fe502.firebaseapp.com",
+      projectId: "readingdaily-scripture-fe502",
+      storageBucket: "readingdaily-scripture-fe502.firebasestorage.app",
+      messagingSenderId: "587902116883",
+      appId: "1:587902116883:web:a1020b4c01a167ec104be6",
+      measurementId: "G-EZFWTHSMNB"
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+
+    // Get URL parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    const mode = urlParams.get('mode');
+    const oobCode = urlParams.get('oobCode');
+    const continueUrl = urlParams.get('continueUrl');
+
+    const messageEl = document.getElementById('message');
+    const buttonContainer = document.getElementById('button-container');
+
+    // Handle the action
+    if (!mode || !oobCode) {
+      showError('Invalid or missing parameters. Please check your email link.');
+    } else if (mode === 'resetPassword') {
+      handlePasswordReset(oobCode);
+    } else if (mode === 'verifyEmail') {
+      handleEmailVerification(oobCode);
+    } else {
+      showError('Unknown action: ' + mode);
+    }
+
+    function handlePasswordReset(code) {
+      messageEl.innerHTML = `
+        <p class="loading">Verifying password reset code...</p>
+      `;
+
+      auth.verifyPasswordResetCode(code)
+        .then(email => {
+          messageEl.innerHTML = `
+            <p>Reset password for: <strong>${email}</strong></p>
+            <p style="margin-top: 10px;">Enter your new password below:</p>
+            <input type="password" id="newPassword" placeholder="New password"
+                   style="width: 100%; padding: 12px; margin-top: 15px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 16px;">
+            <input type="password" id="confirmPassword" placeholder="Confirm password"
+                   style="width: 100%; padding: 12px; margin-top: 10px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 16px;">
+            <button onclick="resetPassword('${code}')" class="button">Reset Password</button>
+          `;
+        })
+        .catch(error => {
+          showError('Invalid or expired password reset link. Please request a new one.');
+        });
+    }
+
+    function resetPassword(code) {
+      const newPassword = document.getElementById('newPassword').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
+
+      if (!newPassword || newPassword.length < 6) {
+        alert('Password must be at least 6 characters');
+        return;
+      }
+
+      if (newPassword !== confirmPassword) {
+        alert('Passwords do not match');
+        return;
+      }
+
+      messageEl.innerHTML = '<p class="loading">Resetting your password...</p>';
+
+      auth.confirmPasswordReset(code, newPassword)
+        .then(() => {
+          showSuccess('Password reset successful! You can now sign in with your new password in the app.');
+        })
+        .catch(error => {
+          showError('Error resetting password: ' + error.message);
+        });
+    }
+
+    function handleEmailVerification(code) {
+      messageEl.innerHTML = '<p class="loading">Verifying your email...</p>';
+
+      auth.applyActionCode(code)
+        .then(() => {
+          showSuccess('Email verified successfully! You can now sign in to the app.');
+        })
+        .catch(error => {
+          showError('Invalid or expired verification link. Please request a new one.');
+        });
+    }
+
+    function showSuccess(message) {
+      messageEl.innerHTML = `<p class="success">✅ ${message}</p>`;
+      buttonContainer.innerHTML = '<a href="https://apps.apple.com/app/readingdaily-scripture/idYOUR_APP_ID" class="button">Open App</a>';
+    }
+
+    function showError(message) {
+      messageEl.innerHTML = `<p class="error">❌ ${message}</p>`;
+    }
+  </script>
+</body>
+</html>
