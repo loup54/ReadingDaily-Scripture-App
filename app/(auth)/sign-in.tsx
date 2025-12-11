@@ -12,14 +12,30 @@ export default function SignInPage() {
 
   const handleSignIn = async (email: string, password: string) => {
     try {
+      console.log('[SignIn] Starting sign-in for:', email);
       await login({ email, password });
+      console.log('[SignIn] Login successful, initializing trial...');
       await initializeTrial();
+      console.log('[SignIn] Trial initialized, navigating to readings...');
       router.replace('/(tabs)/readings');
-    } catch (error) {
-      Alert.alert(
-        'Sign In Failed',
-        error instanceof Error ? error.message : 'Invalid credentials. Please try again.'
-      );
+    } catch (error: any) {
+      console.error('[SignIn] Sign-in failed:', {
+        error,
+        code: error?.code,
+        message: error?.message,
+        fullError: JSON.stringify(error, null, 2)
+      });
+
+      // Show detailed error message
+      let errorMessage = 'Invalid credentials. Please try again.';
+      if (error?.message) {
+        errorMessage = error.message;
+      }
+      if (error?.code) {
+        errorMessage += `\n\nError code: ${error.code}`;
+      }
+
+      Alert.alert('Sign In Failed', errorMessage);
     }
   };
 
