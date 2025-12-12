@@ -6,6 +6,7 @@
     "icon": "./assets/icon.png",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
+    "newArchEnabled": true,
     "assetBundlePatterns": [
       "**/*"
     ],
@@ -27,12 +28,19 @@
       }
     },
     "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/icon.png",
+        "backgroundColor": "#7C3AED"
+      },
       "splash": {
         "image": "./assets/splash.png",
         "resizeMode": "contain",
         "backgroundColor": "#7C3AED"
       },
-      "package": "com.readingdaily.scripture"
+      "package": "com.readingdaily.scripture",
+      "compileSdkVersion": 35,
+      "targetSdkVersion": 35,
+      "minSdkVersion": 24
     },
     "plugins": [
       [
