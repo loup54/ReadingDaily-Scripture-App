@@ -43,14 +43,7 @@
         "buildConfiguration": "Release"
       },
       "env": {
-        "NPM_CONFIG_LEGACY_PEER_DEPS": "true",
-        "EXPO_PUBLIC_FIREBASE_API_KEY": "AIzaSyDJIfZfHCif6ohNG_J-_NkaNPY2A-Ek2fc",
-        "EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN": "readingdaily-scripture-fe502.firebaseapp.com",
-        "EXPO_PUBLIC_FIREBASE_PROJECT_ID": "readingdaily-scripture-fe502",
-        "EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET": "readingdaily-scripture-fe502.firebasestorage.app",
-        "EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID": "587902116883",
-        "EXPO_PUBLIC_FIREBASE_APP_ID": "1:587902116883:web:a1020b4c01a167ec104be6",
-        "EXPO_PUBLIC_FIREBASE_MEASUREMENT_ID": "G-EZFWTHSMNB"
+        "NPM_CONFIG_LEGACY_PEER_DEPS": "true"
       },
       "channel": "production"
     }
