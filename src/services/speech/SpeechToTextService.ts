@@ -5,7 +5,7 @@
  * Service for transcribing audio recordings using Google Cloud Speech-to-Text API
  */
 
-import * as FileSystem from 'expo-file-system/legacy';
+import * as FileSystem from 'expo-file-system';
 import Constants from 'expo-constants';
 
 const GOOGLE_CLOUD_API_KEY = Constants.expoConfig?.extra?.EXPO_PUBLIC_GOOGLE_CLOUD_API_KEY ||

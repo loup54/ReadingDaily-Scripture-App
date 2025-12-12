@@ -10,7 +10,7 @@
  */
 
 import * as sdk from 'microsoft-cognitiveservices-speech-sdk';
-import * as FileSystemLegacy from 'expo-file-system/legacy';
+import * as FileSystemLegacy from 'expo-file-system';
 import * as Crypto from 'expo-crypto';
 import { ENV } from '@/config/env';
 import {

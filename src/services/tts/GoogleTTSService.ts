@@ -5,9 +5,9 @@
  */
 
 import { ENV } from '@/config/env';
-import * as FileSystemLegacy from 'expo-file-system/legacy';
+import * as FileSystemLegacy from 'expo-file-system';
 
-// Use the legacy API to avoid deprecation warnings
+// SDK 52: No longer using /legacy import path
 const FileSystem = FileSystemLegacy;
 const cacheDirectory = (FileSystem as any).cacheDirectory || (FileSystem as any).documentDirectory || '';
 
