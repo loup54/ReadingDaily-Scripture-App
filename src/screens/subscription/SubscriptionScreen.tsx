@@ -195,24 +195,19 @@ export const SubscriptionScreen: React.FC<SubscriptionScreenProps> = ({
 
           {!hasPurchased && (
             <>
-              {/* Lifetime Access Card */}
+              {/* Subscription Tiers - Basic */}
               <LinearGradient
-                colors={[colors.primary + '15', colors.secondary + '15']}
+                colors={[colors.primary + '10', colors.secondary + '10']}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
                 style={styles.pricingCardGradient}
               >
                 <View style={[styles.pricingCard, { backgroundColor: colors.card }]}>
                   <View style={styles.pricingHeader}>
-                    <View style={styles.badgeContainer}>
-                      <View style={[styles.bestValueBadge, { backgroundColor: colors.primary + '20' }]}>
-                        <Text style={[styles.badgeText, { color: colors.primary }]}>BEST VALUE</Text>
-                      </View>
-                    </View>
-                    <Text style={[styles.pricingTitle, { color: colors.text }]}>Lifetime Access</Text>
+                    <Text style={[styles.pricingTitle, { color: colors.text }]}>Basic</Text>
                     <View style={styles.priceBadge}>
-                      <Text style={[styles.priceAmount, { color: colors.primary }]}>${lifetimePrice}</Text>
-                      <Text style={[styles.priceLabel, { color: colors.textSecondary }]}>one-time payment</Text>
+                      <Text style={[styles.priceAmount, { color: colors.primary }]}>$2.99</Text>
+                      <Text style={[styles.priceLabel, { color: colors.textSecondary }]}>/month</Text>
                     </View>
                   </View>
 
@@ -226,7 +221,7 @@ export const SubscriptionScreen: React.FC<SubscriptionScreenProps> = ({
                         color={colors.primary}
                       />
                       <Text style={[styles.featureText, { color: colors.text }]}>
-                        Unlimited daily scripture readings
+                        Daily Scripture readings
                       </Text>
                     </View>
                     <View style={styles.featureRow}>
@@ -236,7 +231,7 @@ export const SubscriptionScreen: React.FC<SubscriptionScreenProps> = ({
                         color={colors.primary}
                       />
                       <Text style={[styles.featureText, { color: colors.text }]}>
-                        Audio playback with adjustable speed
+                        Audio narration
                       </Text>
                     </View>
                     <View style={styles.featureRow}>
@@ -246,43 +241,179 @@ export const SubscriptionScreen: React.FC<SubscriptionScreenProps> = ({
                         color={colors.primary}
                       />
                       <Text style={[styles.featureText, { color: colors.text }]}>
-                        Multiple translation options
-                      </Text>
-                    </View>
-                    <View style={styles.featureRow}>
-                      <Ionicons
-                        name="checkmark-circle"
-                        size={20}
-                        color={colors.primary}
-                      />
-                      <Text style={[styles.featureText, { color: colors.text }]}>
-                        Practice mode (coming soon)
-                      </Text>
-                    </View>
-                    <View style={styles.featureRow}>
-                      <Ionicons
-                        name="checkmark-circle"
-                        size={20}
-                        color={colors.primary}
-                      />
-                      <Text style={[styles.featureText, { color: colors.text }]}>
-                        Progress tracking
-                      </Text>
-                    </View>
-                    <View style={styles.featureRow}>
-                      <Ionicons
-                        name="checkmark-circle"
-                        size={20}
-                        color={colors.primary}
-                      />
-                      <Text style={[styles.featureText, { color: colors.text }]}>
-                        No subscription fees
+                        Offline access
                       </Text>
                     </View>
                   </View>
 
                   <Button
-                    title={`Purchase for $${lifetimePrice}`}
+                    title="Subscribe to Basic"
+                    variant="secondary"
+                    size="lg"
+                    fullWidth
+                    onPress={handlePurchase}
+                    loading={purchasing}
+                    style={styles.purchaseButton}
+                  />
+                </View>
+              </LinearGradient>
+
+              {/* Subscription Tiers - Premium (Popular) */}
+              <LinearGradient
+                colors={[colors.primary + '15', colors.secondary + '15']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.pricingCardGradient}
+              >
+                <View style={[styles.pricingCard, { backgroundColor: colors.card }]}>
+                  <View style={styles.pricingHeader}>
+                    <View style={styles.badgeContainer}>
+                      <View style={[styles.bestValueBadge, { backgroundColor: colors.accent.green + '30' }]}>
+                        <Text style={[styles.badgeText, { color: colors.accent.green }]}>Popular</Text>
+                      </View>
+                    </View>
+                    <Text style={[styles.pricingTitle, { color: colors.text }]}>Premium</Text>
+                    <View style={styles.priceBadge}>
+                      <Text style={[styles.priceAmount, { color: colors.primary }]}>$19.99</Text>
+                      <Text style={[styles.priceLabel, { color: colors.textSecondary }]}>/year</Text>
+                    </View>
+                  </View>
+
+                  <View style={[styles.divider, { backgroundColor: colors.border }]} />
+
+                  <View style={styles.featuresList}>
+                    <View style={styles.featureRow}>
+                      <Ionicons
+                        name="checkmark-circle"
+                        size={20}
+                        color={colors.primary}
+                      />
+                      <Text style={[styles.featureText, { color: colors.text }]}>
+                        All Basic features
+                      </Text>
+                    </View>
+                    <View style={styles.featureRow}>
+                      <Ionicons
+                        name="checkmark-circle"
+                        size={20}
+                        color={colors.primary}
+                      />
+                      <Text style={[styles.featureText, { color: colors.text }]}>
+                        Sync across devices
+                      </Text>
+                    </View>
+                    <View style={styles.featureRow}>
+                      <Ionicons
+                        name="checkmark-circle"
+                        size={20}
+                        color={colors.primary}
+                      />
+                      <Text style={[styles.featureText, { color: colors.text }]}>
+                        Ad-free experience
+                      </Text>
+                    </View>
+                  </View>
+
+                  <Button
+                    title="Subscribe to Premium"
+                    variant="accent"
+                    size="lg"
+                    fullWidth
+                    onPress={handlePurchase}
+                    loading={purchasing}
+                    style={styles.purchaseButton}
+                  />
+                </View>
+              </LinearGradient>
+
+              {/* Subscription Tiers - Lifetime (Best Value) */}
+              <LinearGradient
+                colors={[colors.accent.green + '15', colors.accent.blue + '15']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.pricingCardGradient}
+              >
+                <View style={[styles.pricingCard, { backgroundColor: colors.card }]}>
+                  <View style={styles.pricingHeader}>
+                    <View style={styles.badgeContainer}>
+                      <View style={[styles.bestValueBadge, { backgroundColor: colors.accent.green + '30' }]}>
+                        <Text style={[styles.badgeText, { color: colors.accent.green }]}>Best Value</Text>
+                      </View>
+                    </View>
+                    <Text style={[styles.pricingTitle, { color: colors.text }]}>Lifetime</Text>
+                    <View style={styles.priceBadge}>
+                      <Text style={[styles.priceAmount, { color: colors.primary }]}>$59.99</Text>
+                      <Text style={[styles.priceLabel, { color: colors.textSecondary }]}>one-time</Text>
+                    </View>
+                  </View>
+
+                  <View style={[styles.divider, { backgroundColor: colors.border }]} />
+
+                  <View style={styles.featuresList}>
+                    <View style={styles.featureRow}>
+                      <Ionicons
+                        name="checkmark-circle"
+                        size={20}
+                        color={colors.accent.green}
+                      />
+                      <Text style={[styles.featureText, { color: colors.text }]}>
+                        All Premium features
+                      </Text>
+                    </View>
+                    <View style={styles.featureRow}>
+                      <Ionicons
+                        name="checkmark-circle"
+                        size={20}
+                        color={colors.accent.green}
+                      />
+                      <Text style={[styles.featureText, { color: colors.text }]}>
+                        Lifetime updates
+                      </Text>
+                    </View>
+                    <View style={styles.featureRow}>
+                      <Ionicons
+                        name="checkmark-circle"
+                        size={20}
+                        color={colors.accent.green}
+                      />
+                      <Text style={[styles.featureText, { color: colors.text }]}>
+                        Priority support
+                      </Text>
+                    </View>
+                    <View style={styles.featureRow}>
+                      <Ionicons
+                        name="checkmark-circle"
+                        size={20}
+                        color={colors.accent.green}
+                      />
+                      <Text style={[styles.featureText, { color: colors.text }]}>
+                        Exclusive content
+                      </Text>
+                    </View>
+                    <View style={styles.featureRow}>
+                      <Ionicons
+                        name="checkmark-circle"
+                        size={20}
+                        color={colors.accent.green}
+                      />
+                      <Text style={[styles.featureText, { color: colors.text }]}>
+                        Never expires
+                      </Text>
+                    </View>
+                    <View style={styles.featureRow}>
+                      <Ionicons
+                        name="checkmark-circle"
+                        size={20}
+                        color={colors.accent.green}
+                      />
+                      <Text style={[styles.featureText, { color: colors.text }]}>
+                        One-time payment
+                      </Text>
+                    </View>
+                  </View>
+
+                  <Button
+                    title="Get Lifetime Access"
                     variant="accent"
                     size="lg"
                     fullWidth
@@ -333,6 +464,26 @@ export const SubscriptionScreen: React.FC<SubscriptionScreenProps> = ({
               )}
             </View>
           )}
+
+          {/* Coupon Code Section */}
+          <View style={styles.couponSection}>
+            <Text style={[styles.giftingTitle, { color: colors.text.primary }]}>
+              Have a Coupon Code?
+            </Text>
+            <Text style={[styles.giftingSubtitle, { color: colors.text.secondary }]}>
+              Enter your code to activate your subscription
+            </Text>
+
+            <Button
+              title="Enter Coupon Code"
+              icon="pricetag"
+              variant="outline"
+              size="md"
+              fullWidth
+              onPress={handleRedeemGift}
+              style={styles.giftButton}
+            />
+          </View>
 
           {/* Gifting Section */}
           <View style={styles.giftingSection}>
@@ -525,6 +676,13 @@ const styles = StyleSheet.create({
     color: Colors.text.white,
     opacity: 0.7,
     marginTop: Spacing.xs,
+  },
+  couponSection: {
+    marginTop: Spacing.xl,
+    marginBottom: Spacing.lg,
+    paddingTop: Spacing.lg,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255, 255, 255, 0.1)',
   },
   giftingSection: {
     marginTop: Spacing.xl,
