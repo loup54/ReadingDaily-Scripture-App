@@ -17,14 +17,15 @@
     },
     "ios": {
       "bundleIdentifier": "com.readingdaily.scripture",
-      "buildNumber": "52",
+      "buildNumber": "53",
       "splash": {
         "image": "./assets/splash.png",
         "resizeMode": "contain",
         "backgroundColor": "#7C3AED"
       },
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSMicrophoneUsageDescription": "This app needs access to your microphone to practice pronunciation of sacred scripture."
       }
     },
     "android": {
@@ -40,7 +41,10 @@
       "package": "com.readingdaily.scripture",
       "compileSdkVersion": 35,
       "targetSdkVersion": 35,
-      "minSdkVersion": 24
+      "minSdkVersion": 24,
+      "permissions": [
+        "android.permission.RECORD_AUDIO"
+      ]
     },
     "plugins": [
       [

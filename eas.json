@@ -21,7 +21,8 @@
         "buildType": "apk"
       },
       "env": {
-        "NPM_CONFIG_LEGACY_PEER_DEPS": "true"
+        "NPM_CONFIG_LEGACY_PEER_DEPS": "true",
+        "EXPO_PUBLIC_GOOGLE_CLOUD_API_KEY": "AIzaSyB0uezCk4ERGIPn8VssFjZdWT7H83uiBXo"
       },
       "channel": "preview"
     },
@@ -43,7 +44,8 @@
         "buildConfiguration": "Release"
       },
       "env": {
-        "NPM_CONFIG_LEGACY_PEER_DEPS": "true"
+        "NPM_CONFIG_LEGACY_PEER_DEPS": "true",
+        "EXPO_PUBLIC_GOOGLE_CLOUD_API_KEY": "AIzaSyB0uezCk4ERGIPn8VssFjZdWT7H83uiBXo"
       },
       "channel": "production"
     }
