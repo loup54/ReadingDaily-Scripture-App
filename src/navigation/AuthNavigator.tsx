@@ -47,7 +47,21 @@ export const AuthNavigator: React.FC = () => {
       await signUp({ fullName, email, password, acceptTerms: true });
       // Navigation to main app handled by app-level navigator
     } catch (error: any) {
-      Alert.alert('Sign Up Failed', error.message || 'Please try again');
+      // Check if account already exists
+      if (error.code === 'auth/email-already-in-use' ||
+          error.message?.toLowerCase().includes('already exists') ||
+          error.message?.toLowerCase().includes('already in use')) {
+        Alert.alert(
+          'Account Already Exists',
+          'An account with this email already exists. Would you like to sign in instead?',
+          [
+            { text: 'Cancel', style: 'cancel' },
+            { text: 'Sign In', onPress: () => setCurrentScreen('signIn') }
+          ]
+        );
+      } else {
+        Alert.alert('Sign Up Failed', error.message || 'Please try again');
+      }
     }
   };
 
