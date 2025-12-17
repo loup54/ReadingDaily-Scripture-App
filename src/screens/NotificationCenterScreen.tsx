@@ -359,15 +359,11 @@ export function NotificationCenterScreen() {
             '✓ Turn on Daily Reminders to receive readings',
             '✓ Notifications appear here when readings are available',
           ]}
-          actionButton={
-            !searchText && selectedType === 'all' && selectedStatus === 'all'
-              ? {
-                  label: loadingTestData ? 'Loading...' : 'Load Test Notifications',
-                  onPress: handleLoadTestNotifications,
-                  variant: 'secondary',
-                }
-              : undefined
-          }
+          actionButton={{
+            label: loadingTestData ? 'Loading...' : 'Load Test Notifications',
+            onPress: handleLoadTestNotifications,
+            variant: 'secondary',
+          }}
         />
       )}
     </View>

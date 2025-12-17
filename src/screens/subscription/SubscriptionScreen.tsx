@@ -465,26 +465,6 @@ export const SubscriptionScreen: React.FC<SubscriptionScreenProps> = ({
             </View>
           )}
 
-          {/* Coupon Code Section */}
-          <View style={styles.couponSection}>
-            <Text style={[styles.giftingTitle, { color: colors.text.primary }]}>
-              Have a Coupon Code?
-            </Text>
-            <Text style={[styles.giftingSubtitle, { color: colors.text.secondary }]}>
-              Enter your code to activate your subscription
-            </Text>
-
-            <Button
-              title="Enter Coupon Code"
-              icon="pricetag"
-              variant="outline"
-              size="md"
-              fullWidth
-              onPress={handleRedeemGift}
-              style={styles.giftButton}
-            />
-          </View>
-
           {/* Gifting Section */}
           <View style={styles.giftingSection}>
             <Text style={[styles.giftingTitle, { color: colors.text.primary }]}>
@@ -676,13 +656,6 @@ const styles = StyleSheet.create({
     color: Colors.text.white,
     opacity: 0.7,
     marginTop: Spacing.xs,
-  },
-  couponSection: {
-    marginTop: Spacing.xl,
-    marginBottom: Spacing.lg,
-    paddingTop: Spacing.lg,
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.1)',
   },
   giftingSection: {
     marginTop: Spacing.xl,
