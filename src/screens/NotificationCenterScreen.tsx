@@ -47,7 +47,7 @@ export function NotificationCenterScreen() {
   const router = useRouter();
   const { colors } = useTheme();
   const user = useAuthStore((state) => state.user);
-  const userId = user?.uid || '';
+  const userId = user?.id || '';
 
   // Store hooks
   const history = useNotificationHistory();

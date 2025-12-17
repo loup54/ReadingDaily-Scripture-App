@@ -26,13 +26,15 @@ export default function SignInPage() {
         fullError: JSON.stringify(error, null, 2)
       });
 
-      // Show detailed error message
+      // Show user-friendly error message (hide technical details)
       let errorMessage = 'Invalid credentials. Please try again.';
+
       if (error?.message) {
-        errorMessage = error.message;
-      }
-      if (error?.code) {
-        errorMessage += `\n\nError code: ${error.code}`;
+        // Remove "Firebase: " prefix and error code from message
+        errorMessage = error.message
+          .replace(/^Firebase:\s*/i, '')  // Remove "Firebase: " prefix
+          .replace(/\s*\([^)]+\)\.?$/i, '') // Remove error code in parentheses at end
+          .trim();
       }
 
       Alert.alert('Sign In Failed', errorMessage);

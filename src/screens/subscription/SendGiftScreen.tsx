@@ -107,10 +107,21 @@ export const SendGiftScreen: React.FC<SendGiftScreenProps> = ({
       }
     } catch (error: any) {
       console.error('Gift sending error:', error);
-      Alert.alert(
-        'Error',
-        error.message || 'An error occurred while sending the gift'
-      );
+
+      // Map error messages to user-friendly text
+      let errorMessage = 'An error occurred while sending the gift. Please try again.';
+
+      if (error?.code === 'unauthenticated' || error?.message?.includes('unauthenticated')) {
+        errorMessage = 'Please sign in again to send a gift.';
+      } else if (error?.message) {
+        // Remove technical prefixes and codes
+        errorMessage = error.message
+          .replace(/^Firebase:\s*/i, '')
+          .replace(/\s*\([^)]+\)\.?$/i, '')
+          .trim();
+      }
+
+      Alert.alert('Error', errorMessage);
     } finally {
       setLoading(false);
     }
