@@ -16,9 +16,20 @@ class USCCBScraper:
     """
     Scraper for USCCB daily readings
     URL format: https://bible.usccb.org/bible/readings/MMDDYY.cfm
+
+    Special solemnities with multiple Masses use: MMDDYY-MassType.cfm
+    (e.g., 122525-Day.cfm for Christmas Day Mass)
     """
 
     BASE_URL = "https://bible.usccb.org/bible/readings"
+
+    # Solemnities with multiple Mass options (use "Day" Mass by default)
+    MULTI_MASS_DATES = {
+        '12-25': 'Day',      # Christmas Day → Mass during the Day
+        '04-20': 'Day',      # Easter Sunday 2025 (calculate dynamically in future)
+        '04-12': 'Day',      # Easter Sunday 2026
+        '03-28': 'Day',      # Easter Sunday 2027
+    }
 
     def __init__(self):
         self.session = requests.Session()
@@ -37,11 +48,19 @@ class USCCBScraper:
             dict with reading data or None if failed
         """
         try:
-            # Format URL: MMDDYY (e.g., 100125 for Oct 1, 2025)
+            # Check if this is a multi-mass date (e.g., Christmas, Easter)
+            date_key = date.strftime('%m-%d')
             date_str = date.strftime('%m%d%y')
-            url = f"{self.BASE_URL}/{date_str}.cfm"
 
-            logger.info(f"Scraping USCCB: {url}")
+            if date_key in self.MULTI_MASS_DATES:
+                # Use specific Mass type (usually "Day" Mass)
+                mass_type = self.MULTI_MASS_DATES[date_key]
+                url = f"{self.BASE_URL}/{date_str}-{mass_type}.cfm"
+                logger.info(f"Multi-mass date detected, using {mass_type} Mass: {url}")
+            else:
+                # Normal single-mass date
+                url = f"{self.BASE_URL}/{date_str}.cfm"
+                logger.info(f"Scraping USCCB: {url}")
 
             # Fetch page
             response = self.session.get(url, timeout=10)
