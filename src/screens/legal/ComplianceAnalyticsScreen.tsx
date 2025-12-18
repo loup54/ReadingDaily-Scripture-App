@@ -72,14 +72,14 @@ export const ComplianceAnalyticsScreen: React.FC = () => {
    * Load compliance data
    */
   const loadComplianceData = useCallback(async () => {
-    if (!user?.uid) return;
+    if (!user?.id) return;
 
     try {
       setState(prev => ({ ...prev, loading: true, error: null }));
 
       // Generate new report
       const complianceService = ComplianceReportService.getInstance();
-      const report = await complianceService.generateComplianceReport(user.uid, 'full');
+      const report = await complianceService.generateComplianceReport(user.id, 'full');
 
       // Get analytics
       const viewStats = await DocumentAnalyticsService.getUserViewStats();
@@ -154,11 +154,11 @@ export const ComplianceAnalyticsScreen: React.FC = () => {
    * Handle verify acceptances
    */
   const handleVerifyAcceptances = useCallback(async () => {
-    if (!user?.uid) return;
+    if (!user?.id) return;
 
     try {
       const complianceService = ComplianceReportService.getInstance();
-      const verification = await complianceService.verifyAcceptancesValid(user.uid);
+      const verification = await complianceService.verifyAcceptancesValid(user.id);
 
       if (verification.allValid) {
         Alert.alert('Verification Complete', `All ${verification.validCount} acceptances are valid and current.`);
