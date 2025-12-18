@@ -29,7 +29,7 @@ import { usePracticeStore } from '@/stores/usePracticeStore';
 import { useReadingStore } from '@/stores/useReadingStore';
 import { useSettingsStore } from '@/stores/useSettingsStore';
 import { useProgressStore } from '@/stores/progressStore';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuthStore } from '@/stores/useAuthStore';
 import { Colors, Typography, Spacing, BorderRadius, Shadows } from '@/constants';
 import { ONBOARDING_FEATURES } from '@/constants/onboarding';
 import { useTheme } from '@/hooks/useTheme';
@@ -43,7 +43,7 @@ export const PronunciationPracticeScreen: React.FC<PronunciationPracticeScreenPr
   onBack,
 }) => {
   const { colors } = useTheme();
-  const { user } = useAuth();
+  const user = useAuthStore((state) => state.user);
   const { recordReading } = useProgressStore();
   const scrollViewRef = useRef<ScrollView>(null);
   const pulseAnim = useRef(new Animated.Value(1)).current;
