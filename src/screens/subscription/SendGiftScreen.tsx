@@ -22,6 +22,7 @@ import { Colors, FontSizes, FontWeights, Spacing, BorderRadius, Shadows } from '
 import { useTheme } from '@/hooks/useTheme';
 import { useAuthStore } from '@stores/useAuthStore';
 import { getFunctions, httpsCallable } from 'firebase/functions';
+import { auth } from '@/config/firebase';
 import { SUBSCRIPTION_TIERS } from '@constants/subscriptions';
 
 interface SendGiftScreenProps {
@@ -72,8 +73,30 @@ export const SendGiftScreen: React.FC<SendGiftScreenProps> = ({
       return;
     }
 
+    // Check Firebase Auth is actually authenticated
+    const currentUser = auth.currentUser;
+    if (!currentUser) {
+      Alert.alert(
+        'Authentication Required',
+        'Your session has expired. Please sign out and sign in again to send a gift.',
+        [
+          {
+            text: 'OK',
+            onPress: () => {
+              // Could navigate to login here
+            },
+          },
+        ]
+      );
+      return;
+    }
+
     setLoading(true);
     try {
+      // Get fresh ID token to ensure authentication
+      const idToken = await currentUser.getIdToken(true);
+      console.log('[SendGiftScreen] Got ID token, sending gift...');
+
       const functions = getFunctions();
       const sendGift = httpsCallable(functions, 'sendGift');
 
