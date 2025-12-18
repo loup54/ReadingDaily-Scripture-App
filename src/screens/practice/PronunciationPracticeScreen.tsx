@@ -28,6 +28,8 @@ import {
 import { usePracticeStore } from '@/stores/usePracticeStore';
 import { useReadingStore } from '@/stores/useReadingStore';
 import { useSettingsStore } from '@/stores/useSettingsStore';
+import { useProgressStore } from '@/stores/progressStore';
+import { useAuth } from '@/hooks/useAuth';
 import { Colors, Typography, Spacing, BorderRadius, Shadows } from '@/constants';
 import { ONBOARDING_FEATURES } from '@/constants/onboarding';
 import { useTheme } from '@/hooks/useTheme';
@@ -41,6 +43,8 @@ export const PronunciationPracticeScreen: React.FC<PronunciationPracticeScreenPr
   onBack,
 }) => {
   const { colors } = useTheme();
+  const { user } = useAuth();
+  const { recordReading } = useProgressStore();
   const scrollViewRef = useRef<ScrollView>(null);
   const pulseAnim = useRef(new Animated.Value(1)).current;
   const processingDotOpacity = useRef(new Animated.Value(0.3)).current;
@@ -333,7 +337,19 @@ export const PronunciationPracticeScreen: React.FC<PronunciationPracticeScreenPr
     handleStartSession();
   };
 
-  const handleFinish = () => {
+  const handleFinish = async () => {
+    // Record reading progress
+    if (user?.id) {
+      try {
+        const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
+        await recordReading(user.id, today);
+        console.log('[PronunciationPracticeScreen] Progress recorded for', today);
+      } catch (error) {
+        console.error('[PronunciationPracticeScreen] Failed to record progress:', error);
+        // Don't show error to user - progress recording failure shouldn't block completion
+      }
+    }
+
     Alert.alert(
       'Practice Complete!',
       'Great job! Your progress has been saved.',
