@@ -515,10 +515,14 @@ export const useSettingsStore = create<SettingsStoreState>()(
           persistedState.settings.audio = DEFAULT_SETTINGS.audio;
         }
 
-        // ALWAYS disable audio highlighting (both for new and existing users)
-        // This ensures graceful degradation until timing data is available
-        console.log('[SettingsStore] ✅ Persist migration: setting enableAudioHighlighting to false');
-        persistedState.settings.audio.enableAudioHighlighting = false;
+        // Only disable for NEW users (when setting doesn't exist in persisted state)
+        // Respect existing users' choices to preserve their preference
+        if (version === 0 && persistedState.settings.audio && !persistedState.settings.audio.hasOwnProperty('enableAudioHighlighting')) {
+          console.log('[SettingsStore] ✅ New user: setting enableAudioHighlighting to false (default)');
+          persistedState.settings.audio.enableAudioHighlighting = false;
+        } else {
+          console.log('[SettingsStore] Existing user: preserving enableAudioHighlighting setting:', persistedState.settings.audio?.enableAudioHighlighting);
+        }
 
         return persistedState;
       },

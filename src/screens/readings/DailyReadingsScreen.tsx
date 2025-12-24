@@ -94,12 +94,8 @@ export const DailyReadingsScreen: React.FC<DailyReadingsScreenProps> = ({
 
       try {
         const currentReading = getCurrentReading();
-        await progressService.recordReading(userId, currentReading.id, {
-          startTime: Date.now(),
-          endTime: Date.now(),
-          duration: 0,
-          completedFully: false,
-        });
+        // Record reading with correct date format (YYYY-MM-DD)
+        await progressService.recordReading(userId, currentReading.id, 'full');
       } catch (error) {
         console.log('[DailyReadingsScreen] Progress recording:', error);
       }

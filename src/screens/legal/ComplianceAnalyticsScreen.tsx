@@ -50,6 +50,45 @@ interface ComplianceScreenState {
 }
 
 /**
+ * Empty State Component
+ */
+interface EmptyStateProps {
+  icon: string;
+  title: string;
+  message: string;
+  actionText?: string;
+  onAction?: () => void;
+  colors: any;
+}
+
+const EmptyState: React.FC<EmptyStateProps> = ({ icon, title, message, actionText, onAction, colors }) => {
+  return (
+    <View style={{ alignItems: 'center', paddingVertical: 48, paddingHorizontal: 24 }}>
+      <Ionicons name={icon as any} size={64} color={colors.textSecondary} style={{ marginBottom: 16 }} />
+      <Text style={{ fontSize: 18, fontWeight: '600', color: colors.text, marginBottom: 8, textAlign: 'center' }}>
+        {title}
+      </Text>
+      <Text style={{ fontSize: 14, color: colors.textSecondary, textAlign: 'center', marginBottom: 24 }}>
+        {message}
+      </Text>
+      {actionText && onAction && (
+        <TouchableOpacity
+          style={{
+            backgroundColor: colors.primary,
+            paddingHorizontal: 24,
+            paddingVertical: 12,
+            borderRadius: 8,
+          }}
+          onPress={onAction}
+        >
+          <Text style={{ color: '#FFFFFF', fontSize: 14, fontWeight: '600' }}>{actionText}</Text>
+        </TouchableOpacity>
+      )}
+    </View>
+  );
+};
+
+/**
  * ComplianceAnalyticsScreen Component
  */
 export const ComplianceAnalyticsScreen: React.FC = () => {
@@ -77,13 +116,35 @@ export const ComplianceAnalyticsScreen: React.FC = () => {
     try {
       setState(prev => ({ ...prev, loading: true, error: null }));
 
-      // Generate new report
+      // Generate new report with error handling for each service
       const complianceService = ComplianceReportService.getInstance();
-      const report = await complianceService.generateComplianceReport(user.id, 'full');
+      let report = null;
+      let viewStats = null;
+      let signatureStats = null;
 
-      // Get analytics
-      const viewStats = await DocumentAnalyticsService.getUserViewStats();
-      const signatureStats = await DocumentAnalyticsService.getSignatureStats();
+      try {
+        report = await complianceService.generateComplianceReport(user.id, 'full');
+      } catch (error) {
+        console.warn('[ComplianceAnalytics] Report generation failed:', error);
+        // Continue with partial data
+      }
+
+      try {
+        viewStats = await DocumentAnalyticsService.getUserViewStats();
+      } catch (error) {
+        console.warn('[ComplianceAnalytics] View stats failed:', error);
+        // Continue with partial data
+      }
+
+      try {
+        signatureStats = await DocumentAnalyticsService.getSignatureStats();
+      } catch (error) {
+        console.warn('[ComplianceAnalytics] Signature stats failed:', error);
+        // Continue with partial data
+      }
+
+      // Set error only if ALL services failed
+      const hasAnyData = report !== null || viewStats !== null || signatureStats !== null;
 
       setState(prev => ({
         ...prev,
@@ -91,18 +152,23 @@ export const ComplianceAnalyticsScreen: React.FC = () => {
         viewStats,
         signatureStats,
         loading: false,
+        error: !hasAnyData ? 'Unable to load compliance data. Please check your connection and try again.' : null,
       }));
 
-      logger.info('Compliance data loaded successfully');
+      if (hasAnyData) {
+        logger.info('Compliance data loaded successfully');
+      } else {
+        logger.warn('All compliance services returned no data');
+      }
     } catch (error) {
       logger.error('Error loading compliance data:', error);
       setState(prev => ({
         ...prev,
-        error: 'Failed to load compliance data',
+        error: 'Failed to load compliance data. Some services may be unavailable.',
         loading: false,
       }));
     }
-  }, [user?.uid]);
+  }, [user?.id]);
 
   /**
    * Refresh handler
@@ -172,7 +238,7 @@ export const ComplianceAnalyticsScreen: React.FC = () => {
       logger.error('Error verifying acceptances:', error);
       Alert.alert('Verification Failed', 'Failed to verify acceptances. Please try again.');
     }
-  }, [user?.uid]);
+  }, [user?.id]);
 
   const dynamicStyles = StyleSheet.create({
     container: {
@@ -440,6 +506,26 @@ export const ComplianceAnalyticsScreen: React.FC = () => {
           </Text>
         </View>
 
+        {/* Error Message */}
+        {state.error && (
+          <View style={{
+            backgroundColor: isDark ? '#3A2A2A' : '#FFEBEE',
+            padding: 16,
+            marginHorizontal: 16,
+            borderRadius: 8,
+            marginVertical: 12,
+            borderLeftWidth: 4,
+            borderLeftColor: Colors.status.error,
+          }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <Ionicons name="alert-circle" size={20} color={Colors.status.error} style={{ marginRight: 8 }} />
+              <Text style={{ color: colors.text, fontSize: 14, flex: 1 }}>
+                {state.error}
+              </Text>
+            </View>
+          </View>
+        )}
+
         {/* Tab Navigation */}
         <View style={dynamicStyles.tabBar}>
           {(['overview', 'timeline', 'metrics', 'export'] as const).map(tab => (
@@ -461,8 +547,10 @@ export const ComplianceAnalyticsScreen: React.FC = () => {
         </View>
 
         {/* Overview Tab */}
-        {state.activeTab === 'overview' && state.report && (
+        {state.activeTab === 'overview' && (
+          state.report ? (
           <>
+            {/* Existing content when data exists */}
             {/* Compliance Status Card */}
             <View style={dynamicStyles.card}>
               <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
@@ -535,10 +623,19 @@ export const ComplianceAnalyticsScreen: React.FC = () => {
               ))}
             </View>
           </>
+          ) : (
+            <EmptyState
+              icon="document-text-outline"
+              title="No Compliance Data Yet"
+              message="Accept legal documents to see your compliance status and analytics here. Your document acceptance history, signatures, and engagement will be tracked automatically."
+              colors={colors}
+            />
+          )
         )}
 
         {/* Timeline Tab */}
-        {state.activeTab === 'timeline' && state.report && (
+        {state.activeTab === 'timeline' && (
+          state.report && state.report.timeline && state.report.timeline.length > 0 ? (
           <>
             <View style={dynamicStyles.card}>
               <Text style={{ fontSize: 16, fontWeight: '600', color: colors.text, marginBottom: 16 }}>Acceptance Timeline</Text>
@@ -576,10 +673,19 @@ export const ComplianceAnalyticsScreen: React.FC = () => {
               )}
             </View>
           </>
+          ) : (
+            <EmptyState
+              icon="time-outline"
+              title="No Timeline Events"
+              message="Your document acceptance and signature events will appear here as you interact with legal documents."
+              colors={colors}
+            />
+          )
         )}
 
         {/* Metrics Tab */}
         {state.activeTab === 'metrics' && (
+          state.viewStats || state.signatureStats ? (
           <>
             {state.viewStats && (
               <View style={dynamicStyles.card}>
@@ -651,10 +757,19 @@ export const ComplianceAnalyticsScreen: React.FC = () => {
               </View>
             )}
           </>
+          ) : (
+            <EmptyState
+              icon="stats-chart-outline"
+              title="No Metrics Available"
+              message="View statistics and engagement metrics will appear here once you start viewing and signing documents."
+              colors={colors}
+            />
+          )
         )}
 
         {/* Export Tab */}
         {state.activeTab === 'export' && (
+          state.report ? (
           <>
             <View style={dynamicStyles.card}>
               <Text style={{ fontSize: 16, fontWeight: '600', color: colors.text, marginBottom: 16 }}>Export Report</Text>
@@ -700,12 +815,14 @@ export const ComplianceAnalyticsScreen: React.FC = () => {
               </Text>
             </View>
           </>
-        )}
-
-        {state.error && (
-          <View style={[dynamicStyles.card, { borderColor: '#EF4444' }]}>
-            <Text style={{ color: '#EF4444', fontSize: 14, fontWeight: '500' }}>Error: {state.error}</Text>
-          </View>
+          ) : (
+            <EmptyState
+              icon="download-outline"
+              title="No Reports to Export"
+              message="Once you have compliance data, you'll be able to export reports in JSON, CSV, or PDF format."
+              colors={colors}
+            />
+          )
         )}
       </ScrollView>
     </View>

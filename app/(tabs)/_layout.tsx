@@ -67,7 +67,6 @@ export default function TabsLayout() {
         name="notifications"
         options={{
           title: 'Notifications',
-          href: '/notifications',
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="notifications-outline" size={size} color={color} />
           ),

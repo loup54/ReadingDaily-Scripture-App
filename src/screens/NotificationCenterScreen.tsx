@@ -41,9 +41,16 @@ import { createTestNotifications } from '@/debug/createTestNotifications';
 import { EmptyState } from '@/components/common/EmptyState';
 
 /**
+ * Props for NotificationCenterScreen
+ */
+export interface NotificationCenterScreenProps {
+  showHeader?: boolean;
+}
+
+/**
  * Notification Center Screen
  */
-export function NotificationCenterScreen() {
+export function NotificationCenterScreen({ showHeader = true }: NotificationCenterScreenProps = {}) {
   const router = useRouter();
   const { colors } = useTheme();
   const user = useAuthStore((state) => state.user);
@@ -68,9 +75,12 @@ export function NotificationCenterScreen() {
   // Load data on mount
   useEffect(() => {
     if (userId) {
+      console.log('[NotificationCenter] Loading notifications for user:', userId);
       loadAll(userId);
+    } else {
+      console.warn('[NotificationCenter] No user ID available');
     }
-  }, [userId]);
+  }, [userId, loadAll]);
 
   // Filter notifications
   const filteredNotifications = useCallback(() => {
@@ -190,18 +200,20 @@ export function NotificationCenterScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background.primary }]}>
-      {/* Header */}
-      <View style={[styles.header, { backgroundColor: colors.background.secondary, borderBottomColor: colors.ui.border }]}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-          <Ionicons name="chevron-back" size={24} color={colors.primary.blue} />
-        </TouchableOpacity>
-        <Text style={[styles.title, { color: colors.text.primary }]}>Notifications</Text>
-        {unreadCount > 0 && (
-          <View style={[styles.badgeContainer, { backgroundColor: colors.accent.red }]}>
-            <Text style={styles.badgeText}>{unreadCount}</Text>
-          </View>
-        )}
-      </View>
+      {/* Header - only show when showHeader is true */}
+      {showHeader && (
+        <View style={[styles.header, { backgroundColor: colors.background.secondary, borderBottomColor: colors.ui.border }]}>
+          <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+            <Ionicons name="chevron-back" size={24} color={colors.primary.blue} />
+          </TouchableOpacity>
+          <Text style={[styles.title, { color: colors.text.primary }]}>Notifications</Text>
+          {unreadCount > 0 && (
+            <View style={[styles.badgeContainer, { backgroundColor: colors.accent.red }]}>
+              <Text style={styles.badgeText}>{unreadCount}</Text>
+            </View>
+          )}
+        </View>
+      )}
 
       {/* Search Bar */}
       <View style={[styles.searchContainer, { backgroundColor: colors.background.secondary }]}>

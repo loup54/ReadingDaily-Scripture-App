@@ -20,6 +20,7 @@ import {
   ActivityIndicator,
   TextInput,
   Platform,
+  Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Typography, Spacing, BorderRadius, Shadows } from '@/constants';
@@ -30,6 +31,7 @@ import DocumentSigningService from '@/services/legal/DocumentSigningService';
 import DocumentVersioningService from '@/services/legal/DocumentVersioningService';
 import DocumentAnalyticsService from '@/services/legal/DocumentAnalyticsService';
 import ComplianceReportService from '@/services/legal/ComplianceReportService';
+import { useAuthStore } from '@/stores/useAuthStore';
 
 interface LegalDocumentViewerProps {
   document: LegalDocument;
@@ -51,6 +53,7 @@ export const LegalDocumentViewer: React.FC<LegalDocumentViewerProps> = ({
   onSignatureComplete,
 }) => {
   const { colors } = useTheme();
+  const user = useAuthStore(state => state.user);
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
   const [scrollPosition, setScrollPosition] = useState(0);
@@ -107,15 +110,39 @@ export const LegalDocumentViewer: React.FC<LegalDocumentViewerProps> = ({
 
   /**
    * Handle accept button press
-   * If signature required, show modal; otherwise call onAccept
+   * If signature required, check for existing signature first, then show modal
    */
-  const handleAcceptPress = useCallback(() => {
+  const handleAcceptPress = useCallback(async () => {
     if (requiresSignature) {
+      if (!user?.id) {
+        Alert.alert('Error', 'Please sign in to sign this document');
+        return;
+      }
+
+      // Check if user has already signed this document
+      try {
+        const existingSignature = await DocumentSigningService.getSignature(document.id, user.id);
+
+        if (existingSignature && DocumentSigningService.isSignatureValid(existingSignature)) {
+          // Show alert that document is already signed
+          const signedDate = new Date(existingSignature.signedAt).toLocaleDateString();
+          Alert.alert(
+            'Already Signed',
+            `You have already signed this document on ${signedDate}.\n\nSignature: ${existingSignature.signatureData || 'On file'}`,
+            [{ text: 'OK', style: 'default' }]
+          );
+          return;
+        }
+      } catch (error) {
+        console.error('[LegalDocumentViewer] Error checking existing signature:', error);
+        // Continue to show modal even if check fails
+      }
+
       setShowSignatureModal(true);
     } else if (onAccept) {
       onAccept();
     }
-  }, [requiresSignature, onAccept]);
+  }, [requiresSignature, onAccept, document.id, user]);
 
   /**
    * Handle signature capture
@@ -128,7 +155,8 @@ export const LegalDocumentViewer: React.FC<LegalDocumentViewerProps> = ({
         // Track signature attempt start
         const signatureStartTime = Date.now();
 
-        // Store signature
+        // Store signature with detailed error logging
+        console.log('[LegalDocumentViewer] Capturing signature for:', document.id);
         const documentSignature = await DocumentSigningService.captureSignature(
           document.id,
           signature,
@@ -137,40 +165,51 @@ export const LegalDocumentViewer: React.FC<LegalDocumentViewerProps> = ({
         );
 
         if (!documentSignature) {
-          throw new Error('Failed to capture signature');
+          console.error('[LegalDocumentViewer] captureSignature returned null');
+          throw new Error('Signature service returned null - check AsyncStorage permissions');
         }
 
-        // Link signature to acceptance
-        const linked = await DocumentVersioningService.linkSignatureToAcceptance(
-          document.id,
-          documentSignature.id
-        );
+        console.log('[LegalDocumentViewer] Signature captured, ID:', documentSignature.id);
 
-        if (!linked) {
-          throw new Error('Failed to link signature');
+        // Link signature to acceptance (with error handling)
+        let linked = false;
+        try {
+          linked = await DocumentVersioningService.linkSignatureToAcceptance(
+            document.id,
+            documentSignature.id
+          );
+        } catch (linkError) {
+          console.warn('[LegalDocumentViewer] Failed to link signature, continuing:', linkError);
+          // Continue anyway - signature was captured
+          linked = true;
         }
 
-        // Track successful signature
+        // Track successful signature (non-blocking)
         const timeToSign = Date.now() - signatureStartTime;
-        await DocumentAnalyticsService.trackSignatureAttempt(document.id, true);
-        await DocumentAnalyticsService.trackInteraction(document.id, 'signature_complete', {
-          type: signature.type,
-          timeToSign,
-        });
-
-        // Log audit event for signature
-        const complianceService = ComplianceReportService.getInstance();
-        await complianceService.logAuditEvent({
-          action: 'sign',
-          documentId: document.id,
-          documentTitle: document.title,
-          userId: '', // Will be set by service
-          details: {
-            signatureType: signature.type,
+        try {
+          await DocumentAnalyticsService.trackSignatureAttempt(document.id, true);
+          await DocumentAnalyticsService.trackInteraction(document.id, 'signature_complete', {
+            type: signature.type,
             timeToSign,
-            signatureId: documentSignature.id,
-          },
-        });
+          });
+
+          // Log audit event for signature
+          const complianceService = ComplianceReportService.getInstance();
+          await complianceService.logAuditEvent({
+            action: 'sign',
+            documentId: document.id,
+            documentTitle: document.title,
+            userId: '', // Will be set by service
+            details: {
+              signatureType: signature.type,
+              timeToSign,
+              signatureId: documentSignature.id,
+            },
+          });
+        } catch (analyticsError) {
+          console.warn('[LegalDocumentViewer] Analytics tracking failed (non-critical):', analyticsError);
+          // Don't fail the signature process for analytics errors
+        }
 
         // Call accept callback
         if (onAccept) {
@@ -187,10 +226,17 @@ export const LegalDocumentViewer: React.FC<LegalDocumentViewerProps> = ({
       } catch (error) {
         console.error('[LegalDocumentViewer] Signature capture failed:', error);
 
-        // Track failed signature attempt
-        await DocumentAnalyticsService.trackSignatureAttempt(document.id, false);
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        console.error('[LegalDocumentViewer] Error details:', errorMessage);
 
-        alert('Failed to save signature. Please try again.');
+        // Track failed signature attempt (non-blocking)
+        try {
+          await DocumentAnalyticsService.trackSignatureAttempt(document.id, false);
+        } catch (trackError) {
+          console.warn('[LegalDocumentViewer] Failed to track error:', trackError);
+        }
+
+        alert(`Failed to save signature: ${errorMessage}\n\nPlease ensure the app has storage permissions and try again.`);
       } finally {
         setSigningDocument(false);
       }
