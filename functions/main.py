@@ -170,7 +170,7 @@ def validate_google_receipt(req: https_fn.Request) -> https_fn.Response:
     Expected POST body:
     {
         "packageName": "com.readingdaily.scripture",
-        "productId": "lifetime_access_001",
+        "productId": "com.readingdaily.lifetime.access",
         "purchaseToken": "..."
     }
 

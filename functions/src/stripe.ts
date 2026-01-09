@@ -40,7 +40,7 @@ export const createCheckoutSession = functions.https.onCall(async (data, context
 
     // Product configuration
     const productConfig: { [key: string]: { name: string; price: number } } = {
-      lifetime_access_001: {
+      com.readingdaily.lifetime.access: {
         name: 'Lifetime Access',
         price: 499, // $4.99 in cents
       },

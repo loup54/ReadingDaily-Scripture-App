@@ -25,7 +25,7 @@ import { analyticsService } from '../analytics/AnalyticsService';
 
 // Product IDs from Google Play Console
 const PRODUCT_IDS = [
-  'lifetime_access_001',
+  'com.readingdaily.lifetime.access',
   // Phase 7: Subscription products
   'com.readingdaily.basic.monthly',
   'com.readingdaily.basic.yearly',
@@ -307,7 +307,7 @@ export class GooglePlayService implements IPaymentService {
 
       // Filter for lifetime access product
       const lifetimePurchases = purchases.filter(
-        (p) => p.productId === 'lifetime_access_001'
+        (p) => p.productId === 'com.readingdaily.lifetime.access'
       );
 
       // Acknowledge any unacknowledged purchases
@@ -516,7 +516,7 @@ export class GooglePlayService implements IPaymentService {
         console.warn('[GooglePlayService] Using fallback products');
         this.products = [
           {
-            id: 'lifetime_access_001',
+            id: 'com.readingdaily.lifetime.access',
             name: 'Lifetime Access',
             description: 'Unlock all features forever',
             price: 4.99,

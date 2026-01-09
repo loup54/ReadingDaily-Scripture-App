@@ -158,12 +158,20 @@ export const EnhancedAudioPlayer: React.FC<EnhancedAudioPlayerProps> = ({
               ? TTS_VOICES.MALE_PRIMARY
               : TTS_VOICES.FEMALE_PRIMARY;
 
-          await audioPlaybackService.loadAndPlay(
+          const success = await audioPlaybackService.loadAndPlayOfflineAware(
             reading.content,
             reading.id,
             voice,
             audioSettings.speed
           );
+
+          if (!success) {
+            Alert.alert(
+              'Audio Unavailable',
+              'This reading audio has not been downloaded yet. Please connect to the internet to generate audio, or download readings from Settings → Offline Settings.'
+            );
+            return;
+          }
         } else {
           // Resume existing audio and highlighting
           if (highlightingInitialized) {

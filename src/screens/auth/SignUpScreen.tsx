@@ -95,8 +95,8 @@ export const SignUpScreen: React.FC<SignUpScreenProps> = ({
               <Text style={[styles.title, { color: colors.text.white }]}>Create Your</Text>
               <Text style={[styles.title, { color: colors.text.white }]}>Account</Text>
               <Text style={[styles.subtitle, { color: colors.text.white }]}>
-                Start your English learning journey with 10 free{'\n'}
-                minutes of practice time
+                Sync your progress, bookmarks, and settings{'\n'}
+                across all your devices with cloud backup
               </Text>
             </View>
 

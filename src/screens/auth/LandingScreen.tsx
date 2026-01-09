@@ -54,6 +54,12 @@ export const LandingScreen: React.FC<LandingScreenProps> = ({
             and easy navigation.
           </Text>
 
+          {/* Account Benefits */}
+          <Text style={[styles.accountBenefits, { color: colors.text.white }]}>
+            Create an account to sync your progress{'\n'}
+            and settings across all your devices
+          </Text>
+
           {/* CTA Buttons */}
           <View style={styles.buttonContainer}>
             <Button
@@ -136,8 +142,17 @@ const styles = StyleSheet.create({
     color: Colors.text.white,
     textAlign: 'center',
     opacity: 0.95,
-    marginBottom: Spacing.xl,
+    marginBottom: Spacing.md,
     lineHeight: 24,
+  },
+  accountBenefits: {
+    ...Typography.caption,
+    color: Colors.text.white,
+    textAlign: 'center',
+    opacity: 0.85,
+    fontStyle: 'italic',
+    marginBottom: Spacing.lg,
+    lineHeight: 20,
   },
   buttonContainer: {
     width: '100%',

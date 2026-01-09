@@ -27,7 +27,7 @@ import { analyticsService } from '../analytics/AnalyticsService';
 
 // Product IDs from Apple App Store Connect
 const PRODUCT_IDS = [
-  'lifetime_access_001',
+  'com.readingdaily.lifetime.access',
   // Phase 7: Subscription products
   'com.readingdaily.basic.monthly',
   'com.readingdaily.basic.yearly',
@@ -266,7 +266,7 @@ export class AppleIAPService implements IPaymentService {
 
       // Filter for lifetime access product
       const lifetimePurchases = purchases.filter(
-        (p) => p.productId === 'lifetime_access_001'
+        (p) => p.productId === 'com.readingdaily.lifetime.access'
       );
 
       console.log('[AppleIAPService] Restored purchases:', lifetimePurchases.length);
@@ -300,7 +300,7 @@ export class AppleIAPService implements IPaymentService {
 
       const result = await validateAppleReceipt({
         receipt,
-        productId: productId || 'lifetime_access_001',
+        productId: productId || 'com.readingdaily.lifetime.access',
       });
 
       const data = result.data as { valid: boolean };
@@ -457,7 +457,7 @@ export class AppleIAPService implements IPaymentService {
         console.warn('[AppleIAPService] Using fallback products');
         this.products = [
           {
-            id: 'lifetime_access_001',
+            id: 'com.readingdaily.lifetime.access',
             name: 'Lifetime Access',
             description: 'Unlock all features forever',
             price: 4.99,

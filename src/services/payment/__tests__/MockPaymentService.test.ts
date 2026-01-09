@@ -82,7 +82,7 @@ describe('MockPaymentService', () => {
 
     it('should include lifetime access product', async () => {
       const products = await service.getProducts();
-      const lifetime = products.find(p => p.id === 'lifetime_access_001');
+      const lifetime = products.find(p => p.id === 'com.readingdaily.lifetime.access');
       expect(lifetime).toBeDefined();
       expect(lifetime?.type).toBe('one_time');
       expect(lifetime?.price).toBe(5.0);
@@ -128,7 +128,7 @@ describe('MockPaymentService', () => {
 
   describe('Payment Intent - createPaymentIntent()', () => {
     it('should create payment intent for valid product', async () => {
-      const intent = await service.createPaymentIntent('lifetime_access_001');
+      const intent = await service.createPaymentIntent('com.readingdaily.lifetime.access');
 
       expect(intent).toHaveProperty('id');
       expect(intent).toHaveProperty('provider');
@@ -136,7 +136,7 @@ describe('MockPaymentService', () => {
       expect(intent).toHaveProperty('status');
 
       expect(intent.provider).toBe('mock');
-      expect(intent.productId).toBe('lifetime_access_001');
+      expect(intent.productId).toBe('com.readingdaily.lifetime.access');
       expect(intent.status).toBe('pending');
     });
 
@@ -145,8 +145,8 @@ describe('MockPaymentService', () => {
     });
 
     it('should return unique intent IDs', async () => {
-      const intent1 = await service.createPaymentIntent('lifetime_access_001');
-      const intent2 = await service.createPaymentIntent('lifetime_access_001');
+      const intent1 = await service.createPaymentIntent('com.readingdaily.lifetime.access');
+      const intent2 = await service.createPaymentIntent('com.readingdaily.lifetime.access');
 
       expect(intent1.id).not.toBe(intent2.id);
     });
@@ -156,7 +156,7 @@ describe('MockPaymentService', () => {
 
   describe('Purchase - One-Time Products', () => {
     it('should complete one-time purchase', async () => {
-      const result = await service.purchase('lifetime_access_001');
+      const result = await service.purchase('com.readingdaily.lifetime.access');
 
       expect(result.success).toBe(true);
       expect(result.provider).toBe('mock');
@@ -170,7 +170,7 @@ describe('MockPaymentService', () => {
       let successes = 0;
 
       for (let i = 0; i < attempts; i++) {
-        const result = await service.purchase('lifetime_access_001');
+        const result = await service.purchase('com.readingdaily.lifetime.access');
         if (result.success) successes++;
       }
 
@@ -181,14 +181,14 @@ describe('MockPaymentService', () => {
     });
 
     it('should have realistic transaction IDs', async () => {
-      const result = await service.purchase('lifetime_access_001');
+      const result = await service.purchase('com.readingdaily.lifetime.access');
 
       expect(typeof result.transactionId).toBe('string');
       expect(result.transactionId!.length).toBeGreaterThan(0);
     });
 
     it('should include receipt for one-time purchases', async () => {
-      const result = await service.purchase('lifetime_access_001');
+      const result = await service.purchase('com.readingdaily.lifetime.access');
 
       expect(result.receipt).toBeDefined();
       expect(typeof result.receipt).toBe('string');
@@ -359,7 +359,7 @@ describe('MockPaymentService', () => {
 
   describe('Receipt Validation - validateReceipt()', () => {
     it('should validate receipts', async () => {
-      const purchase = await service.purchase('lifetime_access_001');
+      const purchase = await service.purchase('com.readingdaily.lifetime.access');
       const valid = await service.validateReceipt(purchase.receipt!);
 
       expect(valid).toBe(true);
@@ -380,7 +380,7 @@ describe('MockPaymentService', () => {
   describe('Restore Purchases - restorePurchases()', () => {
     it('should restore previous purchases', async () => {
       // First make a purchase
-      await service.purchase('lifetime_access_001');
+      await service.purchase('com.readingdaily.lifetime.access');
 
       // Then restore
       const result = await service.restorePurchases();
@@ -398,7 +398,7 @@ describe('MockPaymentService', () => {
     });
 
     it('should restore with correct purchase details', async () => {
-      const purchaseResult = await service.purchase('lifetime_access_001');
+      const purchaseResult = await service.purchase('com.readingdaily.lifetime.access');
 
       const restoreResult = await service.restorePurchases();
       expect(restoreResult.success).toBe(true);
@@ -415,9 +415,9 @@ describe('MockPaymentService', () => {
   describe('Concurrent Operations', () => {
     it('should handle concurrent purchases', async () => {
       const results = await Promise.all([
-        service.purchase('lifetime_access_001'),
-        service.purchase('lifetime_access_001'),
-        service.purchase('lifetime_access_001'),
+        service.purchase('com.readingdaily.lifetime.access'),
+        service.purchase('com.readingdaily.lifetime.access'),
+        service.purchase('com.readingdaily.lifetime.access'),
       ]);
 
       expect(results.length).toBe(3);
@@ -459,7 +459,7 @@ describe('MockPaymentService', () => {
       }
 
       // Should still be able to make valid purchases
-      const result = await service.purchase('lifetime_access_001');
+      const result = await service.purchase('com.readingdaily.lifetime.access');
       expect(result.success).toBe(true);
     });
   });
@@ -469,7 +469,7 @@ describe('MockPaymentService', () => {
   describe('Performance', () => {
     it('should simulate network delay for purchases', async () => {
       const start = Date.now();
-      await service.purchase('lifetime_access_001');
+      await service.purchase('com.readingdaily.lifetime.access');
       const duration = Date.now() - start;
 
       // Should simulate 1.5s network delay (±500ms variance)

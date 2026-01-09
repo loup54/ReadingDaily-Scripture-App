@@ -26,7 +26,7 @@ export class MockPaymentService implements IPaymentService {
 
   private products: PaymentProduct[] = [
     {
-      id: 'lifetime_access_001',
+      id: 'com.readingdaily.lifetime.access',
       name: 'Lifetime Access',
       description: 'Unlock all features forever with a one-time payment',
       price: 5.0,

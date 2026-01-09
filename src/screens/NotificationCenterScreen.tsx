@@ -72,15 +72,36 @@ export function NotificationCenterScreen({ showHeader = true }: NotificationCent
   const [sortBy, setSortBy] = useState<'date-desc' | 'date-asc' | 'type'>('date-desc');
   const [showFilters, setShowFilters] = useState(false);
 
-  // Load data on mount
+  // Track if data has been loaded to prevent infinite loops
+  const hasLoadedRef = React.useRef(false);
+  const loadedUserIdRef = React.useRef<string>('');
+
+  // Component lifecycle tracking
   useEffect(() => {
-    if (userId) {
+    console.log('[NotificationCenter] Component mounted');
+    return () => {
+      console.log('[NotificationCenter] Component unmounted');
+    };
+  }, []);
+
+  // Load data on mount or when userId changes
+  // SECURITY: Only loads data for authenticated user
+  // ERROR HANDLING: Gracefully handles missing userId
+  // PERFORMANCE: Prevents infinite render loop with ref tracking
+  useEffect(() => {
+    if (userId && (!hasLoadedRef.current || loadedUserIdRef.current !== userId)) {
       console.log('[NotificationCenter] Loading notifications for user:', userId);
+      hasLoadedRef.current = true;
+      loadedUserIdRef.current = userId;
       loadAll(userId);
-    } else {
+    } else if (!userId) {
       console.warn('[NotificationCenter] No user ID available');
+      hasLoadedRef.current = false;
+      loadedUserIdRef.current = '';
+    } else {
+      console.log('[NotificationCenter] Data already loaded, skipping fetch');
     }
-  }, [userId, loadAll]);
+  }, [userId]);
 
   // Filter notifications
   const filteredNotifications = useCallback(() => {
@@ -120,11 +141,15 @@ export function NotificationCenterScreen({ showHeader = true }: NotificationCent
   }, [history, searchText, selectedType, selectedStatus, sortBy]);
 
   const handleRefresh = async () => {
+    console.log('[NotificationCenter] Manual refresh triggered');
     setRefreshing(true);
     try {
       if (userId) {
         await loadAll(userId);
+        console.log('[NotificationCenter] Manual refresh completed');
       }
+    } catch (error) {
+      console.error('[NotificationCenter] Refresh error:', error);
     } finally {
       setRefreshing(false);
     }
@@ -198,6 +223,13 @@ export function NotificationCenterScreen({ showHeader = true }: NotificationCent
 
   const notifications = filteredNotifications();
 
+  // Log when empty state is shown with updated tips
+  React.useEffect(() => {
+    if (notifications.length === 0) {
+      console.log('[NotificationCenter] Empty state displayed - showing updated tips for iOS Settings and Daily Reminders');
+    }
+  }, [notifications.length]);
+
   return (
     <View style={[styles.container, { backgroundColor: colors.background.primary }]}>
       {/* Header - only show when showHeader is true */}
@@ -246,7 +278,7 @@ export function NotificationCenterScreen({ showHeader = true }: NotificationCent
           {/* Type Filter */}
           <View style={styles.filterGroup}>
             <Text style={[styles.filterLabel, { color: colors.text.primary }]}>Type</Text>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterOptions}>
+            <View style={styles.filterOptions}>
               {['all', 'daily_reminder', 'achievement_unlocked', 'performance_insight'].map(
                 (type) => (
                   <TouchableOpacity
@@ -270,7 +302,7 @@ export function NotificationCenterScreen({ showHeader = true }: NotificationCent
                   </TouchableOpacity>
                 )
               )}
-            </ScrollView>
+            </View>
           </View>
 
           {/* Status Filter */}
@@ -352,6 +384,8 @@ export function NotificationCenterScreen({ showHeader = true }: NotificationCent
             <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor={colors.primary.blue} />
           }
           contentContainerStyle={styles.listContent}
+          style={styles.list}
+          removeClippedSubviews={false}
         />
       ) : (
         <EmptyState
@@ -367,8 +401,8 @@ export function NotificationCenterScreen({ showHeader = true }: NotificationCent
               : 'You haven\'t received any notifications yet'
           }
           tips={[
-            '✓ Enable notifications in Settings → Notifications',
-            '✓ Turn on Daily Reminders to receive readings',
+            '✓ Allow notifications in iOS Settings if prompted',
+            '✓ Turn on Daily Reminders in Settings to receive readings',
             '✓ Notifications appear here when readings are available',
           ]}
           actionButton={{
@@ -481,6 +515,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  list: {
+    flex: 1,
+  },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -559,6 +596,7 @@ const styles = StyleSheet.create({
   listContent: {
     paddingHorizontal: 16,
     paddingVertical: 8,
+    paddingBottom: 80, // Extra padding for tab bar (65px) + safety margin
   },
   notificationIcon: {
     marginRight: 12,

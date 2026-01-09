@@ -3,7 +3,7 @@
  * Manages offline feature configuration with toggles, dropdowns, and actions
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
   View,
   Text,
@@ -50,6 +50,11 @@ export const OfflineSettingsSection: React.FC<OfflineSettingsSectionProps> = ({
   const [isDownloadingNow, setIsDownloadingNow] = useState(false);
   const [isClearing, setIsClearing] = useState(false);
 
+  // Log dark mode state for debugging
+  useEffect(() => {
+    console.log('[OfflineSettings] Render in dark mode:', isDark);
+  }, [isDark]);
+
   // Build storageStats from store values
   const storageStats = {
     used: storageUsedMB * 1024 * 1024, // Convert MB to bytes
@@ -60,8 +65,11 @@ export const OfflineSettingsSection: React.FC<OfflineSettingsSectionProps> = ({
 
   // Color scheme
   const colors = propColors || {
-    text: { primary: isDark ? Colors.text.white : Colors.text.primary },
-    secondary: isDark ? Colors.text.secondary : Colors.text.secondary,
+    text: {
+      primary: isDark ? Colors.text.white : Colors.text.primary,
+      white: Colors.text.white, // Always white for emphasis
+    },
+    secondary: isDark ? '#A0A0A0' : Colors.text.secondary, // Light gray in dark mode for better readability
     background: { card: isDark ? '#1A1A1A' : Colors.background.card },
     ui: { divider: isDark ? '#333' : Colors.ui.divider },
   };
@@ -194,7 +202,7 @@ export const OfflineSettingsSection: React.FC<OfflineSettingsSectionProps> = ({
 
   return (
     <View style={styles.section}>
-      <Text style={[styles.sectionTitle, { color: Colors.text.white }]}>
+      <Text style={[styles.sectionTitle, { color: colors.text.primary }]}>
         Offline Settings
       </Text>
 
@@ -221,7 +229,7 @@ export const OfflineSettingsSection: React.FC<OfflineSettingsSectionProps> = ({
               Cached Readings
             </Text>
           </View>
-          <Text style={[styles.infoValue, { color: colors.secondary }]}>
+          <Text style={[styles.infoValue, { color: isDark ? Colors.text.white : colors.secondary }]}>
             {cachedReadingDates?.length || 0} days
           </Text>
         </View>
