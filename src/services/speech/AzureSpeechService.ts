@@ -10,7 +10,8 @@
  */
 
 import * as sdk from 'microsoft-cognitiveservices-speech-sdk';
-import * as FileSystemLegacy from 'expo-file-system';
+import * as FileSystem from 'expo-file-system';
+import { File } from 'expo-file-system';
 import * as Crypto from 'expo-crypto';
 import { ENV } from '@/config/env';
 import {
@@ -20,9 +21,6 @@ import {
   PhonemeAssessment,
   PracticeError,
 } from '@/types/practice.types';
-
-// Use legacy API to avoid deprecation warnings
-const FileSystem = FileSystemLegacy;
 
 /**
  * Polyfill crypto.getRandomValues for React Native
@@ -232,20 +230,16 @@ class AzureSpeechService {
         // Already a data URI
         fileData = normalizedPath.split(',')[1];
       } else {
-        // Read from file system using base64 encoding
+        // Read from file system using new File API
         try {
-          const base64Data = await (FileSystem as any).readAsStringAsync(normalizedPath, {
-            encoding: 'base64',
-          });
-          fileData = base64Data;
+          const file = new File(normalizedPath);
+          fileData = await file.base64();
         } catch (fsError) {
           // If file:// doesn't work, try without it
           const pathWithoutPrefix = normalizedPath.replace('file://', '');
           console.log('[AudioFileLoad] Retrying without file:// prefix:', pathWithoutPrefix);
-          const base64Data = await (FileSystem as any).readAsStringAsync(pathWithoutPrefix, {
-            encoding: 'base64',
-          });
-          fileData = base64Data;
+          const file = new File(pathWithoutPrefix);
+          fileData = await file.base64();
         }
       }
 

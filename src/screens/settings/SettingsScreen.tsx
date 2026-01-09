@@ -1107,6 +1107,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
                         key={lang.code}
                         style={[
                           styles.selectorOption,
+                          { backgroundColor: colors.background.secondary },
                           selectedLanguage === lang.code && { backgroundColor: colors.primary.blue + '20' }
                         ]}
                         onPress={() => handleLanguageSelect(lang.code)}
@@ -1129,6 +1130,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
                         key={accent.code}
                         style={[
                           styles.selectorOption,
+                          { backgroundColor: colors.background.secondary },
                           selectedAccent === accent.code && { backgroundColor: colors.primary.blue + '20' }
                         ]}
                         onPress={() => handleAccentSelect(accent.code)}

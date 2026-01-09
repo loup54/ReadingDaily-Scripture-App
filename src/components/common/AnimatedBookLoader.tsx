@@ -16,22 +16,21 @@ export const AnimatedBookLoader: React.FC<AnimatedBookLoaderProps> = ({
   size = 120,
   color = '#5B6FE8',
 }) => {
-  // Single animation value for pulsing effect
+  // Animation values
   const pulseAnimation = useRef(new Animated.Value(0)).current;
+  const fillAnimation = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    console.log('[AnimatedBookLoader] Component mounted, starting pulse animation');
+    console.log('[AnimatedBookLoader] Component mounted, starting animations');
 
-    // Create infinite pulsing animation - very visible and simple
-    const animation = Animated.loop(
+    // Pulse animation - subtle scaling
+    const pulse = Animated.loop(
       Animated.sequence([
-        // Pulse up (grow and brighten) - 1s
         Animated.timing(pulseAnimation, {
           toValue: 1,
           duration: 1000,
           useNativeDriver: true,
         }),
-        // Pulse down (shrink and dim) - 1s
         Animated.timing(pulseAnimation, {
           toValue: 0,
           duration: 1000,
@@ -40,13 +39,37 @@ export const AnimatedBookLoader: React.FC<AnimatedBookLoaderProps> = ({
       ])
     );
 
-    animation.start();
+    // Fill animation - fills from 0% to 100% repeatedly
+    const fill = Animated.loop(
+      Animated.sequence([
+        // Fill up from 0% to 100% over 2 seconds
+        Animated.timing(fillAnimation, {
+          toValue: 1,
+          duration: 2000,
+          useNativeDriver: false, // Can't use native driver for height animations
+        }),
+        // Brief pause at full
+        Animated.delay(300),
+        // Empty from 100% to 0% over 1.5 seconds
+        Animated.timing(fillAnimation, {
+          toValue: 0,
+          duration: 1500,
+          useNativeDriver: false,
+        }),
+        // Brief pause at empty
+        Animated.delay(300),
+      ])
+    );
+
+    pulse.start();
+    fill.start();
 
     return () => {
-      console.log('[AnimatedBookLoader] Cleanup - stopping animation');
-      animation.stop();
+      console.log('[AnimatedBookLoader] Cleanup - stopping animations');
+      pulse.stop();
+      fill.stop();
     };
-  }, [pulseAnimation]);
+  }, [pulseAnimation, fillAnimation]);
 
   const pageSize = size * 0.75;
   const spineWidth = size * 0.1;
@@ -87,6 +110,18 @@ export const AnimatedBookLoader: React.FC<AnimatedBookLoaderProps> = ({
           <View style={[styles.pageLine, { opacity: 0.3 }]} />
           <View style={[styles.pageLine, { opacity: 0.25 }]} />
         </View>
+        {/* Animated fill overlay */}
+        <Animated.View
+          style={[
+            styles.fillOverlay,
+            {
+              height: fillAnimation.interpolate({
+                inputRange: [0, 1],
+                outputRange: ['0%', '100%'],
+              }),
+            },
+          ]}
+        />
       </View>
 
       {/* Spine */}
@@ -119,6 +154,18 @@ export const AnimatedBookLoader: React.FC<AnimatedBookLoaderProps> = ({
           <View style={[styles.pageLine, { opacity: 0.3 }]} />
           <View style={[styles.pageLine, { opacity: 0.25 }]} />
         </View>
+        {/* Animated fill overlay */}
+        <Animated.View
+          style={[
+            styles.fillOverlay,
+            {
+              height: fillAnimation.interpolate({
+                inputRange: [0, 1],
+                outputRange: ['0%', '100%'],
+              }),
+            },
+          ]}
+        />
       </View>
 
       {/* Shimmer Highlight */}
@@ -128,7 +175,7 @@ export const AnimatedBookLoader: React.FC<AnimatedBookLoaderProps> = ({
           {
             opacity: pulseAnimation.interpolate({
               inputRange: [0, 1],
-              outputRange: [0.2, 0.5],
+              outputRange: [0.1, 0.3],
             }),
           },
         ]}
@@ -148,17 +195,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   page: {
-    borderRadius: 2,
+    borderRadius: 4,
     justifyContent: 'center',
     alignItems: 'center',
     shadowColor: '#000',
     shadowOffset: {
-      width: 2,
-      height: 4,
+      width: 0,
+      height: 6,
     },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 5,
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 8,
+    overflow: 'hidden', // Important: clips the fill overlay to page bounds
   },
   leftPage: {
     marginRight: -2,
@@ -190,5 +238,14 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderRadius: 2,
     opacity: 0.3,
+  },
+  fillOverlay: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: 'rgba(123, 97, 255, 0.35)', // Purple tint with transparency
+    borderBottomLeftRadius: 4,
+    borderBottomRightRadius: 4,
   },
 });

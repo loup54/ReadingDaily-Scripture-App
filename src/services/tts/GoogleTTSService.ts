@@ -5,11 +5,10 @@
  */
 
 import { ENV } from '@/config/env';
-import * as FileSystemLegacy from 'expo-file-system';
+import * as FileSystem from 'expo-file-system';
+import { File, Directory } from 'expo-file-system';
 
-// SDK 52: No longer using /legacy import path
-const FileSystem = FileSystemLegacy;
-const cacheDirectory = (FileSystem as any).cacheDirectory || (FileSystem as any).documentDirectory || '';
+const cacheDirectory = FileSystem.cacheDirectory || FileSystem.documentDirectory || '';
 
 interface TTSRequest {
   text: string;
@@ -79,11 +78,10 @@ class GoogleTTSService {
         throw new Error('No audio content in TTS response');
       }
 
-      // Save audio to local file
+      // Save audio to local file using new File API
       const audioUri = `${cacheDirectory}tts_${Date.now()}.mp3`;
-      await (FileSystem as any).writeAsStringAsync(audioUri, data.audioContent, {
-        encoding: 'base64',
-      });
+      const file = new File(audioUri);
+      await file.write(data.audioContent);
 
       console.log('[GoogleTTS] Audio saved to:', audioUri);
       return audioUri;

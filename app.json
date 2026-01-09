@@ -2,11 +2,11 @@
   "expo": {
     "name": "ReadingDaily Scripture App",
     "slug": "readingdaily-scripture-app",
+    "scheme": "readingdaily",
     "version": "1.1.1",
     "icon": "./assets/icon.png",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
-    "newArchEnabled": true,
     "assetBundlePatterns": [
       "**/*"
     ],
@@ -17,7 +17,7 @@
     },
     "ios": {
       "bundleIdentifier": "com.readingdaily.scripture",
-      "buildNumber": "59",
+      "buildNumber": "72",
       "splash": {
         "image": "./assets/splash.png",
         "resizeMode": "contain",

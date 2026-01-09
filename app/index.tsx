@@ -12,6 +12,21 @@ export default function Index() {
   const { user, state, isInitialized: authInitialized } = useAuthStore();
   const { initializeTrial, checkTrialStatus } = useTrialStore();
   const [isInitialized, setIsInitialized] = React.useState(false);
+  const [minDurationElapsed, setMinDurationElapsed] = React.useState(false);
+
+  // Minimum display duration for loading screen (so users can see quotes rotate)
+  useEffect(() => {
+    console.log('[App] Starting minimum display timer (5s) for loading screen - allows quote rotation');
+    const timer = setTimeout(() => {
+      console.log('[App] Minimum display duration elapsed - ready to proceed');
+      setMinDurationElapsed(true);
+    }, 5000); // Show loading screen for 5 seconds (quotes rotate every 4s)
+
+    return () => {
+      clearTimeout(timer);
+      console.log('[App] Minimum display timer cleaned up');
+    };
+  }, []);
 
   useEffect(() => {
     const initialize = async () => {
@@ -39,9 +54,10 @@ export default function Index() {
           }
         });
 
+        console.log('[App] Initialization complete - waiting for minimum display duration');
         setIsInitialized(true);
       } catch (error) {
-        console.error('Initialization failed:', error);
+        console.error('[App] Initialization failed:', error);
         setIsInitialized(true);
       }
     };
@@ -49,8 +65,16 @@ export default function Index() {
     initialize();
   }, []);
 
-  if (!isInitialized || !authInitialized) {
-    return <LoadingScreen message="Initializing app..." />;
+  // Show loading screen until BOTH initialization complete AND minimum duration elapsed
+  if (!isInitialized || !authInitialized || !minDurationElapsed) {
+    if (!isInitialized || !authInitialized) {
+      console.log('[App] Showing initialization screen - waiting for initialization');
+    } else {
+      console.log('[App] Initialization done, but showing screen until minimum duration (5s) for quote rotation');
+    }
+    return (
+      <LoadingScreen />
+    );
   }
 
   // Redirect based on auth state
