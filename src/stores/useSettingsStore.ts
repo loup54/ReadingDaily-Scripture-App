@@ -282,17 +282,32 @@ export const useSettingsStore = create<SettingsStoreState>()(
             error: null,
           });
 
-          // TODO: Schedule/cancel notifications based on settings (Phase 16)
-          if (notifications.enabled !== undefined) {
-            if (notifications.enabled) {
-              console.log('📅 Scheduling daily notifications...');
-              // await scheduleNotifications();
+          // Schedule/cancel notifications based on settings
+          const updatedSettings = {
+            ...currentSettings.notifications,
+            ...notifications,
+          };
+
+          // Import dynamically to avoid circular dependencies
+          const { dailyReminderScheduler } = await import(
+            '@/services/notifications/DailyReminderScheduler'
+          );
+
+          if (notifications.enabled !== undefined || notifications.dailyReadingTime !== undefined || notifications.soundEnabled !== undefined) {
+            if (updatedSettings.enabled && updatedSettings.reminderEnabled) {
+              console.log('📅 Scheduling daily notifications for', updatedSettings.dailyReadingTime);
+              await dailyReminderScheduler.scheduleDailyReminder({
+                enabled: true,
+                time: updatedSettings.dailyReadingTime,
+                soundEnabled: updatedSettings.soundEnabled,
+              });
             } else {
-              console.log('🔕 Cancelling notifications...');
-              // await cancelNotifications();
+              console.log('🔕 Cancelling daily notifications');
+              await dailyReminderScheduler.cancelDailyReminder();
             }
           }
         } catch (error) {
+          console.error('[SettingsStore] Error updating notification settings:', error);
           set({
             error: error instanceof Error ? error.message : 'Failed to update notification settings',
           });

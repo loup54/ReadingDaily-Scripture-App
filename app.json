@@ -17,7 +17,7 @@
     },
     "ios": {
       "bundleIdentifier": "com.readingdaily.scripture",
-      "buildNumber": "73",
+      "buildNumber": "74",
       "splash": {
         "image": "./assets/splash.png",
         "resizeMode": "contain",
@@ -25,7 +25,8 @@
       },
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
-        "NSMicrophoneUsageDescription": "This app needs access to your microphone to practice pronunciation of sacred scripture."
+        "NSMicrophoneUsageDescription": "This app needs access to your microphone to practice pronunciation of sacred scripture.",
+        "NSUserNotificationsUsageDescription": "This app needs permission to send you daily reading reminders to help you maintain your spiritual practice."
       }
     },
     "android": {
@@ -57,6 +58,15 @@
           "android": {
             "useNextNotificationChannelOnAndroid": true
           }
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/icon.png",
+          "color": "#7C3AED",
+          "sounds": ["./assets/notification-sound.wav"],
+          "mode": "production"
         }
       ]
     ],

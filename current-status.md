@@ -1,146 +1,266 @@
-## ReadingDaily Scripture App - Current Status
-**Last Updated:** 2026-01-09 11:45 AM
+# ReadingDaily Scripture App - Current Status
 
-### Session Overview 🎯
-**Primary Goal:** Fix pronunciation practice transcription errors and prepare Build 70
-**Current Phase:** ✅ All fixes complete - Building Build 70 for production
+**Last Updated:** 2026-01-12
 
----
+## Session Overview 🎯
 
-### Completed Tasks ✅
-
-#### UI/UX Improvements
-- ✅ Created app icon from Bible image
-- ✅ Fixed History/Progress screen readability
-  - Location: `src/screens/progress/ProgressDashboard.tsx:637-660`
-  - Changes: Stat labels 12px → 14px, Stat values 20px → 24px
-  - Added minimum card height and improved spacing
-- ✅ Fixed Offline Settings storage stats readability in dark mode
-  - Location: `src/components/offline/StorageProgressBar.tsx:50-143`
-  - Changes: Migrated from static `Colors` to theme-aware `useTheme()` hook
-  - Result: Storage numbers now show white text in dark mode (was black/unreadable)
-- ✅ Improved loading screen animation - Made book icon more subtle
-  - Location: `src/components/common/LoadingScreen.tsx:149-154`
-  - Location: `src/components/common/AnimatedBookLoader.tsx:21-72, 114-168`
-  - Changes: Split text into two centered lines, added fill animation to book pages
-  - Result: "Keep smiling!" on line 1, "Loading good things for you..." on line 2, purple fill effect
-
-#### Business/IAP
-- ✅ Submitted IAP for review with screenshot
-- ✅ Fixed registration flow before IAP purchase
-
-#### expo-file-system Migration Fixes
-- ✅ Fixed `file.exists()` method call error
-  - Location: `src/services/speech/SpeechToTextService.ts:59-60`
-  - Location: `src/services/speech/AudioRecordingService.ts`
-  - Location: `src/services/speech/SpeechRecognitionService.ts`
-  - Change: `await file.exists()` → `file.exists` (property not method)
-- ✅ Fixed `readAsStringAsync` deprecation
-  - Location: `src/services/speech/SpeechToTextService.ts:68`
-  - Location: `src/services/speech/AzureSpeechService.ts:237-238`
-  - Change: Migrated to new File API with `file.base64()`
+**Primary Goal:** Implement push notifications for daily reading reminders
+**Current Phase:** ✅ Push notifications system implemented and ready for testing
 
 ---
 
-### Current Issue - RESOLVED ✅
-**Problem:** Pronunciation Practice showing "Could not transcribe audio" with 0% accuracy
-**Error Message:** "(No speech detected)"
-**Status:** ✅ **CODE FIXED** - Error was `audioChannelCount` parameter + iOS Simulator limitations
-**Note:** Feature works correctly on physical devices, cannot be tested on simulator
+## Completed Tasks ✅
 
-#### Fix Attempts Made:
-1. ❌ **Attempt 1:** Removed encoding to let Google auto-detect (FAILED)
-2. ❌ **Attempt 2:** Added proper WAV encoding configuration (FAILED)
-   - Location: `src/services/speech/SpeechToTextService.ts:82-95`
-   - Added: `encoding: 'LINEAR16'`, `sampleRateHertz: 16000`, `audioChannelCount: 1`
-   - Result: App rebuilt, error persists
-3. ✅ **Attempt 3:** FIXED - Removed `audioChannelCount` parameter
-   - **Discovery:** Git history (commit 822f201) shows original working version did NOT have `audioChannelCount`
-   - **Issue:** Google Cloud API `audioChannelCount` should ONLY be set for multi-channel audio
-   - **Fix:** Removed `audioChannelCount: 1` parameter (mono audio auto-detected)
-   - **Result:** Code fix applied successfully
-4. ⚠️ **CRITICAL DISCOVERY:** iOS Simulator Audio Limitation
-   - **Finding:** Recording size shows `0` bytes - simulator cannot record actual audio
-   - **Errors:** `[AudioToolbox] LoudnessManager.mm` + `[CoreAudio] IOWorkLoop overload`
-   - **Root Cause:** iOS Simulator lacks real microphone access - creates silent WAV files
-   - **Solution:** Pronunciation Practice REQUIRES PHYSICAL DEVICE testing
-   - **Status:** ✅ Code is correct, ❌ Cannot validate on simulator
+### Cloud Functions Deployment
+- ✅ **USCCB Reading Scraper Functions Deployed** (Build 16)
+  - `scheduledReadingScraper`: Daily scrape at 1 AM UTC (28-day window)
+  - `manualReadingScrape`: HTTP endpoint for manual triggering
+  - `usccbHealthCheck`: Scraper health monitoring endpoint
+  - Location: `functions/src/readingScrapers.ts` & `functions/src/scrapers/usccb.ts`
 
-#### What We Know:
-- Google Cloud API key is configured: `AIzaSyB0uezCk4ERGIPn8VssFjZdWT7H83uiBXo`
-- API returns 200 OK (based on previous logs)
-- API returns empty results: `{results: []}`
-- Error appears in user feedback: "Could not transcribe audio"
-- This error has been encountered and fixed before
+### Database Population
+- ✅ **Firestore Populated with 28 Days of Readings**
+  - Used Python script to populate historical readings
+  - Date range: 7 days back + today + 21 days forward
+  - Includes: First Reading, Responsorial Psalm, Gospel, Second Reading (Sundays/Solemnities)
+  - Liturgical metadata: season, feast days, colors
 
-#### Next Steps:
-1. Research previous solutions to this exact error in codebase
-2. Investigate actual audio format being sent to API
-3. Check if audio is actually being recorded properly
-4. Verify API key permissions and quotas
-5. Test with different audio encoding parameters
+### Bug Fixes
+- ✅ **Fixed Sign-In Navigation Issue**
+  - Problem: "Already have an account? Sign In" button not responding
+  - Solution: Added debug logging and reload fixed the issue
+  - Location: `src/screens/auth/LandingScreen.tsx:28-31`
+
+- ✅ **Fixed Microphone Permission Block**
+  - Problem: Microphone button disabled when permissions not granted
+  - Issue: Button was blocked from requesting permissions
+  - Solution: Removed `recordingDisabled` from disabled condition
+  - Location: `src/components/pronunciation/PracticeSentenceDisplay.tsx:189`
+  - Result: Button now triggers permission dialog when tapped
+
+### Testing
+- ✅ **App Testing on iOS Simulator**
+  - Sign-in functionality verified
+  - Readings displaying correctly
+  - Pronunciation practice microphone button functional
+  - Reading data loading from Firestore successfully
+
+### Documentation
+- ✅ **Created Comprehensive README.md**
+  - Project overview and features
+  - Tech stack documentation
+  - Setup and installation instructions
+  - Cloud Functions documentation
+  - Development commands
+
+### Onboarding Tutorial
+- ✅ **Implemented First-Time User Onboarding**
+  - Created `OnboardingCarouselScreen` component with 5 feature slides
+  - Integrated with `useSettingsStore` for onboarding state tracking
+  - Created `/onboarding` route using Expo Router
+  - Updated `app/index.tsx` to check onboarding completion
+  - Features showcased:
+    1. Daily Catholic Readings from USCCB
+    2. AI-Powered Pronunciation Practice
+    3. Audio with Word-Level Highlighting (disclaimer added)
+    4. 18 Languages Supported
+    5. Progress Tracking (Streaks & Badges)
+  - Skip and Get Started buttons
+  - Smooth pagination with visual indicators
+  - Purple gradient backgrounds matching app branding
+  - Manual access via Settings > Support > View Tutorial
+
+### Push Notifications (NEW!)
+- ✅ **Daily Reading Reminder System**
+  - Created `DailyReminderScheduler` service using expo-notifications
+  - Integrated with settings store for automatic scheduling
+  - Notification permissions handling (iOS & Android)
+  - Android notification channel configuration
+  - iOS notification permission prompt
+  - Location: `src/services/notifications/DailyReminderScheduler.ts`
+
+- ✅ **Settings UI for Notifications**
+  - Daily Reminders toggle switch
+  - Reminder Time picker (HH:MM format)
+  - Test Notification button for immediate testing
+  - Settings automatically schedule/cancel notifications
+  - Location: `src/screens/settings/SettingsScreen.tsx:790-900`
+
+- ✅ **Configuration**
+  - Added expo-notifications plugin to app.json
+  - iOS: NSUserNotificationsUsageDescription permission
+  - Android: Notification channel with purple accent color
+  - Default reminder time: 08:00 (8 AM)
 
 ---
 
-### Technical Details 📋
+## Current Features ✨
 
-#### Files Modified This Session:
-1. `src/screens/progress/ProgressDashboard.tsx` - Readability improvements
-2. `src/components/offline/StorageProgressBar.tsx` - Dark mode contrast fix
-3. `src/services/speech/SpeechToTextService.ts` - File API migration + encoding fix
-4. `src/services/speech/AudioRecordingService.ts` - File API migration
-5. `src/services/speech/SpeechRecognitionService.ts` - File API migration
-6. `src/services/speech/AzureSpeechService.ts` - File API migration
-7. `src/components/common/LoadingScreen.tsx` - Text layout + animation improvements
-8. `src/components/common/AnimatedBookLoader.tsx` - Added fill animation
-9. `app/index.tsx` - Removed hardcoded loading message prop
-10. `app.json` - Incremented build number to 70
+### Existing Features Confirmed
+1. **Multi-Language Support** (18 languages)
+   - i18next integration with React Native
+   - Languages: en, es, fr, de, it, pt, ru, zh-CN, zh-TW, ja, ko, ar, hi, vi, th, pl, nl, tr
+   - Configuration: `src/i18n.config.ts`
+   - Translation files: `src/locales/*/translation.json`
 
-#### Simulator Testing Results:
-- **Build Status:** ✅ Successful (0 errors, 2 warnings)
-- **Simulator:** iPhone 17 Pro (83B1074B-0765-4870-93FC-7F9028938D97)
-- **App Launch:** ✅ Successful
-- **Services Initialized:** ✅ Firebase, Auth, Network, Analytics, Payment
-- **UI Fixes Verified:** ✅ No errors related to StorageProgressBar or theme changes
-- **Pronunciation Practice:** ⚠️ Confirmed simulator limitation (0 byte recordings)
+2. **Audio Recordings with Word-Level Highlighting**
+   - Google Cloud TTS integration
+   - Multiple voice options (male/female)
+   - Karaoke-style synchronized highlighting
+   - Offline audio caching
+   - Services: TTSService, AudioPlaybackService, WordTimingService
+   - Component: `src/components/reading/ScriptureTextWithHighlighting.tsx`
+   - Note: Requires subscription and continued use (gradual activation)
 
-#### Build Information:
-- **Next Build:** Build 70 (Production)
-- **Build Command:** `eas build --platform ios --profile production`
-- **Platform:** iOS
-- **Distribution:** TestFlight → App Store
-- **EAS Project:** loup1954/readingdaily-scripture-app
+3. **USCCB Reading Scraper**
+   - Automated daily scraping at 1 AM UTC
+   - 28-day rolling window maintenance
+   - Manual trigger endpoint available
+   - Health check monitoring
 
----
-
-### Remaining Todo List ⏳
-- [x] **CRITICAL:** Fix pronunciation practice transcription error ✅
-- [x] Simulator testing - verify no errors/crashes ✅
-- [x] Fix loading screen text layout and fill animation ✅
-- [x] Update all documentation ✅
-- [ ] **CURRENT:** Build 70 via EAS (20 minutes)
-- [ ] Distribute Build 70 via TestFlight (30 minutes)
-- [ ] Test pronunciation practice on physical device (1-2 hours)
-- [ ] Submit Build 70 to App Store with response to Apple
+4. **Push Notifications** (NEW!)
+   - Daily reading reminder notifications
+   - Customizable reminder time
+   - Permission handling for iOS and Android
+   - Test notification functionality
+   - Automatic scheduling via settings
 
 ---
 
-### Project Directory
+## Next Development Phase 🚀
+
+### Immediate Priorities
+
+1. **Testing & Bug Fixes**
+   - Test notifications on physical device
+   - Verify notification scheduling works correctly
+   - Test timezone handling for reminders
+   - Ensure notifications appear when app is closed/backgrounded
+
+2. **Performance Optimization**
+   - Image lazy loading and caching
+   - Bundle size reduction
+   - Screen performance profiling
+   - FlashList implementation for long lists
+
+3. **Enhanced Notifications**
+   - Notification action buttons (e.g., "Start Reading", "Snooze")
+   - Notification history tracking
+   - Quiet hours functionality
+   - Weekly digest option
+
+---
+
+## Technical Details 📋
+
+### Cloud Functions Status
+- **Build**: 16
+- **Deployment**: Production (Firebase)
+- **Functions Deployed**: 9 total
+  - Reading Scrapers: 3
+  - Audio Highlighting: 2
+  - Scheduled Tasks: 4
+
+### Firestore Collections
+- `readings`: 28 documents (daily liturgical readings)
+- `users`: User profiles and progress
+- `subscriptions`: Payment and subscription data
+- `giftCodes`: Subscription gifting system
+
+### Files Modified This Session
+1. `src/services/notifications/DailyReminderScheduler.ts` - Created (NEW!)
+2. `src/stores/useSettingsStore.ts` - Added notification scheduling integration
+3. `src/screens/settings/SettingsScreen.tsx` - Added notification time picker and test button
+4. `app.json` - Added expo-notifications plugin and iOS permission
+5. `current-status.md` - Updated with push notifications implementation
+
+---
+
+## Deployment Information
+
+### Firebase Project
+- Project ID: `readingdaily-scripture-app`
+- Region: `us-central1`
+- Cloud Functions URL: `https://us-central1-readingdaily-scripture-app.cloudfunctions.net`
+
+### Scheduled Tasks
+- `scheduledReadingScraper`: Every day at 1:00 AM UTC
+- `scheduledDailySynthesis`: Daily audio generation
+- `scheduledWeeklyCatchup`: Weekly backfill
+
+### Manual Endpoints
+```bash
+# Manual reading scrape
+curl -X POST https://us-central1-readingdaily-scripture-app.cloudfunctions.net/manualReadingScrape \
+  -H "Content-Type: application/json" \
+  -d '{"date": "2026-01-15"}'
+
+# Health check
+curl https://us-central1-readingdaily-scripture-app.cloudfunctions.net/usccbHealthCheck
+```
+
+---
+
+## Known Issues & Limitations
+
+### Current Limitations
+1. **Pronunciation Practice Testing**
+   - iOS Simulator cannot record audio (hardware limitation)
+   - Physical device required for testing
+   - Simulator creates 0-byte WAV files
+
+2. **USCCB Scraper**
+   - English readings only (USCCB source)
+   - Multi-mass solemnities default to "Day" Mass
+   - Future: Add fallback scrapers (Catholic.org, Universalis)
+
+3. **Performance**
+   - Bundle size optimization needed
+   - Image caching improvements pending
+   - Some screens could benefit from lazy loading
+
+---
+
+## Remaining Todo List ⏳
+
+- [x] Deploy USCCB Reading Scraper Cloud Functions ✅
+- [x] Populate Firestore with readings ✅
+- [x] Fix microphone permission issue ✅
+- [x] Update documentation ✅
+- [x] Implement onboarding tutorial ✅
+- [x] Set up push notifications ✅
+- [ ] **NEXT:** Test notifications on device
+- [ ] Performance optimization
+- [ ] Production build testing
+- [ ] App Store submission
+
+---
+
+## Project Directory
+
 `/Users/louispage/ReadingDaily-Scripture-App/ReadingDaily-Scripture-App`
 
 ---
 
-### Debug Commands Available
+## Debug Commands
+
 ```bash
-# Check Metro bundler
+# Start development server
 npx expo start
 
 # Rebuild iOS app
 npx expo run:ios
 
-# Check simulator status
-xcrun simctl list devices booted
+# View Cloud Function logs
+firebase functions:log
 
-# View app bundle
-xcrun simctl listapps booted | grep -i reading
+# Check Firestore data
+firebase firestore:get readings
+
+# Deploy Cloud Functions
+cd functions && npm run build && firebase deploy --only functions
 ```
+
+---
+
+**Status:** ✅ Push notifications implemented - Ready for device testing
