@@ -172,7 +172,7 @@ npx expo run:ios --device
    - `scheduledDailySynthesis`: Daily audio generation
    - `scheduledWeeklyCatchup`: Weekly backfill
 
-## 🎯 Current Status (2026-01-11)
+## 🎯 Current Status (2026-01-12)
 
 ### ✅ Completed
 - [x] USCCB Reading Scraper deployed to Firebase
@@ -181,15 +181,17 @@ npx expo run:ios --device
 - [x] Sign-in functionality working
 - [x] Reading display with highlighting
 - [x] Cloud Functions tested and operational
+- [x] Onboarding tutorial for new users
+- [x] Push notifications for daily reminders
+- [x] Build 75 deployed to TestFlight (6 testers)
 
 ### 🔄 In Progress
-- [ ] Onboarding tutorial for new users
-- [ ] Push notifications for daily reminders
+- [ ] iOS tester feedback collection
 - [ ] Performance optimization (bundle size, image caching)
 
 ### 📋 Upcoming
-- [ ] Production build testing
-- [ ] App Store submission
+- [ ] Android/Google Play Store deployment
+- [ ] Production App Store submission
 - [ ] Multi-language scraper support
 
 ## 📖 Documentation
