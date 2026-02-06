@@ -476,7 +476,7 @@ export class AppleIAPService implements IPaymentService {
     try {
       console.log('[AppleIAPService] Loading products:', PRODUCT_IDS);
 
-      const products = await RNIap.getProducts(PRODUCT_IDS);
+      const products = await RNIap.getProducts({ skus: PRODUCT_IDS });
       console.log('[AppleIAPService] Products loaded:', products.length);
 
       this.products = products.map((product) => {
