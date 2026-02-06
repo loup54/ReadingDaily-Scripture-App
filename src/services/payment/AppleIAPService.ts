@@ -131,11 +131,23 @@ export class AppleIAPService implements IPaymentService {
   async purchase(productId: string): Promise<PaymentResult> {
     console.log('[AppleIAPService] Processing purchase:', productId);
 
+
     // Auto-initialize if not already initialized
     if (!this.isInitialized) {
-      console.log('⚠️ [IAP] Service not initialized, initializing now...');
-      await this.initialize();
-      console.log('✅ [IAP] Service initialized successfully');
+      console.log('⚠️ [IAP] Service not initialized, auto-initializing...');
+      try {
+        await this.initialize();
+        
+        // Verify initialization actually succeeded
+        if (!this.isInitialized) {
+          throw new Error('Initialization completed but isInitialized flag not set');
+        }
+        
+        console.log('✅ [IAP] Auto-initialization successful');
+      } catch (error) {
+        console.error('❌ [IAP] Auto-initialization failed:', error);
+        throw new Error(`Unable to initialize payment service: ${error.message}`);
+      }
     }
 
 
