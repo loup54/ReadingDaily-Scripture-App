@@ -59,3 +59,11 @@ export {
   sendGift,
   redeemGiftCode,
 } from './gifting';
+
+// Import and export Reading Scraper functions
+// Original vision: 1 week back + 3 weeks forward (28-day window)
+export {
+  scheduledReadingScraper,
+  manualReadingScrape,
+  usccbHealthCheck,
+} from './readingScrapers';

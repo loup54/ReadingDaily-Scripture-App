@@ -26,11 +26,12 @@ import { app } from '@/config/firebase';
 import { analyticsService } from '../analytics/AnalyticsService';
 
 // Product IDs from Apple App Store Connect
+// Updated to .v2 after recreating IAPs in App Store Connect (January 24, 2026)
 const PRODUCT_IDS = [
-  'com.readingdaily.lifetime.access',
+  'com.readingdaily.lifetime.access.v2',
   // Phase 7: Subscription products
-  'com.readingdaily.basic.monthly',
-  'com.readingdaily.basic.yearly',
+  'com.readingdaily.basic.monthly.v2',
+  'com.readingdaily.basic.yearly.v2',
 ];
 
 export class AppleIAPService implements IPaymentService {
@@ -40,6 +41,7 @@ export class AppleIAPService implements IPaymentService {
   private purchaseUpdateSubscription: any = null;
   private purchaseErrorSubscription: any = null;
   private functions = getFunctions(app);
+  private isInitialized: boolean = false;
 
   async initialize(): Promise<void> {
     console.log('[AppleIAPService] Initializing...');
@@ -79,9 +81,12 @@ export class AppleIAPService implements IPaymentService {
       // Load available products
       await this.loadProducts();
 
+      // Mark as initialized
+      this.isInitialized = true;
       console.log('[AppleIAPService] Initialized successfully');
     } catch (error) {
       console.error('[AppleIAPService] Initialization failed:', error);
+      this.isInitialized = false;
       throw error;
     }
   }
@@ -126,7 +131,32 @@ export class AppleIAPService implements IPaymentService {
   async purchase(productId: string): Promise<PaymentResult> {
     console.log('[AppleIAPService] Processing purchase:', productId);
 
+    // Auto-initialize if not already initialized
+    if (!this.isInitialized) {
+      console.log('⚠️ [IAP] Service not initialized, initializing now...');
+      await this.initialize();
+      console.log('✅ [IAP] Service initialized successfully');
+    }
+
+
+    // Debug logging: Check service state before purchase
+    console.log('[AppleIAPService] Pre-purchase state check:', {
+      productsLoaded: this.products.length,
+      productsArray: this.products,
+      requestedProductId: productId,
+      productExists: this.products.some((p) => p.id === productId),
+      storeKitInitialized: this.purchaseUpdateSubscription !== null,
+      isInitialized: this.isInitialized,
+    });
+
     try {
+      // Ensure products are loaded before attempting purchase
+      if (this.products.length === 0) {
+        console.log('[AppleIAPService] Products not loaded, loading now...');
+        await this.loadProducts();
+        console.log('[AppleIAPService] Products loaded:', this.products.length);
+      }
+
       // Get product to determine if it's a subscription
       const product = this.products.find((p) => p.id === productId);
 
@@ -198,16 +228,31 @@ export class AppleIAPService implements IPaymentService {
         timestamp: Date.now(),
       };
     } catch (error: any) {
+      // Detailed error logging
       console.error('[AppleIAPService] Purchase failed:', error);
+      console.error('[AppleIAPService] Error details:', {
+        productId,
+        errorCode: error?.code,
+        errorMessage: error?.message,
+        errorName: error?.name,
+        errorStack: error?.stack,
+        fullError: JSON.stringify(error, Object.getOwnPropertyNames(error)),
+      });
 
       // Handle specific error codes
       let errorMessage = 'Purchase failed';
       if (error.code === 'E_USER_CANCELLED') {
         errorMessage = 'Purchase cancelled by user';
+        console.log('[AppleIAPService] User cancelled the purchase');
       } else if (error.code === 'E_NETWORK_ERROR') {
         errorMessage = 'Network error. Please check your connection.';
+        console.error('[AppleIAPService] Network error during purchase');
       } else if (error.code === 'E_ALREADY_OWNED') {
         errorMessage = 'You already own this item. Try restoring purchases.';
+        console.warn('[AppleIAPService] User already owns this product');
+      } else {
+        // Log unknown error codes
+        console.error('[AppleIAPService] Unknown error code:', error.code);
       }
 
       // Log analytics: payment failed
@@ -266,7 +311,7 @@ export class AppleIAPService implements IPaymentService {
 
       // Filter for lifetime access product
       const lifetimePurchases = purchases.filter(
-        (p) => p.productId === 'com.readingdaily.lifetime.access'
+        (p) => p.productId === 'com.readingdaily.lifetime.access.v2'
       );
 
       console.log('[AppleIAPService] Restored purchases:', lifetimePurchases.length);
@@ -300,7 +345,7 @@ export class AppleIAPService implements IPaymentService {
 
       const result = await validateAppleReceipt({
         receipt,
-        productId: productId || 'com.readingdaily.lifetime.access',
+        productId: productId || 'com.readingdaily.lifetime.access.v2',
       });
 
       const data = result.data as { valid: boolean };
@@ -332,6 +377,9 @@ export class AppleIAPService implements IPaymentService {
     } catch (error) {
       console.error('[AppleIAPService] Cleanup failed:', error);
     }
+
+    // Reset initialization flag
+    this.isInitialized = false;
   }
 
   // Phase 7: Subscription management methods
@@ -457,15 +505,15 @@ export class AppleIAPService implements IPaymentService {
         console.warn('[AppleIAPService] Using fallback products');
         this.products = [
           {
-            id: 'com.readingdaily.lifetime.access',
+            id: 'com.readingdaily.lifetime.access.v2',
             name: 'Lifetime Access',
             description: 'Unlock all features forever',
-            price: 4.99,
+            price: 49.99,
             currency: 'USD',
             type: 'one_time',
           },
           {
-            id: 'com.readingdaily.basic.monthly',
+            id: 'com.readingdaily.basic.monthly.v2',
             name: 'Basic Monthly',
             description: 'Unlimited daily practice + full AI feedback',
             price: 2.99,
@@ -476,7 +524,7 @@ export class AppleIAPService implements IPaymentService {
             trialPeriodDays: 30,
           },
           {
-            id: 'com.readingdaily.basic.yearly',
+            id: 'com.readingdaily.basic.yearly.v2',
             name: 'Basic Yearly',
             description: 'Unlimited daily practice + full AI feedback (save 2 months!)',
             price: 27.99,

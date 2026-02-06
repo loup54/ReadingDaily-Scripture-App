@@ -29,7 +29,7 @@ export const SUBSCRIPTION_TIERS = {
   },
   lifetime: {
     name: 'Lifetime',
-    price: 59.99,
+    price: 49.99,
     duration: null,
     badge: 'Best Value',
     description: 'Permanent access to all features, forever',

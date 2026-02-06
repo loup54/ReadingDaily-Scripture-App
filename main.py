@@ -122,6 +122,102 @@ def manual_scrape(req: https_fn.Request) -> https_fn.Response:
         )
 
 
+@scheduler_fn.on_schedule(schedule="0 1 * * *")
+def scheduled_scraper(event: scheduler_fn.ScheduledEvent) -> None:
+    """
+    Automatically scrape readings every day at 1 AM UTC
+    Maintains 28-day window: 7 days back + today + 21 days forward
+    Original vision: 1 week before and 3 weeks after current date
+    """
+    try:
+        logger.info("🕐 Scheduled scraper triggered")
+
+        # Get current date in US EST timezone (USCCB source timezone)
+        us_tz = pytz.timezone('America/New_York')
+        today = datetime.now(us_tz).date()
+
+        # Calculate 28-day window
+        start_date = today - timedelta(days=7)   # 1 week back
+        end_date = today + timedelta(days=21)    # 3 weeks forward
+
+        success_count = 0
+        skip_count = 0
+        fail_count = 0
+
+        logger.info(f"📅 Scraping window: {start_date} to {end_date} (28 days)")
+
+        # Iterate through all dates in the window
+        current_date = start_date
+        while current_date <= end_date:
+            date_str = current_date.isoformat()
+
+            # Check if already exists and is recent
+            try:
+                existing_doc = get_db().collection('readings').document(date_str).get()
+                if existing_doc.exists:
+                    data = existing_doc.to_dict()
+                    metadata = data.get('metadata', {})
+                    scraped_at_str = metadata.get('scrapedAt')
+
+                    if scraped_at_str:
+                        # Skip if less than 12 hours old
+                        scraped_at = datetime.fromisoformat(scraped_at_str.replace('Z', '+00:00'))
+                        age_hours = (datetime.now(pytz.UTC) - scraped_at).total_seconds() / 3600
+
+                        if age_hours < 12:
+                            logger.info(f"⏭️  Skipping {date_str} ({age_hours:.1f}h old)")
+                            skip_count += 1
+                            current_date += timedelta(days=1)
+                            continue
+            except Exception as check_error:
+                logger.warning(f"Error checking existing doc for {date_str}: {check_error}")
+
+            # Scrape reading
+            reading = scrape_reading_for_date(current_date)
+
+            if reading:
+                # Validate
+                is_valid, errors = validate_reading(reading)
+
+                if is_valid:
+                    # Calculate checksum
+                    checksum = calculate_checksum(reading)
+
+                    # Add metadata
+                    reading['metadata'] = {
+                        'scrapedAt': datetime.utcnow().isoformat() + 'Z',
+                        'source': reading.get('metadata', {}).get('source', 'USCCB'),
+                        'checksum': checksum,
+                        'validated': True,
+                        'version': '1.0',
+                        'automated': True
+                    }
+
+                    # Store in Firestore
+                    doc_ref = get_db().collection('readings').document(date_str)
+                    doc_ref.set(reading)
+                    success_count += 1
+                    logger.info(f"✅ Scraped and stored {date_str}")
+                else:
+                    logger.error(f"❌ Validation failed for {date_str}: {errors}")
+                    fail_count += 1
+            else:
+                logger.error(f"❌ Scraping failed for {date_str}")
+                fail_count += 1
+
+            current_date += timedelta(days=1)
+
+        # Cleanup readings older than 7 days
+        cutoff_date = today - timedelta(days=8)
+        cleanup_old_readings(cutoff_date)
+
+        logger.info(f"🎉 Scheduled scraper complete: {success_count} scraped, {skip_count} skipped, {fail_count} failed")
+
+    except Exception as e:
+        logger.error(f"💥 Scheduled scraper error: {str(e)}")
+        raise
+
+
 def scrape_reading_for_date(date):
     """
     Attempt to scrape reading from multiple sources

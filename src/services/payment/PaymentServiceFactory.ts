@@ -18,11 +18,13 @@ export class PaymentServiceFactory {
    * Create payment service based on platform and environment
    */
   static create(): IPaymentService {
-    // Check if we're in development/testing mode
-    const isDevelopment = __DEV__ || process.env.EXPO_PUBLIC_USE_MOCK_PAYMENTS === 'true';
+    // CRITICAL: Force production mode for EAS builds
+    // Only use mock in explicit development with environment variable
+    const useMockPayments = process.env.EXPO_PUBLIC_USE_MOCK_PAYMENTS === 'true' ||
+                            process.env.EXPO_PUBLIC_MOCK_PAYMENTS === 'true';
 
-    if (isDevelopment) {
-      console.log('[PaymentServiceFactory] Using MockPaymentService');
+    if (useMockPayments) {
+      console.log('[PaymentServiceFactory] Using MockPaymentService (explicit environment variable)');
       return new MockPaymentService();
     }
 
@@ -42,15 +44,35 @@ export class PaymentServiceFactory {
     }
 
     if (Platform.OS === 'ios') {
-      console.log('[PaymentServiceFactory] iOS detected - but using Mock to avoid Expo Go crash');
-      console.warn('[PaymentServiceFactory] Native IAP requires development build or production app');
-      return new MockPaymentService();
+      // Only use Mock in Expo Go to avoid native module crashes
+      // In standalone/production builds (EAS), use real Apple IAP
+      const Constants = require('expo-constants').default;
+      const isExpoGo = Constants.appOwnership === 'expo';
+
+      if (isExpoGo) {
+        console.log('[PaymentServiceFactory] Expo Go detected - using MockPaymentService');
+        return new MockPaymentService();
+      }
+
+      console.log('[PaymentServiceFactory] Using AppleIAPService for iOS production build');
+      const { AppleIAPService } = require('./AppleIAPService');
+      return new AppleIAPService();
     }
 
     if (Platform.OS === 'android') {
-      console.log('[PaymentServiceFactory] Android detected - but using Mock to avoid Expo Go crash');
-      console.warn('[PaymentServiceFactory] Native IAP requires development build or production app');
-      return new MockPaymentService();
+      // Only use Mock in Expo Go to avoid native module crashes
+      // In standalone/production builds (EAS), use real Google Play Billing
+      const Constants = require('expo-constants').default;
+      const isExpoGo = Constants.appOwnership === 'expo';
+
+      if (isExpoGo) {
+        console.log('[PaymentServiceFactory] Expo Go detected - using MockPaymentService');
+        return new MockPaymentService();
+      }
+
+      console.log('[PaymentServiceFactory] Using GooglePlayIAPService for Android production build');
+      const { GooglePlayIAPService } = require('./GooglePlayIAPService');
+      return new GooglePlayIAPService();
     }
 
     // Fallback to mock

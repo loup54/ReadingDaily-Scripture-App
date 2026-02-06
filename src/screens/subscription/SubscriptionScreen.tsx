@@ -5,6 +5,8 @@ import {
   StyleSheet,
   ScrollView,
   Alert,
+  Platform,
+  Dimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -15,6 +17,10 @@ import { Colors, Typography, Spacing, BorderRadius, Shadows } from '@constants';
 import { useTrialStore } from '@stores/useTrialStore';
 import { useAuthStore } from '@stores/useAuthStore';
 import { useTheme } from '@/hooks/useTheme';
+
+// iPad detection
+const { width } = Dimensions.get('window');
+const isTablet = width >= 768;
 
 interface SubscriptionScreenProps {
   onBack?: () => void;
@@ -37,7 +43,7 @@ export const SubscriptionScreen: React.FC<SubscriptionScreenProps> = ({
     restorePurchase,
     startTrial,
   } = useTrialStore();
-  const { user } = useAuthStore();
+  const { user, isGuest } = useAuthStore();
 
   const [purchasing, setPurchasing] = useState(false);
   const [restoring, setRestoring] = useState(false);
@@ -51,20 +57,44 @@ export const SubscriptionScreen: React.FC<SubscriptionScreenProps> = ({
   };
 
   const handlePurchase = async () => {
+    // Apple Guideline 5.1.1 Compliance: Allow guest users to purchase IAP
+    // Registration is OPTIONAL for syncing across devices
     setPurchasing(true);
     try {
       const success = await purchaseLifetimeAccess();
       if (success) {
-        Alert.alert(
-          'Purchase Successful!',
-          'You now have lifetime access to all features.',
-          [
-            {
-              text: 'OK',
-              onPress: onPurchaseComplete,
-            },
-          ]
-        );
+        // Purchase successful - offer optional sign-in for device sync
+        if (isGuest || !user) {
+          Alert.alert(
+            'Purchase Successful!',
+            'You now have lifetime access to all features on this device.\n\nWould you like to create an account to sync your purchase across devices?',
+            [
+              {
+                text: 'Not Now',
+                style: 'cancel',
+                onPress: onPurchaseComplete,
+              },
+              {
+                text: 'Create Account',
+                onPress: () => {
+                  router.push('/(auth)/sign-up');
+                },
+              },
+            ]
+          );
+        } else {
+          // Already authenticated - just show success
+          Alert.alert(
+            'Purchase Successful!',
+            'You now have lifetime access to all features.',
+            [
+              {
+                text: 'OK',
+                onPress: onPurchaseComplete,
+              },
+            ]
+          );
+        }
       } else {
         Alert.alert(
           'Purchase Failed',
@@ -82,6 +112,22 @@ export const SubscriptionScreen: React.FC<SubscriptionScreenProps> = ({
   };
 
   const handleRestore = async () => {
+    // Check if user is guest or not authenticated before restoring
+    if (isGuest || !user) {
+      Alert.alert(
+        'Sign In Required',
+        'Please sign in to restore your previous purchases.',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          {
+            text: 'Sign In',
+            onPress: () => router.push('/(auth)/sign-in'),
+          },
+        ]
+      );
+      return;
+    }
+
     setRestoring(true);
     try {
       const success = await restorePurchase();
@@ -112,14 +158,139 @@ export const SubscriptionScreen: React.FC<SubscriptionScreenProps> = ({
     }
   };
 
+  const handleBasicPurchase = async () => {
+    // Apple Guideline 5.1.1 Compliance: Allow guest users to purchase subscription
+    // Registration is OPTIONAL for syncing across devices
+    setPurchasing(true);
+    try {
+      // Purchase Monthly subscription (com.readingdaily.basic.monthly.v2)
+      const { upgradeToBasic } = useTrialStore.getState();
+      const success = await upgradeToBasic('com.readingdaily.basic.monthly.v2');
+
+      if (success) {
+        // Purchase successful - offer optional sign-in for device sync
+        if (isGuest || !user) {
+          Alert.alert(
+            'Subscription Activated!',
+            'You now have access to all features on this device.\n\nWould you like to create an account to sync your subscription across devices?',
+            [
+              {
+                text: 'Not Now',
+                style: 'cancel',
+                onPress: onPurchaseComplete,
+              },
+              {
+                text: 'Create Account',
+                onPress: () => {
+                  router.push('/(auth)/sign-up');
+                },
+              },
+            ]
+          );
+        } else {
+          // Already authenticated - just show success
+          Alert.alert(
+            'Subscription Activated!',
+            'You now have access to all features.',
+            [
+              {
+                text: 'OK',
+                onPress: onPurchaseComplete,
+              },
+            ]
+          );
+        }
+      }
+    } catch (error) {
+      Alert.alert('Error', 'An unexpected error occurred. Please try again later.');
+    } finally {
+      setPurchasing(false);
+    }
+  };
+
+  const handlePremiumPurchase = async () => {
+    // Apple Guideline 5.1.1 Compliance: Allow guest users to purchase subscription
+    // Registration is OPTIONAL for syncing across devices
+    setPurchasing(true);
+    try {
+      // Purchase Yearly subscription (com.readingdaily.basic.yearly.v2)
+      const { upgradeToBasic } = useTrialStore.getState();
+      const success = await upgradeToBasic('com.readingdaily.basic.yearly.v2');
+
+      if (success) {
+        // Purchase successful - offer optional sign-in for device sync
+        if (isGuest || !user) {
+          Alert.alert(
+            'Subscription Activated!',
+            'You now have access to all features on this device.\n\nWould you like to create an account to sync your subscription across devices?',
+            [
+              {
+                text: 'Not Now',
+                style: 'cancel',
+                onPress: onPurchaseComplete,
+              },
+              {
+                text: 'Create Account',
+                onPress: () => {
+                  router.push('/(auth)/sign-up');
+                },
+              },
+            ]
+          );
+        } else {
+          // Already authenticated - just show success
+          Alert.alert(
+            'Subscription Activated!',
+            'You now have access to all features.',
+            [
+              {
+                text: 'OK',
+                onPress: onPurchaseComplete,
+              },
+            ]
+          );
+        }
+      }
+    } catch (error) {
+      Alert.alert('Error', 'An unexpected error occurred. Please try again later.');
+    } finally {
+      setPurchasing(false);
+    }
+  };
+
   const handleStartTrial = async () => {
+    // Apple Guideline 5.1.1 Compliance: Allow guest users to start trial
+    // Registration is OPTIONAL for syncing across devices
     try {
       await startTrial();
-      Alert.alert(
-        'Trial Started!',
-        'Your 7-day free trial has begun. Enjoy full access!',
-        [{ text: 'OK', onPress: onBack }]
-      );
+
+      // Trial started successfully - offer optional sign-in for device sync
+      if (isGuest || !user) {
+        Alert.alert(
+          'Trial Started!',
+          'Your 7-day free trial has begun on this device.\n\nWould you like to create an account to sync your trial across devices?',
+          [
+            {
+              text: 'Not Now',
+              style: 'cancel',
+              onPress: onBack,
+            },
+            {
+              text: 'Create Account',
+              onPress: () => {
+                router.push('/(auth)/sign-up');
+              },
+            },
+          ]
+        );
+      } else {
+        // Already authenticated - just show success
+        Alert.alert(
+          'Trial Started!',
+          'Your 7-day free trial has begun. Enjoy full access!',
+          [{ text: 'OK', onPress: onBack }]
+        );
+      }
     } catch (error) {
       Alert.alert('Error', 'Unable to start trial. Please try again.');
     }
@@ -251,7 +422,7 @@ export const SubscriptionScreen: React.FC<SubscriptionScreenProps> = ({
                     variant="secondary"
                     size="lg"
                     fullWidth
-                    onPress={handlePurchase}
+                    onPress={handleBasicPurchase}
                     loading={purchasing}
                     style={styles.purchaseButton}
                   />
@@ -319,7 +490,7 @@ export const SubscriptionScreen: React.FC<SubscriptionScreenProps> = ({
                     variant="accent"
                     size="lg"
                     fullWidth
-                    onPress={handlePurchase}
+                    onPress={handlePremiumPurchase}
                     loading={purchasing}
                     style={styles.purchaseButton}
                   />
@@ -342,7 +513,7 @@ export const SubscriptionScreen: React.FC<SubscriptionScreenProps> = ({
                     </View>
                     <Text style={[styles.pricingTitle, { color: colors.text }]}>Lifetime</Text>
                     <View style={styles.priceBadge}>
-                      <Text style={[styles.priceAmount, { color: colors.primary }]}>$59.99</Text>
+                      <Text style={[styles.priceAmount, { color: colors.primary }]}>$49.99</Text>
                       <Text style={[styles.priceLabel, { color: colors.textSecondary }]}>one-time</Text>
                     </View>
                   </View>
@@ -353,7 +524,7 @@ export const SubscriptionScreen: React.FC<SubscriptionScreenProps> = ({
                     <View style={styles.featureRow}>
                       <Ionicons
                         name="checkmark-circle"
-                        size={20}
+                        size={isTablet ? 24 : 20}
                         color={colors.accent.green}
                       />
                       <Text style={[styles.featureText, { color: colors.text }]}>
@@ -363,7 +534,7 @@ export const SubscriptionScreen: React.FC<SubscriptionScreenProps> = ({
                     <View style={styles.featureRow}>
                       <Ionicons
                         name="checkmark-circle"
-                        size={20}
+                        size={isTablet ? 24 : 20}
                         color={colors.accent.green}
                       />
                       <Text style={[styles.featureText, { color: colors.text }]}>
@@ -373,7 +544,7 @@ export const SubscriptionScreen: React.FC<SubscriptionScreenProps> = ({
                     <View style={styles.featureRow}>
                       <Ionicons
                         name="checkmark-circle"
-                        size={20}
+                        size={isTablet ? 24 : 20}
                         color={colors.accent.green}
                       />
                       <Text style={[styles.featureText, { color: colors.text }]}>
@@ -383,7 +554,7 @@ export const SubscriptionScreen: React.FC<SubscriptionScreenProps> = ({
                     <View style={styles.featureRow}>
                       <Ionicons
                         name="checkmark-circle"
-                        size={20}
+                        size={isTablet ? 24 : 20}
                         color={colors.accent.green}
                       />
                       <Text style={[styles.featureText, { color: colors.text }]}>
@@ -393,7 +564,7 @@ export const SubscriptionScreen: React.FC<SubscriptionScreenProps> = ({
                     <View style={styles.featureRow}>
                       <Ionicons
                         name="checkmark-circle"
-                        size={20}
+                        size={isTablet ? 24 : 20}
                         color={colors.accent.green}
                       />
                       <Text style={[styles.featureText, { color: colors.text }]}>
@@ -403,7 +574,7 @@ export const SubscriptionScreen: React.FC<SubscriptionScreenProps> = ({
                     <View style={styles.featureRow}>
                       <Ionicons
                         name="checkmark-circle"
-                        size={20}
+                        size={isTablet ? 24 : 20}
                         color={colors.accent.green}
                       />
                       <Text style={[styles.featureText, { color: colors.text }]}>
@@ -527,14 +698,17 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    padding: Spacing.lg,
+    padding: isTablet ? Spacing.xl * 2 : Spacing.lg,
+    maxWidth: isTablet ? 600 : undefined,
+    alignSelf: isTablet ? 'center' : undefined,
+    width: isTablet ? '100%' : undefined,
   },
   statusCard: {
     backgroundColor: Colors.background.card,
     borderRadius: BorderRadius.xl,
-    padding: Spacing.xl,
+    padding: isTablet ? Spacing.xl * 1.5 : Spacing.xl,
     alignItems: 'center',
-    marginBottom: Spacing.lg,
+    marginBottom: isTablet ? Spacing.xl : Spacing.lg,
     ...Shadows.md,
   },
   statusTitle: {
@@ -556,7 +730,7 @@ const styles = StyleSheet.create({
   },
   pricingCard: {
     borderRadius: BorderRadius.xl,
-    padding: Spacing.lg,
+    padding: isTablet ? Spacing.xl * 1.5 : Spacing.lg,
   },
   pricingHeader: {
     alignItems: 'center',
@@ -601,11 +775,12 @@ const styles = StyleSheet.create({
   featureRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: Spacing.md,
+    marginBottom: isTablet ? Spacing.lg : Spacing.md,
   },
   featureText: {
     ...Typography.body,
-    marginLeft: Spacing.sm,
+    fontSize: isTablet ? 18 : Typography.body.fontSize,
+    marginLeft: isTablet ? Spacing.md : Spacing.sm,
     flex: 1,
   },
   purchaseButton: {

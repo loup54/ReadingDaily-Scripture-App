@@ -3,6 +3,7 @@ import { Redirect, useRouter } from 'expo-router';
 import { LoadingScreen } from '@/components/common/LoadingScreen';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useTrialStore } from '@/stores/useTrialStore';
+import { useSettingsStore } from '@/stores/useSettingsStore';
 import { validateEnv } from '@/config/env';
 import { analyticsService } from '@/services/analytics/AnalyticsService';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
@@ -11,6 +12,7 @@ export default function Index() {
   const router = useRouter();
   const { user, state, isInitialized: authInitialized } = useAuthStore();
   const { initializeTrial, checkTrialStatus } = useTrialStore();
+  const { onboarding } = useSettingsStore();
   const [isInitialized, setIsInitialized] = React.useState(false);
   const [minDurationElapsed, setMinDurationElapsed] = React.useState(false);
 
@@ -65,6 +67,15 @@ export default function Index() {
     initialize();
   }, []);
 
+  // NEW: Automatically enable guest mode if user is not authenticated
+  // This allows users to browse readings without signing in (Apple Guideline 5.1.1 compliance)
+  useEffect(() => {
+    if (!user && state === 'unauthenticated' && authInitialized) {
+      console.log('[App] User not authenticated - enabling guest mode');
+      useAuthStore.getState().setGuestMode();
+    }
+  }, [user, state, authInitialized]);
+
   // Show loading screen until BOTH initialization complete AND minimum duration elapsed
   if (!isInitialized || !authInitialized || !minDurationElapsed) {
     if (!isInitialized || !authInitialized) {
@@ -77,10 +88,18 @@ export default function Index() {
     );
   }
 
-  // Redirect based on auth state
-  if (state === 'authenticated' && user) {
-    return <Redirect href="/(tabs)/readings" />;
+  // Redirect based on auth and onboarding state
+  // NEW: Check onboarding first, regardless of auth state (supports guest mode)
+  if (!onboarding.completed) {
+    console.log('[App] Onboarding not completed - redirecting to onboarding');
+    return <Redirect href="/onboarding" />;
   }
 
-  return <Redirect href="/(auth)/landing" />;
+  // NEW: If onboarding is complete, go to readings (works for both signed-in and guest users)
+  console.log('[App] Onboarding completed - redirecting to readings', {
+    isGuest: useAuthStore.getState().isGuest,
+    hasUser: !!user,
+    state
+  });
+  return <Redirect href="/(tabs)/readings" />;
 }

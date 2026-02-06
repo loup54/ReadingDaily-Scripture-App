@@ -6,7 +6,6 @@
 
 import { ENV } from '@/config/env';
 import * as FileSystem from 'expo-file-system';
-import { File, Directory } from 'expo-file-system';
 
 const cacheDirectory = FileSystem.cacheDirectory || FileSystem.documentDirectory || '';
 
@@ -78,10 +77,11 @@ class GoogleTTSService {
         throw new Error('No audio content in TTS response');
       }
 
-      // Save audio to local file using new File API
+      // Save audio to local file (base64 decoded)
       const audioUri = `${cacheDirectory}tts_${Date.now()}.mp3`;
-      const file = new File(audioUri);
-      await file.write(data.audioContent);
+      await FileSystem.writeAsStringAsync(audioUri, data.audioContent, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
 
       console.log('[GoogleTTS] Audio saved to:', audioUri);
       return audioUri;

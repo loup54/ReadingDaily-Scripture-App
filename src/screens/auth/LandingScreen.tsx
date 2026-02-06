@@ -24,6 +24,12 @@ export const LandingScreen: React.FC<LandingScreenProps> = ({
   onDemo,
 }) => {
   const { colors } = useTheme();
+
+  const handleSignInPress = () => {
+    console.log('[LandingScreen] Sign In button pressed');
+    onSignIn();
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <LinearGradient
@@ -85,7 +91,7 @@ export const LandingScreen: React.FC<LandingScreenProps> = ({
             <Button
               title="Already have an account? Sign In"
               variant="text"
-              onPress={onSignIn}
+              onPress={handleSignInPress}
               textStyle={{ color: colors.text.white }}
               testID="sign-in-link"
             />

@@ -29,6 +29,9 @@ import { PaymentServiceFactory } from '../services/payment';
 import { IPaymentService } from '../services/payment/IPaymentService';
 import { analyticsService } from '../services/analytics/AnalyticsService';
 
+// Development bypass: Skip trial/paywall when SKIP_TRIAL is enabled
+const BYPASS_ENABLED = ENV.SKIP_TRIAL;
+
 interface TrialStoreState extends TrialState {
   // Payment service
   paymentService: IPaymentService | null;
@@ -103,6 +106,19 @@ export const useTrialStore = create<TrialStoreState>()(
 
         // Initialize payment service
         await get()._initializePaymentService();
+
+        // DEVELOPMENT BYPASS: Skip trial/paywall if SKIP_TRIAL is enabled
+        if (BYPASS_ENABLED) {
+          console.log('🚧 DEV MODE: SKIP_TRIAL enabled - bypassing trial/paywall');
+          set({
+            hasPurchased: true,
+            isActive: false,
+            hasExpired: false,
+            currentTier: 'basic',
+            subscriptionStatus: 'active',
+          });
+          return;
+        }
 
         // If already purchased, no need to check trial
         if (state.hasPurchased) {
@@ -222,7 +238,7 @@ export const useTrialStore = create<TrialStoreState>()(
           console.log('💳 Processing purchase via', state.paymentService.provider);
 
           // Process purchase through payment service
-          const result = await state.paymentService.purchase('com.readingdaily.lifetime.access');
+          const result = await state.paymentService.purchase('com.readingdaily.lifetime.access.v2');
 
           if (result.success) {
             console.log('✅ Purchase successful:', result.transactionId);
@@ -261,7 +277,7 @@ export const useTrialStore = create<TrialStoreState>()(
 
             // Check if lifetime access was purchased
             const hasLifetimeAccess = result.purchases.some(
-              (p) => p.productId === 'com.readingdaily.lifetime.access' && p.validated
+              (p) => p.productId === 'com.readingdaily.lifetime.access.v2' && p.validated
             );
 
             if (hasLifetimeAccess) {
@@ -400,12 +416,22 @@ export const useTrialStore = create<TrialStoreState>()(
 
       // Get subscription features for current tier (NEW - Phase 1)
       getSubscriptionFeatures: (): SubscriptionFeatures => {
+        // DEVELOPMENT BYPASS: Return basic tier features if SKIP_TRIAL is enabled
+        if (BYPASS_ENABLED) {
+          return getFeaturesForTier('basic');
+        }
+
         const state = get();
         return getFeaturesForTier(state.currentTier);
       },
 
       // Check if daily limit reached (NEW - Phase 1)
       isDailyLimitReached: (): boolean => {
+        // DEVELOPMENT BYPASS: No daily limit if SKIP_TRIAL is enabled
+        if (BYPASS_ENABLED) {
+          return false;
+        }
+
         const state = get();
 
         // Check if daily counter needs reset
@@ -431,6 +457,11 @@ export const useTrialStore = create<TrialStoreState>()(
 
       // Get remaining daily minutes (NEW - Phase 1)
       getRemainingDailyMinutes: (): number => {
+        // DEVELOPMENT BYPASS: Unlimited minutes if SKIP_TRIAL is enabled
+        if (BYPASS_ENABLED) {
+          return Infinity;
+        }
+
         const state = get();
 
         // Check if daily counter needs reset
