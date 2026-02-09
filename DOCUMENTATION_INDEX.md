@@ -46,10 +46,14 @@ Quick reference to all project documentation organized by category.
 
 ## 📖 Legal & Compliance
 
+### Security
+- **[SECURITY_AUDIT_2026_02_07.md](SECURITY_AUDIT_2026_02_07.md)** - API key exposure audit (Feb 2026)
+- **[SECURITY_REMEDIATION_REVIEW.md](SECURITY_REMEDIATION_REVIEW.md)** - Security review
+
+### Legal Documentation
 - **[LEGAL_DOCUMENTS_IMPLEMENTATION.md](LEGAL_DOCUMENTS_IMPLEMENTATION.md)** - Legal docs system
 - **[LEGAL_DOCS_QUICK_START.md](LEGAL_DOCS_QUICK_START.md)** - Legal quick start
 - **[DOCUMENT_SIGNING_PHASE_4B_PLAN.md](DOCUMENT_SIGNING_PHASE_4B_PLAN.md)** - Document signing plan
-- **[SECURITY_REMEDIATION_REVIEW.md](SECURITY_REMEDIATION_REVIEW.md)** - Security review
 
 ### Legal Documents (src/assets/legal-documents/)
 - Privacy Policy
@@ -78,6 +82,11 @@ Quick reference to all project documentation organized by category.
 
 ## 🔍 Technical Investigation
 
+### Build History & Debugging
+- **[BUILD_94_TO_98_JOURNEY.md](BUILD_94_TO_98_JOURNEY.md)** - Payment service fix progression (Builds 94-98)
+- **[CURRENT_STATUS_BUILD_98.md](CURRENT_STATUS_BUILD_98.md)** - Project status as of Build 98
+
+### Platform & Services
 - **[APP_STORE_CONNECT_INVESTIGATION.md](APP_STORE_CONNECT_INVESTIGATION.md)** - App Store issues
 - **[EAS_MANAGED_CERTIFICATES_INVESTIGATION.md](EAS_MANAGED_CERTIFICATES_INVESTIGATION.md)** - Certificate management
 - **[FIREBASE_MULTI_ENVIRONMENT_ANALYSIS.md](FIREBASE_MULTI_ENVIRONMENT_ANALYSIS.md)** - Multi-environment
@@ -126,4 +135,4 @@ Quick reference to all project documentation organized by category.
 
 ---
 
-**Last Updated:** 2026-01-11
+**Last Updated:** 2026-02-08
