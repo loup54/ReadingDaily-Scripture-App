@@ -1,11 +1,12 @@
 import { useEffect, useRef } from 'react';
-import { View } from 'react-native';
+import { View, AppState, AppStateStatus } from 'react-native';
 import { Slot } from 'expo-router';
 import Toast from 'react-native-toast-message';
 import { ThemeProvider } from '@/contexts/ThemeContext';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useSettingsStore } from '@/stores/useSettingsStore';
 import { useOfflineStore } from '@/stores/useOfflineStore';
+import { useProgressStore } from '@/stores/progressStore';
 import { Colors } from '@constants';
 import { notificationService } from '@/services/notifications/NotificationService';
 import { NetworkStatusService } from '@/services/network/NetworkStatusService';
@@ -50,8 +51,7 @@ const linking = {
       '(tabs)/subscription/send-gift': 'subscription/send-gift',
       '(tabs)/subscription/redeem-gift': 'subscription/redeem-gift',
 
-      // Notification sub-stack
-      'notifications/settings': 'notifications/settings',
+      // Notification settings removed - now handled within main settings tab
 
       // Catch-all for undefined routes
       '*': '*',
@@ -65,71 +65,15 @@ export { linking };
 export default function RootLayout() {
   const { initializeAuthState, isInitialized, state, user } = useAuthStore();
   const { isOnline, isDownloading, downloadProgress, isSyncing, pendingSyncCount } = useOfflineStore();
-
-  // CRITICAL FIX: Ensure enableAudioHighlighting is always false
-  // Use a higher priority effect to run before anything else
-  const firstRenderRef = useRef(true);
-  if (firstRenderRef.current === true) {
-    firstRenderRef.current = false;
-    const currentSettings = useSettingsStore.getState().settings;
-    console.log('[RootLayout] Initial enableAudioHighlighting value:', currentSettings.audio.enableAudioHighlighting);
-    if (currentSettings.audio.enableAudioHighlighting === true) {
-      console.log('[RootLayout] 🔧 CRITICAL FIX: Disabling audio highlighting NOW');
-      const newState = {
-        settings: {
-          ...currentSettings,
-          audio: {
-            ...currentSettings.audio,
-            enableAudioHighlighting: false,
-          },
-        },
-      };
-      console.log('[RootLayout] Setting new state:', { enableAudioHighlighting: newState.settings.audio.enableAudioHighlighting });
-      useSettingsStore.setState(newState);
-    } else {
-      console.log('[RootLayout] enableAudioHighlighting already false, no fix needed');
-    }
-  }
-
-  // CRITICAL FIX: Clear old persisted data and reset store to ensure clean state
-  useEffect(() => {
-    const resetStorageIfNeeded = async () => {
-      try {
-        const AsyncStorage = (await import('@react-native-async-storage/async-storage')).default;
-
-        // Check if we need to reset
-        const currentSettings = useSettingsStore.getState().settings;
-        if (currentSettings.audio.enableAudioHighlighting === true) {
-          console.log('[RootLayout] 🚨 CRITICAL: Persisted data has true value, clearing AsyncStorage...');
-
-          // Clear the corrupted settings from AsyncStorage
-          await AsyncStorage.removeItem('app-settings-storage');
-          console.log('[RootLayout] ✅ Cleared corrupted settings from AsyncStorage');
-
-          // Reset store to defaults
-          await useSettingsStore.getState().resetSettings();
-          console.log('[RootLayout] ✅ Reset settings store to defaults');
-
-          // Verify the fix
-          const verifySettings = useSettingsStore.getState().settings;
-          console.log('[RootLayout] Verified new value:', { enableAudioHighlighting: verifySettings.audio.enableAudioHighlighting });
-        } else {
-          console.log('[RootLayout] ✅ Settings are clean, no reset needed');
-        }
-      } catch (error) {
-        console.error('[RootLayout] Error during settings reset:', error);
-      }
-    };
-
-    resetStorageIfNeeded();
-  }, []);
+  const { clearNewlyEarned } = useProgressStore();
 
   // Initialize Firebase authentication on app startup
   useEffect(() => {
     if (!isInitialized) {
       const initAuth = async () => {
         // In development mode, ensure test account is logged in for easier testing
-        if (DevelopmentAuthHelper.isDevMode()) {
+        // Only runs in __DEV__ mode to prevent accidental auto-login in production
+        if (__DEV__ && DevelopmentAuthHelper.isDevMode()) {
           console.log('[RootLayout] 🔧 Development mode detected - ensuring test account is authenticated');
           const authSuccess = await DevelopmentAuthHelper.ensureTestAccountLoggedIn();
           if (!authSuccess) {
@@ -197,7 +141,7 @@ export default function RootLayout() {
 
         // Subscribe to network changes
         let wasOffline = !isOnline;
-        let syncRetryTimeout: number | null = null;
+        let syncRetryTimeout: NodeJS.Timeout | null = null;
 
         const triggerSync = async () => {
           try {
@@ -295,9 +239,14 @@ export default function RootLayout() {
           wasOffline = !isNowOnline;
         });
 
+        // TEMPORARILY DISABLED: Auto-download blocks tab navigation via DownloadStatusOverlay Modal
+        // This needs to be fixed properly to allow downloads without blocking UI
+        // Users can manually trigger downloads from Settings > Offline Settings > Download Now
+
+        /*
         // Check if auto-download should happen
         const settings = useSettingsStore.getState().settings;
-        const offlineSettings = settings?.offline || {};
+        const offlineSettings = (settings?.offline as any) || {};
 
         const downloadConfig = {
           autoDownloadEnabled: offlineSettings.autoDownloadEnabled ?? true,
@@ -333,6 +282,7 @@ export default function RootLayout() {
           unsubscribeProgress();
           console.log('[RootLayout] ✅ Auto-download complete');
         }
+        */
 
         // Cleanup function
         return () => {
@@ -349,16 +299,65 @@ export default function RootLayout() {
     initializeOfflineFeatures();
   }, []);
 
+  // Handle app state changes (background/foreground transitions)
+  // Prevents download/sync overlays from getting stuck and blocking UI
+  useEffect(() => {
+    console.log('[RootLayout] Setting up AppState listener');
+
+    const appStateSubscription = AppState.addEventListener('change', (nextAppState: AppStateStatus) => {
+      console.log('[RootLayout] AppState changed to:', nextAppState);
+
+      // When app goes to background, cancel downloads and reset overlay states
+      // This prevents overlays (DownloadStatusOverlay, BadgeUnlockedAnimation) from blocking tab navigation
+      if (nextAppState === 'background' || nextAppState === 'inactive') {
+        console.log('[RootLayout] App backgrounding - resetting download/sync/badge states');
+
+        // Cancel any active download
+        if (isDownloading) {
+          console.log('[RootLayout] Cancelling active download');
+          OfflineDownloadCoordinator.cancelDownload();
+        }
+
+        // Reset states to ensure overlays don't block UI when app returns
+        useOfflineStore.setState({
+          isDownloading: false,
+          isSyncing: false,
+          downloadProgress: {
+            step: 'idle',
+            percentage: 0,
+            currentItem: '',
+            itemsCompleted: 0,
+            itemsTotal: 0,
+          },
+        });
+
+        // Clear badge animations to prevent BadgeUnlockedAnimation Modal from blocking UI
+        clearNewlyEarned();
+        console.log('[RootLayout] Cleared badge animation state');
+      }
+
+      // When app comes to foreground, log it (no action needed)
+      if (nextAppState === 'active') {
+        console.log('[RootLayout] App foregrounded - UI should be responsive');
+      }
+    });
+
+    return () => {
+      console.log('[RootLayout] Cleaning up AppState listener');
+      appStateSubscription.remove();
+    };
+  }, [isDownloading, isSyncing]);
+
   return (
     <ThemeProvider>
       <View style={{ flex: 1 }}>
-        {/* Offline Indicator - Shows at top when offline */}
+        {/* Offline Indicator */}
         <OfflineIndicator position="top" animated={true} showDetails={false} />
 
         {/* Main app content - route structure defined by file system */}
         <Slot />
 
-        {/* Download Status Overlay - Shows during offline downloads */}
+        {/* Download Status Overlay */}
         {isDownloading && (
           <DownloadStatusOverlay
             visible={isDownloading}
@@ -372,15 +371,15 @@ export default function RootLayout() {
           />
         )}
 
-        {/* Sync Status Indicator - Shows during sync operations */}
+        {/* Sync Status Indicator */}
         {isSyncing && (
           <SyncStatusIndicator isSyncing={isSyncing} itemsTotal={pendingSyncCount} />
         )}
 
-        {/* Modal Renderer - Renders active modal from global stack (Phase 2) */}
+        {/* Modal Renderer */}
         <ModalRenderer debug={false} />
 
-        {/* Toast Notifications - Auto-dismissing, non-blocking notifications */}
+        {/* Toast Notifications */}
         <Toast config={toastConfig} />
       </View>
     </ThemeProvider>

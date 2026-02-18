@@ -11,23 +11,34 @@ import { getAnalytics, isSupported } from 'firebase/analytics';
 import ReactNativeAsyncStorage from '@react-native-async-storage/async-storage';
 
 // Firebase configuration
-// TODO: Replace with actual Firebase project config
 const firebaseConfig = {
-  apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY || 'your-api-key',
-  authDomain: process.env.EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN || 'your-app.firebaseapp.com',
-  projectId: process.env.EXPO_PUBLIC_FIREBASE_PROJECT_ID || 'your-project-id',
-  storageBucket: process.env.EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET || 'your-app.appspot.com',
-  messagingSenderId: process.env.EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || '123456789',
-  appId: process.env.EXPO_PUBLIC_FIREBASE_APP_ID || 'your-app-id',
-  measurementId: process.env.EXPO_PUBLIC_FIREBASE_MEASUREMENT_ID || 'G-XXXXXXXXXX',
+  apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY || 'AIzaSyDJIfZfHCif6ohNG_J-_NkaNPY2A-Ek2fc',
+  authDomain: process.env.EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN || 'readingdaily-scripture-fe502.firebaseapp.com',
+  projectId: process.env.EXPO_PUBLIC_FIREBASE_PROJECT_ID || 'readingdaily-scripture-fe502',
+  storageBucket: process.env.EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET || 'readingdaily-scripture-fe502.firebasestorage.app',
+  messagingSenderId: process.env.EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || '587902116883',
+  appId: process.env.EXPO_PUBLIC_FIREBASE_APP_ID || '1:587902116883:web:a1020b4c01a167ec104be6',
+  measurementId: process.env.EXPO_PUBLIC_FIREBASE_MEASUREMENT_ID || 'G-EZFWTHSMNB',
 };
+
+console.log('[Firebase Config] Initializing with:', {
+  projectId: firebaseConfig.projectId,
+  authDomain: firebaseConfig.authDomain,
+  apiKeyExists: !!firebaseConfig.apiKey && firebaseConfig.apiKey !== 'your-api-key',
+});
 
 // Initialize Firebase
 let app;
 try {
+  console.log('[Firebase] Starting initialization...');
   app = initializeApp(firebaseConfig);
+  console.log('[Firebase] ✅ Initialized successfully');
 } catch (error) {
-  console.warn('Firebase initialization failed:', error);
+  console.error('[Firebase] 🔴 INITIALIZATION FAILED:', error);
+  console.error('[Firebase] Error details:', {
+    message: error instanceof Error ? error.message : String(error),
+    code: error instanceof Error && 'code' in error ? (error as any).code : 'unknown',
+  });
   // Create a dummy app for development
   app = null as any;
 }
