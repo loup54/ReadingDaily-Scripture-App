@@ -65,7 +65,6 @@
         {
           "icon": "./assets/icon.png",
           "color": "#7C3AED",
-          "sounds": ["./assets/notification-sound.wav"],
           "mode": "production"
         }
       ]
