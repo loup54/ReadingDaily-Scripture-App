@@ -38,9 +38,6 @@
       [
         "expo-build-properties",
         {
-          "ios": {
-            "useFrameworks": "dynamic"
-          },
           "android": {
             "useNextNotificationChannelOnAndroid": true
           }
