@@ -81,8 +81,9 @@ export const TIER_FEATURES: Record<SubscriptionTier, SubscriptionFeatures> = {
  * Product ID constants
  */
 export const SUBSCRIPTION_PRODUCTS = {
-  BASIC_MONTHLY: 'basic_monthly_subscription',
-  BASIC_YEARLY: 'basic_yearly_subscription', // Future
+  BASIC_MONTHLY: 'com.readingdaily.basic.monthly.v2',
+  BASIC_YEARLY: 'com.readingdaily.basic.yearly.v2',
+  LIFETIME: 'com.readingdaily.lifetime.access.v2',
 } as const;
 
 /**

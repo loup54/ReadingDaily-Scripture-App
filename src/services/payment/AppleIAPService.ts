@@ -25,12 +25,15 @@ import { getFunctions, httpsCallable } from 'firebase/functions';
 import { app } from '@/config/firebase';
 import { analyticsService } from '../analytics/AnalyticsService';
 
-// Product IDs from Apple App Store Connect
+// Product IDs — must match EXACTLY what is in App Store Connect → In-App Purchases.
+// Verified from App Store Connect on 2026-02-18:
+//   com.readingdaily.lifetime.access.v2  (Lifetime Premium Access, Non-Consumable, Approved)
+//   com.readingdaily.basic.monthly.v2    (Monthly Premium Subscription, Auto-Renewable, Approved)
+//   com.readingdaily.basic.yearly.v2     (Yearly Premium Subscription, Auto-Renewable, Approved)
 const PRODUCT_IDS = [
-  'lifetime_access_001',
-  // Phase 7: Subscription products
-  'com.readingdaily.basic.monthly',
-  'com.readingdaily.basic.yearly',
+  'com.readingdaily.lifetime.access.v2',
+  'com.readingdaily.basic.monthly.v2',
+  'com.readingdaily.basic.yearly.v2',
 ];
 
 export class AppleIAPService implements IPaymentService {
@@ -56,9 +59,9 @@ export class AppleIAPService implements IPaymentService {
       // Set up purchase update listener
       this.purchaseUpdateSubscription = RNIap.purchaseUpdatedListener(
         async (purchase: RNIap.Purchase) => {
-          console.log('[AppleIAPService] Purchase updated:', purchase.transactionId);
+          console.log('[AppleIAPService] Purchase updated:', purchase.id);
 
-          const receipt = purchase.transactionReceipt;
+          const receipt = purchase.purchaseToken;
           if (receipt) {
             // Finish the transaction
             if (Platform.OS === 'ios') {
@@ -137,12 +140,12 @@ export class AppleIAPService implements IPaymentService {
       // Phase 7: Handle subscription purchases differently
       if (product.type === 'subscription') {
         console.log('[AppleIAPService] Purchasing subscription:', productId);
-        const purchase = await RNIap.requestSubscription({
-          sku: productId,
-          andDangerouslyFinishTransactionAutomaticallyIOS: false,
+        const purchaseResult = await RNIap.requestPurchase({
+          request: { apple: { sku: productId, andDangerouslyFinishTransactionAutomatically: false } },
+          type: 'subs',
         });
 
-        if (!purchase) {
+        if (!purchaseResult) {
           return {
             success: false,
             provider: this.provider,
@@ -151,8 +154,9 @@ export class AppleIAPService implements IPaymentService {
           };
         }
 
-        const transactionId = purchase.transactionId || 'unknown';
-        const receipt = purchase.transactionReceipt || '';
+        const purchase = Array.isArray(purchaseResult) ? purchaseResult[0] : purchaseResult;
+        const transactionId = purchase.id || 'unknown';
+        const receipt = purchase.purchaseToken || '';
         const subscriptionId = purchase.productId || productId;
 
         console.log('[AppleIAPService] Subscription purchase successful:', transactionId);
@@ -168,14 +172,14 @@ export class AppleIAPService implements IPaymentService {
       }
 
       // One-time purchase
-      const purchase = await RNIap.requestPurchase({
-        sku: productId,
-        andDangerouslyFinishTransactionAutomaticallyIOS: false,
+      const purchaseResult = await RNIap.requestPurchase({
+        request: { apple: { sku: productId, andDangerouslyFinishTransactionAutomatically: false } },
+        type: 'in-app',
       });
 
-      console.log('[AppleIAPService] Purchase response:', purchase);
+      console.log('[AppleIAPService] Purchase response:', purchaseResult);
 
-      if (!purchase) {
+      if (!purchaseResult) {
         return {
           success: false,
           provider: this.provider,
@@ -184,9 +188,11 @@ export class AppleIAPService implements IPaymentService {
         };
       }
 
+      const purchase = Array.isArray(purchaseResult) ? purchaseResult[0] : purchaseResult;
+
       // Extract transaction details
-      const transactionId = purchase.transactionId || 'unknown';
-      const receipt = purchase.transactionReceipt || '';
+      const transactionId = purchase.id || 'unknown';
+      const receipt = purchase.purchaseToken || '';
 
       console.log('[AppleIAPService] Purchase successful:', transactionId);
 
@@ -255,8 +261,8 @@ export class AppleIAPService implements IPaymentService {
             userId: 'ios_user', // TODO: Replace with actual user ID
             productId: purchase.productId,
             provider: this.provider,
-            transactionId: purchase.transactionId || 'unknown',
-            receipt: purchase.transactionReceipt,
+            transactionId: purchase.id || 'unknown',
+            receipt: purchase.purchaseToken ?? undefined,
             purchaseDate: purchase.transactionDate || Date.now(),
             deviceFingerprint,
             validated: true, // TODO: Validate with server
@@ -264,16 +270,11 @@ export class AppleIAPService implements IPaymentService {
         })
       );
 
-      // Filter for lifetime access product
-      const lifetimePurchases = purchases.filter(
-        (p) => p.productId === 'lifetime_access_001'
-      );
-
-      console.log('[AppleIAPService] Restored purchases:', lifetimePurchases.length);
+      console.log('[AppleIAPService] Restored purchases:', purchases.length);
 
       return {
         success: true,
-        purchases: lifetimePurchases,
+        purchases,
       };
     } catch (error) {
       console.error('[AppleIAPService] Restore failed:', error);
@@ -300,7 +301,7 @@ export class AppleIAPService implements IPaymentService {
 
       const result = await validateAppleReceipt({
         receipt,
-        productId: productId || 'lifetime_access_001',
+        productId: productId || 'com.readingdaily.lifetime.access.v2',
       });
 
       const data = result.data as { valid: boolean };
@@ -416,23 +417,27 @@ export class AppleIAPService implements IPaymentService {
     try {
       console.log('[AppleIAPService] Loading products:', PRODUCT_IDS);
 
-      const products = await RNIap.getProducts({ skus: PRODUCT_IDS });
-      console.log('[AppleIAPService] Products loaded:', products.length);
+      // Fetch all product types (in-app and subscriptions) using 'all' type
+      const products = await RNIap.fetchProducts({ skus: PRODUCT_IDS, type: 'all' });
+      console.log('[AppleIAPService] Products loaded:', products?.length ?? 0);
+
+      if (!products) {
+        console.warn('[AppleIAPService] No products returned from store');
+        return;
+      }
 
       this.products = products.map((product) => {
-        // Detect subscription vs one-time based on product ID
-        const isSubscription =
-          product.productId.includes('monthly') || product.productId.includes('yearly');
-
-        const billingPeriod = product.productId.includes('yearly')
-          ? 'yearly'
-          : 'monthly';
+        // v14: product.type is 'in-app' | 'subs', product.id is the SKU
+        const isSubscription = product.type === 'subs';
+        const billingPeriod = product.id.includes('yearly') ? 'yearly' : 'monthly';
+        // v14: product.price is already a number (or null)
+        const price = product.price ?? 0;
 
         const baseProduct: PaymentProduct = {
-          id: product.productId,
+          id: product.id,
           name: product.title,
           description: product.description,
-          price: parseFloat(product.price),
+          price,
           currency: product.currency,
           type: isSubscription ? 'subscription' : 'one_time',
         };
@@ -442,7 +447,7 @@ export class AppleIAPService implements IPaymentService {
           return {
             ...baseProduct,
             billingPeriod,
-            renewalPrice: parseFloat(product.price),
+            renewalPrice: price,
             trialPeriodDays: 30, // Apple subscriptions typically include trial
           };
         }
@@ -452,21 +457,22 @@ export class AppleIAPService implements IPaymentService {
     } catch (error) {
       console.error('[AppleIAPService] Failed to load products:', error);
 
-      // Fallback to hardcoded products (for development)
+      // Fallback to hardcoded products (development only — not used in production builds).
+      // IDs match exactly what is in App Store Connect (verified 2026-02-18).
       if (__DEV__) {
         console.warn('[AppleIAPService] Using fallback products');
         this.products = [
           {
-            id: 'lifetime_access_001',
-            name: 'Lifetime Access',
+            id: 'com.readingdaily.lifetime.access.v2',
+            name: 'Lifetime Premium Access',
             description: 'Unlock all features forever',
-            price: 4.99,
+            price: 49.99,
             currency: 'USD',
             type: 'one_time',
           },
           {
-            id: 'com.readingdaily.basic.monthly',
-            name: 'Basic Monthly',
+            id: 'com.readingdaily.basic.monthly.v2',
+            name: 'Monthly Premium Subscription',
             description: 'Unlimited daily practice + full AI feedback',
             price: 2.99,
             currency: 'USD',
@@ -476,8 +482,8 @@ export class AppleIAPService implements IPaymentService {
             trialPeriodDays: 30,
           },
           {
-            id: 'com.readingdaily.basic.yearly',
-            name: 'Basic Yearly',
+            id: 'com.readingdaily.basic.yearly.v2',
+            name: 'Yearly Premium Subscription',
             description: 'Unlimited daily practice + full AI feedback (save 2 months!)',
             price: 27.99,
             currency: 'USD',

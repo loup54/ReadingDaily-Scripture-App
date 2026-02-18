@@ -222,7 +222,7 @@ export const useTrialStore = create<TrialStoreState>()(
           console.log('💳 Processing purchase via', state.paymentService.provider);
 
           // Process purchase through payment service
-          const result = await state.paymentService.purchase('lifetime_access_001');
+          const result = await state.paymentService.purchase('com.readingdaily.lifetime.access.v2');
 
           if (result.success) {
             console.log('✅ Purchase successful:', result.transactionId);
@@ -261,12 +261,32 @@ export const useTrialStore = create<TrialStoreState>()(
 
             // Check if lifetime access was purchased
             const hasLifetimeAccess = result.purchases.some(
-              (p) => p.productId === 'lifetime_access_001' && p.validated
+              (p) => p.productId === 'com.readingdaily.lifetime.access.v2' && p.validated
             );
 
             if (hasLifetimeAccess) {
               set({
                 hasPurchased: true,
+                isActive: false,
+                hasExpired: false,
+              });
+              return true;
+            }
+
+            // Check if a subscription was purchased (monthly or yearly, either naming convention)
+            const SUBSCRIPTION_IDS = [
+              'com.readingdaily.basic.monthly.v2',
+              'com.readingdaily.basic.yearly.v2',
+            ];
+            const hasActiveSubscription = result.purchases.some(
+              (p) => SUBSCRIPTION_IDS.includes(p.productId)
+            );
+
+            if (hasActiveSubscription) {
+              set({
+                currentTier: 'basic',
+                subscriptionStatus: 'active',
+                autoRenewEnabled: true,
                 isActive: false,
                 hasExpired: false,
               });

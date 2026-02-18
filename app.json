@@ -2,7 +2,7 @@
   "expo": {
     "name": "ReadingDaily Scripture App",
     "slug": "readingdaily-scripture-app",
-    "version": "1.0.0",
+    "version": "1.1.6",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
     "assetBundlePatterns": [
@@ -15,12 +15,15 @@
     },
     "ios": {
       "bundleIdentifier": "com.readingdaily.scripture",
-      "buildNumber": "1",
+      "buildNumber": "99",
       "supportsTabletMode": true,
       "splash": {
         "image": "./assets/splash.png",
         "resizeMode": "contain",
         "backgroundColor": "#7C3AED"
+      },
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
@@ -42,7 +45,13 @@
             "useNextNotificationChannelOnAndroid": true
           }
         }
-      ]
-    ]
+      ],
+      "react-native-iap"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "0c4f39f5-184d-4af5-8dca-2cc4d52675e6"
+      }
+    }
   }
 }

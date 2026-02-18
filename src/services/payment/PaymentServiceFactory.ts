@@ -9,16 +9,16 @@ import { Platform } from 'react-native';
 import { IPaymentService } from './IPaymentService';
 import { MockPaymentService } from './MockPaymentService';
 import { StripePaymentService } from './StripePaymentService';
-// Don't import native modules at top level - they crash in Expo Go
-// import { AppleIAPService } from './AppleIAPService';
-// import { GooglePlayService } from './GooglePlayService';
+// Native IAP modules loaded via dynamic require to avoid Expo Go crash.
+// __DEV__ is true in Expo Go, so these paths are never reached there.
 
 export class PaymentServiceFactory {
   /**
    * Create payment service based on platform and environment
    */
   static create(): IPaymentService {
-    // Check if we're in development/testing mode
+    // In development/Expo Go, __DEV__ is true — use mock to avoid native module crash.
+    // EXPO_PUBLIC_USE_MOCK_PAYMENTS can also force mock in a native dev build.
     const isDevelopment = __DEV__ || process.env.EXPO_PUBLIC_USE_MOCK_PAYMENTS === 'true';
 
     if (isDevelopment) {
@@ -26,7 +26,7 @@ export class PaymentServiceFactory {
       return new MockPaymentService();
     }
 
-    // Production: Use platform-specific service
+    // Production native build: use real platform payment services.
     if (Platform.OS === 'web') {
       console.log('[PaymentServiceFactory] Using StripePaymentService for web');
 
@@ -42,15 +42,17 @@ export class PaymentServiceFactory {
     }
 
     if (Platform.OS === 'ios') {
-      console.log('[PaymentServiceFactory] iOS detected - but using Mock to avoid Expo Go crash');
-      console.warn('[PaymentServiceFactory] Native IAP requires development build or production app');
-      return new MockPaymentService();
+      console.log('[PaymentServiceFactory] Using AppleIAPService for iOS production build');
+      // Dynamic require prevents the module from loading in Expo Go (where __DEV__ is true
+      // and this branch is never reached).
+      const { AppleIAPService } = require('./AppleIAPService');
+      return new AppleIAPService();
     }
 
     if (Platform.OS === 'android') {
-      console.log('[PaymentServiceFactory] Android detected - but using Mock to avoid Expo Go crash');
-      console.warn('[PaymentServiceFactory] Native IAP requires development build or production app');
-      return new MockPaymentService();
+      console.log('[PaymentServiceFactory] Using GooglePlayService for Android production build');
+      const { GooglePlayService } = require('./GooglePlayService');
+      return new GooglePlayService();
     }
 
     // Fallback to mock

@@ -62,7 +62,7 @@ export const PaywallScreen: React.FC<PaywallScreenProps> = ({
       console.log(`💳 Starting upgrade from ${currentTier} to basic`);
 
       // Upgrade via payment service
-      const success = await upgradeToBasic('basic_monthly_subscription');
+      const success = await upgradeToBasic('com.readingdaily.basic.monthly.v2');
 
       if (success) {
         console.log('✅ Upgrade successful');
