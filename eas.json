@@ -45,6 +45,7 @@
       },
       "env": {
         "NPM_CONFIG_LEGACY_PEER_DEPS": "true",
+        "NPM_CONFIG_PRODUCTION": "false",
         "NODE_ENV": "production",
         "EXPO_PUBLIC_FIREBASE_API_KEY": "AIzaSyDJIfZfHCif6ohNG_J-_NkaNPY2A-Ek2fc",
         "EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN": "readingdaily-scripture-fe502.firebaseapp.com",

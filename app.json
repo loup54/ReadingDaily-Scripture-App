@@ -46,7 +46,14 @@
           }
         }
       ],
-      "react-native-iap"
+      [
+        "react-native-iap",
+        {
+          "ios": {
+            "with-folly-no-coroutines": true
+          }
+        }
+      ]
     ],
     "extra": {
       "eas": {
