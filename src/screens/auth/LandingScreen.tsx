@@ -24,6 +24,12 @@ export const LandingScreen: React.FC<LandingScreenProps> = ({
   onDemo,
 }) => {
   const { colors } = useTheme();
+
+  const handleSignInPress = () => {
+    console.log('[LandingScreen] Sign In button pressed');
+    onSignIn();
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <LinearGradient
@@ -54,6 +60,12 @@ export const LandingScreen: React.FC<LandingScreenProps> = ({
             and easy navigation.
           </Text>
 
+          {/* Account Benefits */}
+          <Text style={[styles.accountBenefits, { color: colors.text.white }]}>
+            Create an account to sync your progress{'\n'}
+            and settings across all your devices
+          </Text>
+
           {/* CTA Buttons */}
           <View style={styles.buttonContainer}>
             <Button
@@ -79,7 +91,7 @@ export const LandingScreen: React.FC<LandingScreenProps> = ({
             <Button
               title="Already have an account? Sign In"
               variant="text"
-              onPress={onSignIn}
+              onPress={handleSignInPress}
               textStyle={{ color: colors.text.white }}
               testID="sign-in-link"
             />
@@ -136,8 +148,17 @@ const styles = StyleSheet.create({
     color: Colors.text.white,
     textAlign: 'center',
     opacity: 0.95,
-    marginBottom: Spacing.xl,
+    marginBottom: Spacing.md,
     lineHeight: 24,
+  },
+  accountBenefits: {
+    ...Typography.caption,
+    color: Colors.text.white,
+    textAlign: 'center',
+    opacity: 0.85,
+    fontStyle: 'italic',
+    marginBottom: Spacing.lg,
+    lineHeight: 20,
   },
   buttonContainer: {
     width: '100%',

@@ -95,8 +95,8 @@ export const SignUpScreen: React.FC<SignUpScreenProps> = ({
               <Text style={[styles.title, { color: colors.text.white }]}>Create Your</Text>
               <Text style={[styles.title, { color: colors.text.white }]}>Account</Text>
               <Text style={[styles.subtitle, { color: colors.text.white }]}>
-                Start your English learning journey with 10 free{'\n'}
-                minutes of practice time
+                Sync your progress, bookmarks, and settings{'\n'}
+                across all your devices with cloud backup
               </Text>
             </View>
 
@@ -142,6 +142,23 @@ export const SignUpScreen: React.FC<SignUpScreenProps> = ({
                 testID="password-input"
               />
 
+              {/* Sign In Option - Moved to Top */}
+              <View style={styles.signInContainer}>
+                <Text style={[styles.signInPrompt, { color: colors.text.secondary }]}>
+                  Already have an account?
+                </Text>
+                <Button
+                  title="Sign In"
+                  variant="secondary"
+                  size="md"
+                  onPress={onSignIn}
+                  testID="sign-in-button"
+                  style={styles.signInButton}
+                />
+              </View>
+
+              <View style={styles.divider} />
+
               <Button
                 title="Start Free Trial"
                 variant="accent"
@@ -151,17 +168,6 @@ export const SignUpScreen: React.FC<SignUpScreenProps> = ({
                 loading={loading}
                 testID="sign-up-button"
                 style={styles.submitButton}
-              />
-
-              <Text style={styles.createAccountText}>Create Account</Text>
-
-              <View style={styles.divider} />
-
-              <Button
-                title="Already have an account? Sign in"
-                variant="text"
-                onPress={onSignIn}
-                testID="sign-in-link"
               />
             </View>
 
@@ -242,6 +248,20 @@ const styles = StyleSheet.create({
   },
   submitButton: {
     marginBottom: Spacing.xs,
+  },
+  signInContainer: {
+    alignItems: 'center',
+    marginTop: Spacing.md,
+    marginBottom: Spacing.md,
+  },
+  signInPrompt: {
+    ...Typography.body,
+    color: Colors.text.secondary,
+    marginBottom: Spacing.sm,
+    textAlign: 'center',
+  },
+  signInButton: {
+    minWidth: 200,
   },
   createAccountText: {
     ...Typography.caption,

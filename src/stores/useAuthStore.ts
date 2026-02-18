@@ -14,6 +14,7 @@ interface AuthStoreState {
   state: AuthState;
   error: AuthError | null;
   isInitialized: boolean; // Track if auth state has been checked
+  isGuest: boolean; // NEW: Track if user is in guest mode
 
   // Actions
   login: (credentials: LoginCredentials) => Promise<void>;
@@ -23,6 +24,7 @@ interface AuthStoreState {
   verifyEmail: (token: string) => Promise<void>;
   refreshAuth: () => Promise<void>;
   initializeAuthState: () => Promise<void>; // New: Initialize persistent auth on app startup
+  setGuestMode: () => void; // NEW: Set guest mode
   clearError: () => void;
 }
 
@@ -36,6 +38,7 @@ export const useAuthStore = create<AuthStoreState>((set, get) => {
     state: 'idle',
     error: null,
     isInitialized: false,
+    isGuest: false, // NEW: Initialize guest mode as false
 
     /**
      * Initialize auth state from Firebase on app startup
@@ -57,6 +60,7 @@ export const useAuthStore = create<AuthStoreState>((set, get) => {
             set({
               state: 'unauthenticated',
               isInitialized: true,
+              isGuest: true, // Enable guest mode on timeout
               error: null,
             });
             resolve();
@@ -119,11 +123,14 @@ export const useAuthStore = create<AuthStoreState>((set, get) => {
             } else {
               // User logged out or not authenticated
               console.log('[useAuthStore] No authenticated user found');
+              const currentState = get();
               set({
                 user: null,
                 token: null,
                 state: 'unauthenticated',
                 isInitialized: true,
+                // Preserve guest mode if already set, otherwise enable it automatically
+                isGuest: currentState.isGuest || true,
                 error: null,
               });
             }
@@ -136,6 +143,7 @@ export const useAuthStore = create<AuthStoreState>((set, get) => {
             set({
               state: 'unauthenticated',
               isInitialized: true,
+              isGuest: true, // Enable guest mode on initialization error
               error: error as AuthError,
             });
             resolve();
@@ -154,6 +162,7 @@ export const useAuthStore = create<AuthStoreState>((set, get) => {
           user: response.user,
           token: response.token,
           state: 'authenticated',
+          isGuest: false, // NEW: Clear guest mode on login
           error: null,
         });
       } catch (error) {
@@ -169,15 +178,19 @@ export const useAuthStore = create<AuthStoreState>((set, get) => {
       set({ state: 'loading', error: null });
 
       try {
+        console.log('[useAuthStore] signUp: Starting signup for:', data.email);
         const response = await AuthService.signUp(data);
+        console.log('[useAuthStore] signUp: Success');
 
         set({
           user: response.user,
           token: response.token,
           state: 'authenticated',
+          isGuest: false, // NEW: Clear guest mode on sign up
           error: null,
         });
       } catch (error) {
+        console.error('[useAuthStore] signUp: Error caught:', error);
         set({
           state: 'error',
           error: error as AuthError,
@@ -284,6 +297,22 @@ export const useAuthStore = create<AuthStoreState>((set, get) => {
           error: error as AuthError,
         });
       }
+    },
+
+    /**
+     * Set guest mode - allows users to browse without signing in
+     * Guest users can view readings but not access premium features
+     */
+    setGuestMode: () => {
+      console.log('[useAuthStore] Setting guest mode');
+      set({
+        isGuest: true,
+        user: null,
+        token: null,
+        state: 'unauthenticated',
+        isInitialized: true,
+        error: null,
+      });
     },
 
     clearError: () => {

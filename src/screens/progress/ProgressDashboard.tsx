@@ -517,15 +517,15 @@ export const ProgressDashboard: React.FC<ProgressDashboardProps> = ({
         <View style={styles.bottomSpacer} />
       </ScrollView>
 
-      {/* Badge Unlocked Animation */}
-      {unlockedBadge && (
+      {/* Badge Unlocked Animation - TEMPORARILY DISABLED FOR DEBUGGING */}
+      {/* {unlockedBadge && (
         <BadgeUnlockedAnimation
           visible={showBadgeAnimation}
           badge={unlockedBadge}
           onDismiss={handleDismissBadgeAnimationWithQueue}
           autoDismissMs={3000}
         />
-      )}
+      )} */}
     </SafeAreaView>
   );
 };
@@ -637,24 +637,26 @@ const styles = StyleSheet.create({
   statCard: {
     flex: 1,
     alignItems: 'center',
-    paddingVertical: Spacing.md,
-    paddingHorizontal: Spacing.sm,
+    paddingVertical: Spacing.lg,
+    paddingHorizontal: Spacing.xs,
     borderRadius: BorderRadius.lg,
     borderWidth: 1,
     ...Shadows.md,
-    overflow: 'hidden',
+    minHeight: 110,
   },
 
   statLabel: {
-    fontSize: FontSizes.xs,
+    fontSize: FontSizes.sm,
     fontWeight: FontWeights.medium,
     marginVertical: Spacing.xs,
     textAlign: 'center',
+    lineHeight: 18,
   },
 
   statValue: {
-    fontSize: FontSizes.xl,
+    fontSize: FontSizes.xxl,
     fontWeight: FontWeights.bold,
+    lineHeight: 28,
   },
 
   // Calendar

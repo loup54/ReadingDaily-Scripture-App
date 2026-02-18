@@ -11,8 +11,6 @@ import {
   View,
   Text,
   StyleSheet,
-  Modal,
-  TouchableOpacity,
   Animated,
   ViewStyle,
 } from 'react-native';
@@ -235,20 +233,9 @@ export const BadgeUnlockedAnimation: React.FC<
   const gradientColors = getGradientColors();
 
   return (
-    <Modal
-      visible={visible}
-      transparent
-      animationType="none"
-      onRequestClose={handleDismiss}
-    >
-      {/* Semi-transparent overlay */}
-      <TouchableOpacity
-        style={styles.overlay}
-        activeOpacity={0.5}
-        onPress={handleDismiss}
-      >
-        <View style={styles.overlay} />
-      </TouchableOpacity>
+    <View style={styles.container} pointerEvents="box-none">
+      {/* Semi-transparent overlay - allows touches to pass through to tab bar and other UI */}
+      <View style={styles.overlay} pointerEvents="none" />
 
       {/* Confetti particles */}
       <View style={styles.confettiContainer}>
@@ -329,27 +316,22 @@ export const BadgeUnlockedAnimation: React.FC<
           </View>
         </LinearGradient>
       </Animated.View>
-
-      {/* Tap to dismiss overlay */}
-      <TouchableOpacity
-        style={styles.dismissOverlay}
-        onPress={handleDismiss}
-        activeOpacity={1}
-      />
-    </Modal>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
+  // Container - absolute positioned to cover screen, allows touches to pass through
+  container: {
+    ...StyleSheet.absoluteFillObject,
+    pointerEvents: 'box-none',
+  },
+
   // Overlay
   overlay: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  },
-
-  // Dismiss overlay
-  dismissOverlay: {
-    ...StyleSheet.absoluteFillObject,
+    pointerEvents: 'none', // CRITICAL: Must not intercept touches
   },
 
   // Confetti

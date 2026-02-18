@@ -48,6 +48,7 @@ interface SettingsScreenProps {
   onLegalDocuments?: () => void;
   onBackupExport?: () => void;
   onComplianceAnalytics?: () => void;
+  onViewTutorial?: () => void;
 }
 
 export const SettingsScreen: React.FC<SettingsScreenProps> = ({
@@ -61,6 +62,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
   onLegalDocuments,
   onBackupExport,
   onComplianceAnalytics,
+  onViewTutorial,
 }) => {
   const { user } = useAuthStore();
   const { hasPurchased, isActive, getFormattedTimeRemaining, remainingMinutes } = useTrialStore();
@@ -182,40 +184,21 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
   const handleDailyRemindersToggle = useCallback(async (value: boolean) => {
     console.log('[Settings] Toggling daily reminders:', value);
     try {
-      if (value) {
-        // Enabling daily reminders via Phase 10B notification system
-        console.log('[Settings] 📱 Enabling daily reminders...');
-
-        // Update notification preferences to enable daily reminders
-        await updateNotificationPreferences(user?.uid || '', {
-          ...notificationPreferences,
-          dailyRemindersEnabled: true,
-        });
-
-        console.log('[Settings] ✅ Daily reminders enabled');
-        Alert.alert('Success', 'Daily reminders enabled. You\'ll receive a notification at your scheduled time.');
-      } else {
-        // Disabling daily reminders via Phase 10B notification system
-        console.log('[Settings] ⏹️ Disabling daily reminders...');
-
-        // Update notification preferences to disable daily reminders
-        await updateNotificationPreferences(user?.uid || '', {
-          ...notificationPreferences,
-          dailyRemindersEnabled: false,
-        });
-
-        console.log('[Settings] ✅ Daily reminders disabled');
-        Alert.alert('Success', 'Daily reminders disabled.');
-      }
-
-      // Update the settings in store
+      // Update the settings in store (automatically schedules/cancels via DailyReminderScheduler)
       await updateNotificationSettings({ reminderEnabled: value });
       console.log('[Settings] ✅ Daily reminders updated:', value);
+
+      // Show success message
+      if (value) {
+        Alert.alert('Success', 'Daily reminders enabled. You\'ll receive a notification at your scheduled time.');
+      } else {
+        Alert.alert('Success', 'Daily reminders disabled.');
+      }
     } catch (error) {
       console.error('[Settings] ❌ Failed to update daily reminders:', error);
       Alert.alert('Error', 'Failed to update notification settings. Please try again.');
     }
-  }, [updateNotificationPreferences, updateNotificationSettings, notificationPreferences, user?.uid]);
+  }, [updateNotificationSettings]);
 
   const handleTranslationToggle = useCallback(async (value: boolean) => {
     console.log('[Settings] Toggling translation feature:', value);
@@ -809,6 +792,92 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
                   thumbColor={colors.text.white}
                 />
               </View>
+
+              {/* Notification Time Picker - shown when reminders are enabled */}
+              {settings.notifications.reminderEnabled && (
+                <>
+                  <TouchableOpacity
+                    style={[styles.settingRow, { marginTop: 12, paddingLeft: 46 }]}
+                    onPress={() => {
+                      Alert.prompt(
+                        'Set Reminder Time',
+                        'Enter time in HH:MM format (24-hour)',
+                        [
+                          { text: 'Cancel', style: 'cancel' },
+                          {
+                            text: 'Save',
+                            onPress: async (time) => {
+                              if (time && /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/.test(time)) {
+                                await updateNotificationSettings({ dailyReadingTime: time });
+                                Alert.alert('Success', `Daily reminder time set to ${time}`);
+                              } else {
+                                Alert.alert('Error', 'Invalid time format. Use HH:MM (e.g., 08:00)');
+                              }
+                            },
+                          },
+                        ],
+                        'plain-text',
+                        settings.notifications.dailyReadingTime
+                      );
+                    }}
+                  >
+                    <View style={styles.settingLeft}>
+                      <Ionicons
+                        name="time-outline"
+                        size={22}
+                        color={colors.primary.purple}
+                      />
+                      <View style={styles.settingTextContainer}>
+                        <Text style={dynamicStyles.settingLabel}>Reminder Time</Text>
+                        <Text style={dynamicStyles.settingValue}>
+                          {settings.notifications.dailyReadingTime}
+                        </Text>
+                      </View>
+                    </View>
+                    <Ionicons
+                      name="chevron-forward"
+                      size={20}
+                      color={colors.text.tertiary}
+                    />
+                  </TouchableOpacity>
+
+                  {/* Test Notification Button */}
+                  <TouchableOpacity
+                    style={[styles.settingRow, { marginTop: 8, paddingLeft: 46 }]}
+                    onPress={async () => {
+                      try {
+                        const { dailyReminderScheduler } = await import(
+                          '@/services/notifications/DailyReminderScheduler'
+                        );
+                        await dailyReminderScheduler.sendTestNotification();
+                        Alert.alert('Test Sent', 'A test notification should appear shortly!');
+                      } catch (error) {
+                        console.error('[Settings] Error sending test notification:', error);
+                        Alert.alert('Error', 'Failed to send test notification. Please check permissions.');
+                      }
+                    }}
+                  >
+                    <View style={styles.settingLeft}>
+                      <Ionicons
+                        name="send-outline"
+                        size={22}
+                        color={colors.primary.green}
+                      />
+                      <View style={styles.settingTextContainer}>
+                        <Text style={dynamicStyles.settingLabel}>Test Notification</Text>
+                        <Text style={dynamicStyles.settingValue}>
+                          Send a test reminder now
+                        </Text>
+                      </View>
+                    </View>
+                    <Ionicons
+                      name="chevron-forward"
+                      size={20}
+                      color={colors.text.tertiary}
+                    />
+                  </TouchableOpacity>
+                </>
+              )}
             </View>
           </View>
 
@@ -962,16 +1031,16 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
                   />
                   <View style={styles.settingTextContainer}>
                     <View style={styles.labelRow}>
-                      <Text style={dynamicStyles.settingLabel}>Word Highlighting</Text>
+                      <Text style={dynamicStyles.settingLabel}>Word Highlighting (Preview)</Text>
                       <TooltipIcon
-                        title="Word Highlighting"
-                        description="Words will highlight as the audio plays. This helps you follow along and improves your reading speed."
+                        title="Word Highlighting (Preview)"
+                        description="Words will highlight in sync as the audio plays. This feature requires timing data that is currently being generated. It may not work for all readings yet."
                         size={14}
                         color={colors.primary.blue}
                       />
                     </View>
                     <Text style={dynamicStyles.settingValue}>
-                      Highlight words during audio playback
+                      Experimental: Words light up during playback
                     </Text>
                   </View>
                 </View>
@@ -1107,6 +1176,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
                         key={lang.code}
                         style={[
                           styles.selectorOption,
+                          { backgroundColor: colors.background.secondary },
                           selectedLanguage === lang.code && { backgroundColor: colors.primary.blue + '20' }
                         ]}
                         onPress={() => handleLanguageSelect(lang.code)}
@@ -1129,6 +1199,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
                         key={accent.code}
                         style={[
                           styles.selectorOption,
+                          { backgroundColor: colors.background.secondary },
                           selectedAccent === accent.code && { backgroundColor: colors.primary.blue + '20' }
                         ]}
                         onPress={() => handleAccentSelect(accent.code)}
@@ -1510,6 +1581,28 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
                     color={colors.primary.blue}
                   />
                   <Text style={dynamicStyles.settingLabel}>Help & FAQ</Text>
+                </View>
+                <Ionicons
+                  name="chevron-forward"
+                  size={20}
+                  color={colors.text.tertiary}
+                />
+              </TouchableOpacity>
+
+              <View style={dynamicStyles.divider} />
+
+              <TouchableOpacity
+                style={styles.settingRow}
+                onPress={onViewTutorial}
+                activeOpacity={0.7}
+              >
+                <View style={styles.settingLeft}>
+                  <Ionicons
+                    name="school-outline"
+                    size={22}
+                    color={colors.primary.blue}
+                  />
+                  <Text style={dynamicStyles.settingLabel}>View Tutorial</Text>
                 </View>
                 <Ionicons
                   name="chevron-forward"

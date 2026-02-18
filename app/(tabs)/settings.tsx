@@ -38,6 +38,10 @@ export default function SettingsTab() {
     router.push('/(tabs)/compliance-analytics');
   };
 
+  const handleViewTutorial = () => {
+    router.push('/onboarding');
+  };
+
   const handleLogout = () => {
     Alert.alert(
       'Log Out',
@@ -92,6 +96,7 @@ export default function SettingsTab() {
       onLegalDocuments={handleLegalDocuments}
       onBackupExport={handleBackupExport}
       onComplianceAnalytics={handleComplianceAnalytics}
+      onViewTutorial={handleViewTutorial}
     />
   );
 }

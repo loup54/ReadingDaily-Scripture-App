@@ -56,7 +56,7 @@ class SubscriptionCancellationServiceClass {
 
       const response = await cancelSubscriptionFunction({
         ...request,
-        userId: user.uid,
+        userId: user.id,
         idToken,
       });
 

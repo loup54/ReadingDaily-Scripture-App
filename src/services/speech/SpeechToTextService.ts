@@ -5,7 +5,8 @@
  * Service for transcribing audio recordings using Google Cloud Speech-to-Text API
  */
 
-import * as FileSystem from 'expo-file-system/legacy';
+import * as FileSystem from 'expo-file-system';
+import { File } from 'expo-file-system';
 import Constants from 'expo-constants';
 
 const GOOGLE_CLOUD_API_KEY = Constants.expoConfig?.extra?.EXPO_PUBLIC_GOOGLE_CLOUD_API_KEY ||
@@ -55,16 +56,16 @@ export class SpeechToTextService {
       console.log('[SpeechToTextService] Transcribing audio:', audioUri);
 
       // Verify audio file exists
-      const fileInfo = await FileSystem.getInfoAsync(audioUri);
-      if (!fileInfo.exists) {
+      const file = new File(audioUri);
+      const exists = file.exists;
+      if (!exists) {
         throw new Error(`Audio file not found at: ${audioUri}`);
       }
+      const fileInfo = { size: file.size };
       console.log('[SpeechToTextService] Audio file exists, size:', fileInfo.size);
 
-      // Read audio file as base64
-      const audioBase64 = await FileSystem.readAsStringAsync(audioUri, {
-        encoding: 'base64',
-      });
+      // Read audio file as base64 using new File API
+      const audioBase64 = await file.base64();
 
       // Validate base64 content
       if (!audioBase64 || audioBase64.length === 0) {
@@ -85,6 +86,8 @@ export class SpeechToTextService {
           languageCode,
           enableWordTimeOffsets: true,
           enableWordConfidence: true,
+          enableAutomaticPunctuation: true,
+          // NOTE: audioChannelCount should NOT be set for mono audio - Google will auto-detect
         },
         audio: {
           content: audioBase64,
@@ -94,10 +97,10 @@ export class SpeechToTextService {
       // Log request details for debugging
       console.log('[SpeechToTextService] Request details:', {
         audioSize: audioBase64.length,
-        encoding: requestBody.config.encoding,
         sampleRate: requestBody.config.sampleRateHertz,
         languageCode: requestBody.config.languageCode,
         apiKeyLength: this.apiKey.length,
+        apiKeyPresent: !!this.apiKey,
       });
 
       // Make API request
@@ -134,9 +137,11 @@ export class SpeechToTextService {
       }
 
       const data = await response.json();
+      console.log('[SpeechToTextService] API Response:', JSON.stringify(data, null, 2));
 
       if (!data.results || data.results.length === 0) {
-        console.warn('[SpeechToTextService] No transcription results');
+        console.warn('[SpeechToTextService] ⚠️ No transcription results - audio may be silent or unclear');
+        console.warn('[SpeechToTextService] Full response:', JSON.stringify(data));
         return {
           transcript: '',
           confidence: 0,

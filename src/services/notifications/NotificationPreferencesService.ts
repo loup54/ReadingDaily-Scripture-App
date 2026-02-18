@@ -66,7 +66,7 @@ class NotificationPreferencesServiceClass {
 
       // Save device token to Firestore
       try {
-        const userRef = admin.firestore().collection('users').doc(user.uid);
+        const userRef = admin.firestore().collection('users').doc(user.id);
         await userRef.update({
           deviceTokens: admin.firestore.FieldValue.arrayUnion(token),
           lastTokenRegistrationAt: admin.firestore.Timestamp.now(),
@@ -98,7 +98,7 @@ class NotificationPreferencesServiceClass {
       }
 
       // Try to get from Firestore first
-      const userDoc = await admin.firestore().collection('users').doc(user.uid).get();
+      const userDoc = await admin.firestore().collection('users').doc(user.id).get();
       if (userDoc.exists) {
         const data = userDoc.data();
         const firestorePrefs = data?.notificationPreferences;
@@ -139,7 +139,7 @@ class NotificationPreferencesServiceClass {
       await admin
         .firestore()
         .collection('users')
-        .doc(user.uid)
+        .doc(user.id)
         .update({
           notificationPreferences: updatedPrefs,
           preferencesUpdatedAt: admin.firestore.Timestamp.now(),
@@ -231,7 +231,7 @@ class NotificationPreferencesServiceClass {
       await admin
         .firestore()
         .collection('users')
-        .doc(user.uid)
+        .doc(user.id)
         .update({
           deviceTokens: admin.firestore.FieldValue.arrayRemove(token),
         });
@@ -260,7 +260,7 @@ class NotificationPreferencesServiceClass {
       const snapshot = await admin
         .firestore()
         .collection('users')
-        .doc(user.uid)
+        .doc(user.id)
         .collection('notificationHistory')
         .orderBy('sentAt', 'desc')
         .limit(limit)
@@ -289,7 +289,7 @@ class NotificationPreferencesServiceClass {
       await admin
         .firestore()
         .collection('users')
-        .doc(user.uid)
+        .doc(user.id)
         .collection('notificationHistory')
         .doc(notificationId)
         .update({
@@ -316,7 +316,7 @@ class NotificationPreferencesServiceClass {
       const snapshot = await admin
         .firestore()
         .collection('users')
-        .doc(user.uid)
+        .doc(user.id)
         .collection('notificationHistory')
         .where('readAt', '==', null)
         .get();

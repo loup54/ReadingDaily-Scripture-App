@@ -16,14 +16,14 @@ interface TrialExpiredModalProps {
   visible: boolean;
   onPurchase: () => void;
   onDismiss?: () => void;
-  lifetimePrice: number;
+  lifetimePrice?: number; // Deprecated, kept for backwards compatibility
 }
 
 export const TrialExpiredModal: React.FC<TrialExpiredModalProps> = ({
   visible,
   onPurchase,
   onDismiss,
-  lifetimePrice,
+  lifetimePrice, // Ignored - using subscription model now
 }) => {
   const { colors } = useTheme();
 
@@ -56,62 +56,133 @@ export const TrialExpiredModal: React.FC<TrialExpiredModalProps> = ({
               </View>
 
               {/* Title */}
-              <Text style={[styles.title, { color: colors.text.white }]}>Trial Expired</Text>
+              <Text style={[styles.title, { color: colors.text.white }]}>Your Trial Has Ended</Text>
               <Text style={[styles.subtitle, { color: colors.text.white }]}>
-                Your 7-day free trial has ended.{'\n'}
-                Continue reading scripture daily with{'\n'}
-                lifetime access!
+                Continue your spiritual journey with{'\n'}
+                lifetime access to all features
               </Text>
 
               {/* Features */}
               <View style={styles.features}>
                 <View style={styles.featureRow}>
                   <Ionicons
-                    name="checkmark-circle"
+                    name="infinite"
                     size={24}
                     color={colors.accent.green}
                   />
                   <Text style={[styles.featureText, { color: colors.text.white }]}>
-                    Unlimited daily readings
+                    Unlimited Access
                   </Text>
                 </View>
                 <View style={styles.featureRow}>
                   <Ionicons
-                    name="checkmark-circle"
+                    name="volume-high-outline"
                     size={24}
                     color={colors.accent.green}
                   />
                   <Text style={[styles.featureText, { color: colors.text.white }]}>
-                    Audio with adjustable speed
+                    Audio Narration
                   </Text>
                 </View>
                 <View style={styles.featureRow}>
                   <Ionicons
-                    name="checkmark-circle"
+                    name="book-outline"
                     size={24}
                     color={colors.accent.green}
                   />
                   <Text style={[styles.featureText, { color: colors.text.white }]}>
-                    Multiple translations
+                    ESL Learning
+                  </Text>
+                </View>
+                <View style={styles.featureRow}>
+                  <Ionicons
+                    name="cloud-download-outline"
+                    size={24}
+                    color={colors.accent.green}
+                  />
+                  <Text style={[styles.featureText, { color: colors.text.white }]}>
+                    Offline Mode
+                  </Text>
+                </View>
+                <View style={styles.featureRow}>
+                  <Ionicons
+                    name="trophy-outline"
+                    size={24}
+                    color={colors.accent.green}
+                  />
+                  <Text style={[styles.featureText, { color: colors.text.white }]}>
+                    Track Progress
+                  </Text>
+                </View>
+                <View style={styles.featureRow}>
+                  <Ionicons
+                    name="shield-checkmark-outline"
+                    size={24}
+                    color={colors.accent.green}
+                  />
+                  <Text style={[styles.featureText, { color: colors.text.white }]}>
+                    One-Time Payment
                   </Text>
                 </View>
               </View>
 
-              {/* Price Badge */}
-              <View style={styles.priceBadge}>
-                <Text style={[styles.priceAmount, { color: colors.text.white }]}>${lifetimePrice}</Text>
-                <Text style={[styles.priceLabel, { color: colors.text.white }]}>one-time payment</Text>
+              {/* Subscription Tiers */}
+              <View style={styles.subscriptionTiers}>
+                {/* Basic Tier */}
+                <View style={styles.tierCard}>
+                  <Text style={[styles.tierTitle, { color: colors.text.white }]}>Basic</Text>
+                  <View style={styles.tierPriceRow}>
+                    <Text style={[styles.tierPrice, { color: colors.text.white }]}>$2.99</Text>
+                    <Text style={[styles.tierPeriod, { color: colors.text.white }]}>/month</Text>
+                  </View>
+                  <Text style={[styles.tierDescription, { color: colors.text.white }]}>
+                    Access to daily Scripture readings and devotionals
+                  </Text>
+                  <View style={styles.tierFeatures}>
+                    <Text style={[styles.tierFeature, { color: colors.text.white }]}>✓ Daily Scripture readings</Text>
+                    <Text style={[styles.tierFeature, { color: colors.text.white }]}>✓ Audio narration</Text>
+                    <Text style={[styles.tierFeature, { color: colors.text.white }]}>✓ Offline access</Text>
+                  </View>
+                </View>
+
+                {/* Premium Tier */}
+                <View style={[styles.tierCard, styles.premiumTier]}>
+                  <View style={styles.popularBadge}>
+                    <Text style={styles.popularBadgeText}>POPULAR</Text>
+                  </View>
+                  <Text style={[styles.tierTitle, { color: colors.text.white }]}>Premium</Text>
+                  <View style={styles.tierPriceRow}>
+                    <Text style={[styles.tierPrice, { color: colors.text.white }]}>$19.99</Text>
+                    <Text style={[styles.tierPeriod, { color: colors.text.white }]}>/year</Text>
+                  </View>
+                  <Text style={[styles.tierDescription, { color: colors.text.white }]}>
+                    Full access to all premium features
+                  </Text>
+                  <View style={styles.tierFeatures}>
+                    <Text style={[styles.tierFeature, { color: colors.text.white }]}>✓ All Basic features</Text>
+                    <Text style={[styles.tierFeature, { color: colors.text.white }]}>✓ Sync across devices</Text>
+                    <Text style={[styles.tierFeature, { color: colors.text.white }]}>✓ Priority support</Text>
+                  </View>
+                </View>
               </View>
 
-              {/* CTA Button */}
+              {/* CTA Buttons */}
               <Button
-                title="Get Lifetime Access"
+                title="Start with Premium"
                 variant="accent"
                 size="lg"
                 fullWidth
                 onPress={onPurchase}
                 style={styles.purchaseButton}
               />
+              <TouchableOpacity
+                onPress={onPurchase}
+                style={styles.basicButton}
+              >
+                <Text style={[styles.basicButtonText, { color: colors.text.white }]}>
+                  Choose Basic instead
+                </Text>
+              </TouchableOpacity>
 
               {/* Dismiss */}
               {onDismiss && (
@@ -119,7 +190,7 @@ export const TrialExpiredModal: React.FC<TrialExpiredModalProps> = ({
                   onPress={onDismiss}
                   style={styles.dismissButton}
                 >
-                  <Text style={[styles.dismissText, { color: colors.text.white }]}>Maybe later</Text>
+                  <Text style={[styles.dismissText, { color: colors.text.white }]}>Already purchased? Restore</Text>
                 </TouchableOpacity>
               )}
             </View>
@@ -187,27 +258,85 @@ const styles = StyleSheet.create({
     marginLeft: Spacing.sm,
     flex: 1,
   },
-  priceBadge: {
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    borderRadius: BorderRadius.lg,
-    paddingVertical: Spacing.md,
-    paddingHorizontal: Spacing.xl,
+  subscriptionTiers: {
+    width: '100%',
+    gap: Spacing.md,
     marginBottom: Spacing.xl,
-    alignItems: 'center',
   },
-  priceAmount: {
-    ...Typography.displayLarge,
+  tierCard: {
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    borderRadius: BorderRadius.lg,
+    padding: Spacing.lg,
+    borderWidth: 2,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
+  },
+  premiumTier: {
+    borderColor: Colors.accent.green,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+  },
+  popularBadge: {
+    position: 'absolute',
+    top: Spacing.sm,
+    right: Spacing.sm,
+    backgroundColor: Colors.accent.green,
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: Spacing.xs,
+    borderRadius: BorderRadius.sm,
+  },
+  popularBadgeText: {
+    ...Typography.caption,
+    color: Colors.text.white,
+    fontWeight: '700',
+    fontSize: 10,
+  },
+  tierTitle: {
+    ...Typography.h3,
+    color: Colors.text.white,
+    fontWeight: '700',
+    marginBottom: Spacing.xs,
+  },
+  tierPriceRow: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    marginBottom: Spacing.sm,
+  },
+  tierPrice: {
+    ...Typography.displayMedium,
     color: Colors.text.white,
     fontWeight: '700',
   },
-  priceLabel: {
+  tierPeriod: {
+    ...Typography.body,
+    color: Colors.text.white,
+    opacity: 0.8,
+    marginLeft: Spacing.xs,
+  },
+  tierDescription: {
     ...Typography.caption,
     color: Colors.text.white,
     opacity: 0.9,
-    marginTop: Spacing.xs,
+    marginBottom: Spacing.md,
+  },
+  tierFeatures: {
+    gap: Spacing.xs,
+  },
+  tierFeature: {
+    ...Typography.caption,
+    color: Colors.text.white,
+    opacity: 0.9,
   },
   purchaseButton: {
+    marginBottom: Spacing.sm,
+  },
+  basicButton: {
+    paddingVertical: Spacing.md,
     marginBottom: Spacing.md,
+  },
+  basicButtonText: {
+    ...Typography.body,
+    color: Colors.text.white,
+    textAlign: 'center',
+    opacity: 0.9,
   },
   dismissButton: {
     paddingVertical: Spacing.sm,

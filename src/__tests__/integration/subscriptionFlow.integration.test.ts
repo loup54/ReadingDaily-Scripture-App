@@ -406,7 +406,7 @@ describe('Subscription Flow - Integration Tests', () => {
 
     it('should handle reinstall with restore purchases', async () => {
       // First install: make purchase
-      const purchase = await paymentService.purchase('lifetime_access_001');
+      const purchase = await paymentService.purchase('com.readingdaily.lifetime.access');
       expect(purchase.success).toBe(true);
 
       // Simulate reinstall: restore purchases
@@ -415,7 +415,7 @@ describe('Subscription Flow - Integration Tests', () => {
       expect(restored.purchases.length).toBeGreaterThan(0);
 
       const restoredPurchase = restored.purchases.find(
-        p => p.productId === 'lifetime_access_001'
+        p => p.productId === 'com.readingdaily.lifetime.access'
       );
       expect(restoredPurchase).toBeDefined();
     });
@@ -470,9 +470,9 @@ describe('Subscription Flow - Integration Tests', () => {
     it('should handle multiple concurrent purchases', async () => {
       // This should not happen in real app, but test for robustness
       const results = await Promise.all([
-        paymentService.purchase('lifetime_access_001'),
-        paymentService.purchase('lifetime_access_001'),
-        paymentService.purchase('lifetime_access_001'),
+        paymentService.purchase('com.readingdaily.lifetime.access'),
+        paymentService.purchase('com.readingdaily.lifetime.access'),
+        paymentService.purchase('com.readingdaily.lifetime.access'),
       ]);
 
       // All should have unique transaction IDs

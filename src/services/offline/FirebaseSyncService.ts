@@ -49,10 +49,10 @@ export class FirebaseSyncService {
         };
       }
 
-      console.log('[FirebaseSyncService] Syncing settings for user:', user.uid);
+      console.log('[FirebaseSyncService] Syncing settings for user:', user.id);
 
       // Update user settings document
-      const userSettingsRef = doc(db, 'users', user.uid, 'settings', 'preferences');
+      const userSettingsRef = doc(db, 'users', user.id, 'settings', 'preferences');
       const settingsData = {
         ...settings,
         lastSyncedAt: Timestamp.now(),
@@ -86,10 +86,10 @@ export class FirebaseSyncService {
         };
       }
 
-      console.log('[FirebaseSyncService] Syncing progress for user:', user.uid, 'data:', progress);
+      console.log('[FirebaseSyncService] Syncing progress for user:', user.id, 'data:', progress);
 
       // Update user progress document
-      const userProgressRef = doc(db, 'users', user.uid);
+      const userProgressRef = doc(db, 'users', user.id);
       const progressData = {
         progress: {
           ...progress,
@@ -129,13 +129,13 @@ export class FirebaseSyncService {
         };
       }
 
-      console.log('[FirebaseSyncService] Recording reading for user:', user.uid, 'date:', readingData.readingDate);
+      console.log('[FirebaseSyncService] Recording reading for user:', user.id, 'date:', readingData.readingDate);
 
       // Call Cloud Function to record reading
       const recordReading = httpsCallable(this.FUNCTIONS, 'recordReading');
 
       const result = await recordReading({
-        userId: user.uid,
+        userId: user.id,
         readingDate: readingData.readingDate,
         completedAt: readingData.completedAt || Date.now(),
         pronunciationResults: readingData.pronunciationResults,
@@ -344,13 +344,13 @@ export class FirebaseSyncService {
     try {
       const user = useAuthStore.getState().user;
 
-      if (!user?.uid) {
+      if (!user?.id) {
         console.warn('[FirebaseSyncService] No user authenticated');
         return false;
       }
 
       // Try to read user doc
-      const userDocRef = doc(db, 'users', user.uid);
+      const userDocRef = doc(db, 'users', user.id);
       const docSnap = await getDoc(userDocRef);
 
       console.log('[FirebaseSyncService] ✅ Firestore connectivity verified');

@@ -27,11 +27,12 @@ import { Colors, Typography, Spacing, BorderRadius, Shadows } from '@/constants'
 import { useTrialStore } from '@/stores/useTrialStore';
 import { SubscriptionTier } from '@/types/subscription.types';
 import { analyticsService } from '@/services/analytics/AnalyticsService';
+import { UpgradeSource } from '@/types/analytics.types';
 
 interface PaywallScreenProps {
   onClose?: () => void;
   onUpgradeComplete?: () => void;
-  sourceContext?: 'daily_limit' | 'locked_tab' | 'settings' | 'practice';
+  sourceContext?: UpgradeSource;
 }
 
 type TierOption = 'free' | 'basic';
@@ -39,7 +40,7 @@ type TierOption = 'free' | 'basic';
 export const PaywallScreen: React.FC<PaywallScreenProps> = ({
   onClose,
   onUpgradeComplete,
-  sourceContext = 'practice',
+  sourceContext = 'other',
 }) => {
   const [selectedTier, setSelectedTier] = useState<TierOption>('basic');
   const [isProcessing, setIsProcessing] = useState(false);
@@ -62,7 +63,7 @@ export const PaywallScreen: React.FC<PaywallScreenProps> = ({
       console.log(`💳 Starting upgrade from ${currentTier} to basic`);
 
       // Upgrade via payment service
-      const success = await upgradeToBasic('com.readingdaily.basic.monthly.v2');
+      const success = await upgradeToBasic('basic_monthly_subscription');
 
       if (success) {
         console.log('✅ Upgrade successful');

@@ -231,26 +231,14 @@ export const useTrialStore = create<TrialStoreState>()(
         try {
           const state = get();
 
-          // REMOVED: Blocking null check - let AppleIAPService handle auto-init
-          // The Build 95 auto-initialization in AppleIAPService.purchase() will handle this
-
-          console.log('💳 Processing purchase via', state.paymentService?.provider || 'payment service');
-
-          // If paymentService is somehow still null, create it now
           if (!state.paymentService) {
-            console.warn('⚠️ Payment service not initialized, creating now...');
-            await get()._initializePaymentService();
-
-            // Double-check it was created
-            const updatedState = get();
-            if (!updatedState.paymentService) {
-              throw new Error('Failed to initialize payment service');
-            }
+            throw new Error('Payment service not initialized');
           }
 
+          console.log('💳 Processing purchase via', state.paymentService.provider);
+
           // Process purchase through payment service
-          // AppleIAPService.purchase() has auto-init built in (Build 95)
-          const result = await get().paymentService!.purchase('com.readingdaily.lifetime.access.v2');
+          const result = await state.paymentService.purchase('com.readingdaily.lifetime.access.v2');
 
           if (result.success) {
             console.log('✅ Purchase successful:', result.transactionId);
@@ -275,23 +263,14 @@ export const useTrialStore = create<TrialStoreState>()(
         try {
           const state = get();
 
-          // REMOVED: Blocking null check - let AppleIAPService handle auto-init
-
-          console.log('🔄 Restoring purchases via', state.paymentService?.provider || 'payment service');
-
-          // If paymentService is somehow still null, create it now
           if (!state.paymentService) {
-            console.warn('⚠️ Payment service not initialized, creating now...');
-            await get()._initializePaymentService();
-
-            const updatedState = get();
-            if (!updatedState.paymentService) {
-              throw new Error('Failed to initialize payment service');
-            }
+            throw new Error('Payment service not initialized');
           }
 
+          console.log('🔄 Restoring purchases via', state.paymentService.provider);
+
           // Restore purchases through payment service
-          const result = await get().paymentService!.restorePurchases();
+          const result = await state.paymentService.restorePurchases();
 
           if (result.success && result.purchases.length > 0) {
             console.log('✅ Purchases restored:', result.purchases.length);
@@ -324,23 +303,14 @@ export const useTrialStore = create<TrialStoreState>()(
         try {
           const state = get();
 
-          // REMOVED: Blocking null check - let AppleIAPService handle auto-init
-
-          console.log('💳 Processing subscription upgrade via', state.paymentService?.provider || 'payment service');
-
-          // If paymentService is somehow still null, create it now
           if (!state.paymentService) {
-            console.warn('⚠️ Payment service not initialized, creating now...');
-            await get()._initializePaymentService();
-
-            const updatedState = get();
-            if (!updatedState.paymentService) {
-              throw new Error('Failed to initialize payment service');
-            }
+            throw new Error('Payment service not initialized');
           }
 
+          console.log('💳 Processing subscription upgrade via', state.paymentService.provider);
+
           // Process subscription purchase through payment service
-          const result = await get().paymentService!.purchase(subscriptionId);
+          const result = await state.paymentService.purchase(subscriptionId);
 
           if (result.success) {
             console.log('✅ Subscription upgrade successful:', result.transactionId);

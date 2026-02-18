@@ -8,6 +8,7 @@
 
 import { Audio, AVPlaybackStatus } from 'expo-av';
 import * as FileSystem from 'expo-file-system';
+import { Directory, File } from 'expo-file-system';
 
 export interface RecordingState {
   isRecording: boolean;
@@ -385,8 +386,9 @@ export class SpeechRecognitionService {
       const directory = `${FileSystem.documentDirectory}recordings/`;
 
       // Create directory if it doesn't exist
-      const dirInfo = await FileSystem.getInfoAsync(directory);
-      if (!dirInfo.exists) {
+      const dir = new Directory(directory);
+      const exists = await dir.exists();
+      if (!exists) {
         await FileSystem.makeDirectoryAsync(directory, { intermediates: true });
       }
 
@@ -412,7 +414,11 @@ export class SpeechRecognitionService {
     try {
       console.log('[SpeechRecognitionService] Deleting recording:', uri);
 
-      await FileSystem.deleteAsync(uri, { idempotent: true });
+      const file = new File(uri);
+      const exists = file.exists;
+      if (exists) {
+        await file.delete();
+      }
 
       console.log('[SpeechRecognitionService] Recording deleted');
     } catch (error) {
@@ -428,8 +434,9 @@ export class SpeechRecognitionService {
     try {
       const directory = `${FileSystem.documentDirectory}recordings/`;
 
-      const dirInfo = await FileSystem.getInfoAsync(directory);
-      if (!dirInfo.exists) {
+      const dir = new Directory(directory);
+      const exists = await dir.exists();
+      if (!exists) {
         return [];
       }
 

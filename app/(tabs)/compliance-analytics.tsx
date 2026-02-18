@@ -24,6 +24,6 @@ export default function ComplianceAnalyticsRoute() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background.main,
+    backgroundColor: Colors.background.primary,
   },
 });

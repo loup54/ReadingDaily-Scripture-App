@@ -109,11 +109,11 @@ export const SkeletonLoader: React.FC<SkeletonLoaderProps> = ({
   });
 
   const skeletonStyle: ViewStyle = {
-    width,
+    width: typeof width === 'number' ? width : width,
     height,
     backgroundColor,
     borderRadius: shape === 'circle' ? height / 2 : radius,
-  };
+  } as ViewStyle;
 
   return (
     <Animated.View

@@ -349,6 +349,7 @@ export class AuthService {
       'auth/user-not-found': 'No account found with this email',
       'auth/wrong-password': 'Incorrect password',
       'auth/too-many-requests': 'Too many login attempts. Please try again later',
+      'auth/user-disabled': 'This account has been disabled. Please contact support for assistance.',
       'auth/account-exists-with-different-credential':
         'An account with this email already exists with a different sign-in method',
     };

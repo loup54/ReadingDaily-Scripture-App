@@ -5,6 +5,8 @@ import {
   StyleSheet,
   ScrollView,
   Alert,
+  Platform,
+  Dimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -15,6 +17,10 @@ import { Colors, Typography, Spacing, BorderRadius, Shadows } from '@constants';
 import { useTrialStore } from '@stores/useTrialStore';
 import { useAuthStore } from '@stores/useAuthStore';
 import { useTheme } from '@/hooks/useTheme';
+
+// iPad detection
+const { width } = Dimensions.get('window');
+const isTablet = width >= 768;
 
 interface SubscriptionScreenProps {
   onBack?: () => void;
@@ -37,7 +43,7 @@ export const SubscriptionScreen: React.FC<SubscriptionScreenProps> = ({
     restorePurchase,
     startTrial,
   } = useTrialStore();
-  const { user } = useAuthStore();
+  const { user, isGuest } = useAuthStore();
 
   const [purchasing, setPurchasing] = useState(false);
   const [restoring, setRestoring] = useState(false);
@@ -51,20 +57,44 @@ export const SubscriptionScreen: React.FC<SubscriptionScreenProps> = ({
   };
 
   const handlePurchase = async () => {
+    // Apple Guideline 5.1.1 Compliance: Allow guest users to purchase IAP
+    // Registration is OPTIONAL for syncing across devices
     setPurchasing(true);
     try {
       const success = await purchaseLifetimeAccess();
       if (success) {
-        Alert.alert(
-          'Purchase Successful!',
-          'You now have lifetime access to all features.',
-          [
-            {
-              text: 'OK',
-              onPress: onPurchaseComplete,
-            },
-          ]
-        );
+        // Purchase successful - offer optional sign-in for device sync
+        if (isGuest || !user) {
+          Alert.alert(
+            'Purchase Successful!',
+            'You now have lifetime access to all features on this device.\n\nWould you like to create an account to sync your purchase across devices?',
+            [
+              {
+                text: 'Not Now',
+                style: 'cancel',
+                onPress: onPurchaseComplete,
+              },
+              {
+                text: 'Create Account',
+                onPress: () => {
+                  router.push('/(auth)/sign-up');
+                },
+              },
+            ]
+          );
+        } else {
+          // Already authenticated - just show success
+          Alert.alert(
+            'Purchase Successful!',
+            'You now have lifetime access to all features.',
+            [
+              {
+                text: 'OK',
+                onPress: onPurchaseComplete,
+              },
+            ]
+          );
+        }
       } else {
         Alert.alert(
           'Purchase Failed',
@@ -82,6 +112,22 @@ export const SubscriptionScreen: React.FC<SubscriptionScreenProps> = ({
   };
 
   const handleRestore = async () => {
+    // Check if user is guest or not authenticated before restoring
+    if (isGuest || !user) {
+      Alert.alert(
+        'Sign In Required',
+        'Please sign in to restore your previous purchases.',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          {
+            text: 'Sign In',
+            onPress: () => router.push('/(auth)/sign-in'),
+          },
+        ]
+      );
+      return;
+    }
+
     setRestoring(true);
     try {
       const success = await restorePurchase();
@@ -112,14 +158,139 @@ export const SubscriptionScreen: React.FC<SubscriptionScreenProps> = ({
     }
   };
 
+  const handleBasicPurchase = async () => {
+    // Apple Guideline 5.1.1 Compliance: Allow guest users to purchase subscription
+    // Registration is OPTIONAL for syncing across devices
+    setPurchasing(true);
+    try {
+      // Purchase Monthly subscription (com.readingdaily.basic.monthly.v2)
+      const { upgradeToBasic } = useTrialStore.getState();
+      const success = await upgradeToBasic('com.readingdaily.basic.monthly.v2');
+
+      if (success) {
+        // Purchase successful - offer optional sign-in for device sync
+        if (isGuest || !user) {
+          Alert.alert(
+            'Subscription Activated!',
+            'You now have access to all features on this device.\n\nWould you like to create an account to sync your subscription across devices?',
+            [
+              {
+                text: 'Not Now',
+                style: 'cancel',
+                onPress: onPurchaseComplete,
+              },
+              {
+                text: 'Create Account',
+                onPress: () => {
+                  router.push('/(auth)/sign-up');
+                },
+              },
+            ]
+          );
+        } else {
+          // Already authenticated - just show success
+          Alert.alert(
+            'Subscription Activated!',
+            'You now have access to all features.',
+            [
+              {
+                text: 'OK',
+                onPress: onPurchaseComplete,
+              },
+            ]
+          );
+        }
+      }
+    } catch (error) {
+      Alert.alert('Error', 'An unexpected error occurred. Please try again later.');
+    } finally {
+      setPurchasing(false);
+    }
+  };
+
+  const handlePremiumPurchase = async () => {
+    // Apple Guideline 5.1.1 Compliance: Allow guest users to purchase subscription
+    // Registration is OPTIONAL for syncing across devices
+    setPurchasing(true);
+    try {
+      // Purchase Yearly subscription (com.readingdaily.basic.yearly.v2)
+      const { upgradeToBasic } = useTrialStore.getState();
+      const success = await upgradeToBasic('com.readingdaily.basic.yearly.v2');
+
+      if (success) {
+        // Purchase successful - offer optional sign-in for device sync
+        if (isGuest || !user) {
+          Alert.alert(
+            'Subscription Activated!',
+            'You now have access to all features on this device.\n\nWould you like to create an account to sync your subscription across devices?',
+            [
+              {
+                text: 'Not Now',
+                style: 'cancel',
+                onPress: onPurchaseComplete,
+              },
+              {
+                text: 'Create Account',
+                onPress: () => {
+                  router.push('/(auth)/sign-up');
+                },
+              },
+            ]
+          );
+        } else {
+          // Already authenticated - just show success
+          Alert.alert(
+            'Subscription Activated!',
+            'You now have access to all features.',
+            [
+              {
+                text: 'OK',
+                onPress: onPurchaseComplete,
+              },
+            ]
+          );
+        }
+      }
+    } catch (error) {
+      Alert.alert('Error', 'An unexpected error occurred. Please try again later.');
+    } finally {
+      setPurchasing(false);
+    }
+  };
+
   const handleStartTrial = async () => {
+    // Apple Guideline 5.1.1 Compliance: Allow guest users to start trial
+    // Registration is OPTIONAL for syncing across devices
     try {
       await startTrial();
-      Alert.alert(
-        'Trial Started!',
-        'Your 7-day free trial has begun. Enjoy full access!',
-        [{ text: 'OK', onPress: onBack }]
-      );
+
+      // Trial started successfully - offer optional sign-in for device sync
+      if (isGuest || !user) {
+        Alert.alert(
+          'Trial Started!',
+          'Your 7-day free trial has begun on this device.\n\nWould you like to create an account to sync your trial across devices?',
+          [
+            {
+              text: 'Not Now',
+              style: 'cancel',
+              onPress: onBack,
+            },
+            {
+              text: 'Create Account',
+              onPress: () => {
+                router.push('/(auth)/sign-up');
+              },
+            },
+          ]
+        );
+      } else {
+        // Already authenticated - just show success
+        Alert.alert(
+          'Trial Started!',
+          'Your 7-day free trial has begun. Enjoy full access!',
+          [{ text: 'OK', onPress: onBack }]
+        );
+      }
     } catch (error) {
       Alert.alert('Error', 'Unable to start trial. Please try again.');
     }
@@ -195,24 +366,19 @@ export const SubscriptionScreen: React.FC<SubscriptionScreenProps> = ({
 
           {!hasPurchased && (
             <>
-              {/* Lifetime Access Card */}
+              {/* Subscription Tiers - Basic */}
               <LinearGradient
-                colors={[colors.primary + '15', colors.secondary + '15']}
+                colors={[colors.primary + '10', colors.secondary + '10']}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
                 style={styles.pricingCardGradient}
               >
                 <View style={[styles.pricingCard, { backgroundColor: colors.card }]}>
                   <View style={styles.pricingHeader}>
-                    <View style={styles.badgeContainer}>
-                      <View style={[styles.bestValueBadge, { backgroundColor: colors.primary + '20' }]}>
-                        <Text style={[styles.badgeText, { color: colors.primary }]}>BEST VALUE</Text>
-                      </View>
-                    </View>
-                    <Text style={[styles.pricingTitle, { color: colors.text }]}>Lifetime Access</Text>
+                    <Text style={[styles.pricingTitle, { color: colors.text }]}>Basic</Text>
                     <View style={styles.priceBadge}>
-                      <Text style={[styles.priceAmount, { color: colors.primary }]}>${lifetimePrice}</Text>
-                      <Text style={[styles.priceLabel, { color: colors.textSecondary }]}>one-time payment</Text>
+                      <Text style={[styles.priceAmount, { color: colors.primary }]}>$2.99</Text>
+                      <Text style={[styles.priceLabel, { color: colors.textSecondary }]}>/month</Text>
                     </View>
                   </View>
 
@@ -226,7 +392,7 @@ export const SubscriptionScreen: React.FC<SubscriptionScreenProps> = ({
                         color={colors.primary}
                       />
                       <Text style={[styles.featureText, { color: colors.text }]}>
-                        Unlimited daily scripture readings
+                        Daily Scripture readings
                       </Text>
                     </View>
                     <View style={styles.featureRow}>
@@ -236,7 +402,7 @@ export const SubscriptionScreen: React.FC<SubscriptionScreenProps> = ({
                         color={colors.primary}
                       />
                       <Text style={[styles.featureText, { color: colors.text }]}>
-                        Audio playback with adjustable speed
+                        Audio narration
                       </Text>
                     </View>
                     <View style={styles.featureRow}>
@@ -246,43 +412,179 @@ export const SubscriptionScreen: React.FC<SubscriptionScreenProps> = ({
                         color={colors.primary}
                       />
                       <Text style={[styles.featureText, { color: colors.text }]}>
-                        Multiple translation options
-                      </Text>
-                    </View>
-                    <View style={styles.featureRow}>
-                      <Ionicons
-                        name="checkmark-circle"
-                        size={20}
-                        color={colors.primary}
-                      />
-                      <Text style={[styles.featureText, { color: colors.text }]}>
-                        Practice mode (coming soon)
-                      </Text>
-                    </View>
-                    <View style={styles.featureRow}>
-                      <Ionicons
-                        name="checkmark-circle"
-                        size={20}
-                        color={colors.primary}
-                      />
-                      <Text style={[styles.featureText, { color: colors.text }]}>
-                        Progress tracking
-                      </Text>
-                    </View>
-                    <View style={styles.featureRow}>
-                      <Ionicons
-                        name="checkmark-circle"
-                        size={20}
-                        color={colors.primary}
-                      />
-                      <Text style={[styles.featureText, { color: colors.text }]}>
-                        No subscription fees
+                        Offline access
                       </Text>
                     </View>
                   </View>
 
                   <Button
-                    title={`Purchase for $${lifetimePrice}`}
+                    title="Subscribe to Basic"
+                    variant="secondary"
+                    size="lg"
+                    fullWidth
+                    onPress={handleBasicPurchase}
+                    loading={purchasing}
+                    style={styles.purchaseButton}
+                  />
+                </View>
+              </LinearGradient>
+
+              {/* Subscription Tiers - Premium (Popular) */}
+              <LinearGradient
+                colors={[colors.primary + '15', colors.secondary + '15']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.pricingCardGradient}
+              >
+                <View style={[styles.pricingCard, { backgroundColor: colors.card }]}>
+                  <View style={styles.pricingHeader}>
+                    <View style={styles.badgeContainer}>
+                      <View style={[styles.bestValueBadge, { backgroundColor: colors.accent.green + '30' }]}>
+                        <Text style={[styles.badgeText, { color: colors.accent.green }]}>Popular</Text>
+                      </View>
+                    </View>
+                    <Text style={[styles.pricingTitle, { color: colors.text }]}>Premium</Text>
+                    <View style={styles.priceBadge}>
+                      <Text style={[styles.priceAmount, { color: colors.primary }]}>$19.99</Text>
+                      <Text style={[styles.priceLabel, { color: colors.textSecondary }]}>/year</Text>
+                    </View>
+                  </View>
+
+                  <View style={[styles.divider, { backgroundColor: colors.border }]} />
+
+                  <View style={styles.featuresList}>
+                    <View style={styles.featureRow}>
+                      <Ionicons
+                        name="checkmark-circle"
+                        size={20}
+                        color={colors.primary}
+                      />
+                      <Text style={[styles.featureText, { color: colors.text }]}>
+                        All Basic features
+                      </Text>
+                    </View>
+                    <View style={styles.featureRow}>
+                      <Ionicons
+                        name="checkmark-circle"
+                        size={20}
+                        color={colors.primary}
+                      />
+                      <Text style={[styles.featureText, { color: colors.text }]}>
+                        Sync across devices
+                      </Text>
+                    </View>
+                    <View style={styles.featureRow}>
+                      <Ionicons
+                        name="checkmark-circle"
+                        size={20}
+                        color={colors.primary}
+                      />
+                      <Text style={[styles.featureText, { color: colors.text }]}>
+                        Ad-free experience
+                      </Text>
+                    </View>
+                  </View>
+
+                  <Button
+                    title="Subscribe to Premium"
+                    variant="accent"
+                    size="lg"
+                    fullWidth
+                    onPress={handlePremiumPurchase}
+                    loading={purchasing}
+                    style={styles.purchaseButton}
+                  />
+                </View>
+              </LinearGradient>
+
+              {/* Subscription Tiers - Lifetime (Best Value) */}
+              <LinearGradient
+                colors={[colors.accent.green + '15', colors.accent.blue + '15']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.pricingCardGradient}
+              >
+                <View style={[styles.pricingCard, { backgroundColor: colors.card }]}>
+                  <View style={styles.pricingHeader}>
+                    <View style={styles.badgeContainer}>
+                      <View style={[styles.bestValueBadge, { backgroundColor: colors.accent.green + '30' }]}>
+                        <Text style={[styles.badgeText, { color: colors.accent.green }]}>Best Value</Text>
+                      </View>
+                    </View>
+                    <Text style={[styles.pricingTitle, { color: colors.text }]}>Lifetime</Text>
+                    <View style={styles.priceBadge}>
+                      <Text style={[styles.priceAmount, { color: colors.primary }]}>$49.99</Text>
+                      <Text style={[styles.priceLabel, { color: colors.textSecondary }]}>one-time</Text>
+                    </View>
+                  </View>
+
+                  <View style={[styles.divider, { backgroundColor: colors.border }]} />
+
+                  <View style={styles.featuresList}>
+                    <View style={styles.featureRow}>
+                      <Ionicons
+                        name="checkmark-circle"
+                        size={isTablet ? 24 : 20}
+                        color={colors.accent.green}
+                      />
+                      <Text style={[styles.featureText, { color: colors.text }]}>
+                        All Premium features
+                      </Text>
+                    </View>
+                    <View style={styles.featureRow}>
+                      <Ionicons
+                        name="checkmark-circle"
+                        size={isTablet ? 24 : 20}
+                        color={colors.accent.green}
+                      />
+                      <Text style={[styles.featureText, { color: colors.text }]}>
+                        Lifetime updates
+                      </Text>
+                    </View>
+                    <View style={styles.featureRow}>
+                      <Ionicons
+                        name="checkmark-circle"
+                        size={isTablet ? 24 : 20}
+                        color={colors.accent.green}
+                      />
+                      <Text style={[styles.featureText, { color: colors.text }]}>
+                        Priority support
+                      </Text>
+                    </View>
+                    <View style={styles.featureRow}>
+                      <Ionicons
+                        name="checkmark-circle"
+                        size={isTablet ? 24 : 20}
+                        color={colors.accent.green}
+                      />
+                      <Text style={[styles.featureText, { color: colors.text }]}>
+                        Exclusive content
+                      </Text>
+                    </View>
+                    <View style={styles.featureRow}>
+                      <Ionicons
+                        name="checkmark-circle"
+                        size={isTablet ? 24 : 20}
+                        color={colors.accent.green}
+                      />
+                      <Text style={[styles.featureText, { color: colors.text }]}>
+                        Never expires
+                      </Text>
+                    </View>
+                    <View style={styles.featureRow}>
+                      <Ionicons
+                        name="checkmark-circle"
+                        size={isTablet ? 24 : 20}
+                        color={colors.accent.green}
+                      />
+                      <Text style={[styles.featureText, { color: colors.text }]}>
+                        One-time payment
+                      </Text>
+                    </View>
+                  </View>
+
+                  <Button
+                    title="Get Lifetime Access"
                     variant="accent"
                     size="lg"
                     fullWidth
@@ -396,14 +698,17 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    padding: Spacing.lg,
+    padding: isTablet ? Spacing.xl * 2 : Spacing.lg,
+    maxWidth: isTablet ? 600 : undefined,
+    alignSelf: isTablet ? 'center' : undefined,
+    width: isTablet ? '100%' : undefined,
   },
   statusCard: {
     backgroundColor: Colors.background.card,
     borderRadius: BorderRadius.xl,
-    padding: Spacing.xl,
+    padding: isTablet ? Spacing.xl * 1.5 : Spacing.xl,
     alignItems: 'center',
-    marginBottom: Spacing.lg,
+    marginBottom: isTablet ? Spacing.xl : Spacing.lg,
     ...Shadows.md,
   },
   statusTitle: {
@@ -425,7 +730,7 @@ const styles = StyleSheet.create({
   },
   pricingCard: {
     borderRadius: BorderRadius.xl,
-    padding: Spacing.lg,
+    padding: isTablet ? Spacing.xl * 1.5 : Spacing.lg,
   },
   pricingHeader: {
     alignItems: 'center',
@@ -470,11 +775,12 @@ const styles = StyleSheet.create({
   featureRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: Spacing.md,
+    marginBottom: isTablet ? Spacing.lg : Spacing.md,
   },
   featureText: {
     ...Typography.body,
-    marginLeft: Spacing.sm,
+    fontSize: isTablet ? 18 : Typography.body.fontSize,
+    marginLeft: isTablet ? Spacing.md : Spacing.sm,
     flex: 1,
   },
   purchaseButton: {

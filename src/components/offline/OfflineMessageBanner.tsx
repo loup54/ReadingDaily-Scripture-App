@@ -39,7 +39,7 @@ export const OfflineMessageBanner: React.FC<OfflineMessageBannerProps> = ({
   autoDismissDelay = 5000,
 }) => {
   const slideAnim = useRef(new Animated.Value(visible ? 0 : -120)).current;
-  const dismissTimeoutRef = useRef<NodeJS.Timeout>();
+  const dismissTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
 
   useEffect(() => {
     console.log('[OfflineMessageBanner] Banner visibility changed:', {

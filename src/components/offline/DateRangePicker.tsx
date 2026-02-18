@@ -269,12 +269,12 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
             day.getMonth() === new Date().getMonth() &&
             day.getFullYear() === new Date().getFullYear();
 
-          let dayStyle = styles.day;
-          let textStyle = [styles.dayText, { color: isDark ? Colors.text.white : Colors.text.primary }];
+          let dayStyle: any = styles.day;
+          let textStyle: any = [styles.dayText, { color: isDark ? Colors.text.white : Colors.text.primary }];
 
           if (isBoundary) {
             dayStyle = [dayStyle, styles.boundaryDay];
-            textStyle = [styles.dayText, { color: Colors.text.white, fontWeight: '700' }];
+            textStyle = [styles.dayText, { color: Colors.text.white, fontWeight: '700' as const }];
           } else if (inRange) {
             dayStyle = [dayStyle, styles.rangeDay];
           } else if (isToday) {

@@ -21,7 +21,9 @@ import { Spacing } from '@/constants/spacing';
 import { audioPlaybackService, TTS_VOICES, formatDuration } from '@/services/audio';
 import { audioHighlightingService } from '@/services/audio/AudioHighlightingService';
 import { useAudioSettings, useSettingsStore } from '@/stores/useSettingsStore';
+import { useAuthStore } from '@/stores/useAuthStore';
 import { useTheme } from '@/hooks/useTheme';
+import { useRouter } from 'expo-router';
 import type { AudioPlaybackState } from '@/services/audio';
 import type { Reading } from '@/types/reading.types';
 
@@ -39,6 +41,8 @@ export const EnhancedAudioPlayer: React.FC<EnhancedAudioPlayerProps> = ({
   onPlaybackComplete,
 }) => {
   const { colors } = useTheme();
+  const router = useRouter();
+  const { user, isGuest } = useAuthStore();
   const audioSettings = useAudioSettings();
   const [playbackState, setPlaybackState] = useState<AudioPlaybackState>({
     isPlaying: false,
@@ -105,6 +109,34 @@ export const EnhancedAudioPlayer: React.FC<EnhancedAudioPlayerProps> = ({
    * Handle play/pause toggle
    */
   const handlePlayPause = async () => {
+    // Check if user is guest or not authenticated before allowing audio playback
+    console.log('[EnhancedAudioPlayer] handlePlayPause - Auth check:', {
+      isGuest,
+      hasUser: !!user,
+      shouldBlock: isGuest || !user,
+    });
+
+    if (isGuest || !user) {
+      console.log('[EnhancedAudioPlayer] Blocking guest audio playback');
+      Alert.alert(
+        'Premium Feature',
+        'Audio playback is a premium feature. Sign in to access audio narration, pronunciation practice, and sync your progress across devices.',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          {
+            text: 'Sign In',
+            onPress: () => {
+              // Navigate to sign-in screen
+              router.push('/(auth)/sign-in');
+            },
+          },
+        ]
+      );
+      return;
+    }
+
+    console.log('[EnhancedAudioPlayer] Allowing authenticated user to play audio');
+
     if (playbackState.isLoading) return;
 
     try {
@@ -116,8 +148,17 @@ export const EnhancedAudioPlayer: React.FC<EnhancedAudioPlayerProps> = ({
           audioHighlightingService.pauseHighlighting();
         }
       } else {
-        // If no audio loaded, generate and play
-        if (playbackState.duration === 0) {
+        // If audio finished or no audio loaded, generate and play from start
+        if (playbackState.duration === 0 || playbackState.isFinished) {
+          // Reset player if audio finished
+          if (playbackState.isFinished) {
+            console.log('[EnhancedAudioPlayer] Audio finished - resetting for replay');
+            await audioPlaybackService.cleanup();
+            if (highlightingInitialized) {
+              audioHighlightingService.stopHighlighting();
+              setHighlightingInitialized(false);
+            }
+          }
           // Initialize highlighting before playing (only if enabled AND timing data exists)
           // Read the CURRENT store value directly to avoid stale hook values during rehydration
           const currentSettings = useSettingsStore.getState().settings;
@@ -136,8 +177,8 @@ export const EnhancedAudioPlayer: React.FC<EnhancedAudioPlayerProps> = ({
               await audioHighlightingService.startHighlighting({
                 readingId: reading.id,
                 readingType: reading.type as 'gospel' | 'first-reading' | 'psalm' | 'second-reading',
-                onWordChange: (event) => {
-                  console.log('[EnhancedAudioPlayer] Word changed:', event.word.word);
+                onWordChange: (wordIndex, word) => {
+                  console.log('[EnhancedAudioPlayer] Word changed:', word.word);
                 },
                 onError: (error) => {
                   console.error('[EnhancedAudioPlayer] Highlighting error:', error);
@@ -158,12 +199,20 @@ export const EnhancedAudioPlayer: React.FC<EnhancedAudioPlayerProps> = ({
               ? TTS_VOICES.MALE_PRIMARY
               : TTS_VOICES.FEMALE_PRIMARY;
 
-          await audioPlaybackService.loadAndPlay(
+          const success = await audioPlaybackService.loadAndPlayOfflineAware(
             reading.content,
             reading.id,
             voice,
             audioSettings.speed
           );
+
+          if (!success) {
+            Alert.alert(
+              'Audio Unavailable',
+              'This reading audio has not been downloaded yet. Please connect to the internet to generate audio, or download readings from Settings → Offline Settings.'
+            );
+            return;
+          }
         } else {
           // Resume existing audio and highlighting
           if (highlightingInitialized) {

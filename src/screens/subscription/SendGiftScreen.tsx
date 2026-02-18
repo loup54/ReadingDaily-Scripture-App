@@ -22,6 +22,7 @@ import { Colors, FontSizes, FontWeights, Spacing, BorderRadius, Shadows } from '
 import { useTheme } from '@/hooks/useTheme';
 import { useAuthStore } from '@stores/useAuthStore';
 import { getFunctions, httpsCallable } from 'firebase/functions';
+import { auth } from '@/config/firebase';
 import { SUBSCRIPTION_TIERS } from '@constants/subscriptions';
 
 interface SendGiftScreenProps {
@@ -72,8 +73,30 @@ export const SendGiftScreen: React.FC<SendGiftScreenProps> = ({
       return;
     }
 
+    // Check Firebase Auth is actually authenticated
+    const currentUser = auth.currentUser;
+    if (!currentUser) {
+      Alert.alert(
+        'Authentication Required',
+        'Your session has expired. Please sign out and sign in again to send a gift.',
+        [
+          {
+            text: 'OK',
+            onPress: () => {
+              // Could navigate to login here
+            },
+          },
+        ]
+      );
+      return;
+    }
+
     setLoading(true);
     try {
+      // Get fresh ID token to ensure authentication
+      const idToken = await currentUser.getIdToken(true);
+      console.log('[SendGiftScreen] Got ID token, sending gift...');
+
       const functions = getFunctions();
       const sendGift = httpsCallable(functions, 'sendGift');
 
@@ -107,10 +130,21 @@ export const SendGiftScreen: React.FC<SendGiftScreenProps> = ({
       }
     } catch (error: any) {
       console.error('Gift sending error:', error);
-      Alert.alert(
-        'Error',
-        error.message || 'An error occurred while sending the gift'
-      );
+
+      // Map error messages to user-friendly text
+      let errorMessage = 'An error occurred while sending the gift. Please try again.';
+
+      if (error?.code === 'unauthenticated' || error?.message?.includes('unauthenticated')) {
+        errorMessage = 'Please sign in again to send a gift.';
+      } else if (error?.message) {
+        // Remove technical prefixes and codes
+        errorMessage = error.message
+          .replace(/^Firebase:\s*/i, '')
+          .replace(/\s*\([^)]+\)\.?$/i, '')
+          .trim();
+      }
+
+      Alert.alert('Error', errorMessage);
     } finally {
       setLoading(false);
     }

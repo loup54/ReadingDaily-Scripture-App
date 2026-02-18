@@ -186,7 +186,7 @@ export const PracticeSentenceDisplay: React.FC<PracticeSentenceDisplayProps> = (
               backgroundColor={
                 recordingState === 'recording' ? Colors.accent.red : Colors.primary.blue
               }
-              disabled={recordingDisabled || recordingState === 'preparing' || recordingState === 'processing'}
+              disabled={recordingState === 'preparing' || recordingState === 'processing'}
             />
           )}
         </View>

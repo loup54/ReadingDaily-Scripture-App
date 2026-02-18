@@ -26,27 +26,28 @@ export class MockPaymentService implements IPaymentService {
 
   private products: PaymentProduct[] = [
     {
-      id: 'com.readingdaily.lifetime.access.v2',
-      name: 'Lifetime Premium Access',
+      id: 'com.readingdaily.lifetime.access',
+      name: 'Lifetime Access',
       description: 'Unlock all features forever with a one-time payment',
-      price: 49.99,
+      price: 5.0,
       currency: 'USD',
       type: 'one_time',
     },
+    // NEW - Phase 7: Subscription product
     {
-      id: 'com.readingdaily.basic.monthly.v2',
-      name: 'Monthly Premium Subscription',
+      id: 'basic_monthly_subscription',
+      name: 'Basic Monthly',
       description: 'Unlimited daily practice + full AI feedback',
       price: 2.99,
       currency: 'USD',
       type: 'subscription',
       billingPeriod: 'monthly',
       renewalPrice: 2.99,
-      trialPeriodDays: 30,
+      trialPeriodDays: 30, // 30-day free trial
     },
     {
-      id: 'com.readingdaily.basic.yearly.v2',
-      name: 'Yearly Premium Subscription',
+      id: 'basic_yearly_subscription',
+      name: 'Basic Yearly',
       description: 'Unlimited daily practice + full AI feedback (save 2 months!)',
       price: 27.99,
       currency: 'USD',

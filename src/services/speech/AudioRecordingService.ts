@@ -11,6 +11,7 @@
 
 import { Audio, InterruptionModeAndroid, InterruptionModeIOS } from 'expo-av';
 import * as FileSystem from 'expo-file-system';
+import { File } from 'expo-file-system';
 import { Platform } from 'react-native';
 import { PracticeError, RecordingState } from '@/types/practice.types';
 
@@ -58,9 +59,8 @@ class AudioRecordingService {
    * Prepare audio mode for recording
    */
   private static async prepareAudioMode(): Promise<void> {
-    // expo-audio API is different from expo-av
-    // Only call setAudioModeAsync if it exists
-    if (Audio.setAudioModeAsync) {
+    try {
+      console.log('[AudioRecordingService] Setting up audio mode for recording');
       await Audio.setAudioModeAsync({
         allowsRecordingIOS: true,
         playsInSilentModeIOS: true,
@@ -70,6 +70,10 @@ class AudioRecordingService {
         shouldDuckAndroid: false,
         playThroughEarpieceAndroid: false,
       });
+      console.log('[AudioRecordingService] Audio mode configured successfully');
+    } catch (error) {
+      console.error('[AudioRecordingService] Failed to set audio mode:', error);
+      throw error;
     }
   }
 
@@ -80,35 +84,42 @@ class AudioRecordingService {
    */
   static async startRecording(): Promise<void> {
     try {
+      console.log('[AudioRecordingService] Starting recording...');
+
       // Check permissions
       const hasPermission = await this.hasPermissions();
       if (!hasPermission) {
+        console.error('[AudioRecordingService] Permission denied');
         throw this.createError(
           'PERMISSION_DENIED',
           'Microphone permission is required for pronunciation practice'
         );
       }
+      console.log('[AudioRecordingService] Permissions granted');
 
       // Stop any existing recording
       if (this.recording) {
+        console.log('[AudioRecordingService] Stopping existing recording');
         await this.stopRecording();
       }
 
       this.recordingState = 'preparing';
 
       // Prepare audio mode
+      console.log('[AudioRecordingService] Preparing audio mode');
       await this.prepareAudioMode();
 
       // Create new recording
+      console.log('[AudioRecordingService] Creating new recording instance');
       const recording = new Audio.Recording();
 
-      // Configure recording options for WAV format (required by Azure)
+      // Configure recording options for WAV format (required by Google Cloud)
       const recordingOptions = {
         android: {
           extension: '.wav',
           outputFormat: Audio.AndroidOutputFormat.DEFAULT,
           audioEncoder: Audio.AndroidAudioEncoder.DEFAULT,
-          sampleRate: 16000, // Azure prefers 16kHz
+          sampleRate: 16000, // Google Cloud prefers 16kHz
           numberOfChannels: 1, // Mono
           bitRate: 128000,
         },
@@ -116,7 +127,7 @@ class AudioRecordingService {
           extension: '.wav',
           outputFormat: Audio.IOSOutputFormat.LINEARPCM,
           audioQuality: Audio.IOSAudioQuality.HIGH,
-          sampleRate: 16000, // Azure prefers 16kHz
+          sampleRate: 16000, // Google Cloud prefers 16kHz
           numberOfChannels: 1, // Mono
           bitRate: 128000,
           linearPCMBitDepth: 16,
@@ -129,21 +140,30 @@ class AudioRecordingService {
         },
       };
 
+      console.log('[AudioRecordingService] Preparing to record with options:', JSON.stringify(recordingOptions[Platform.OS], null, 2));
       await recording.prepareToRecordAsync(recordingOptions);
+
+      console.log('[AudioRecordingService] Starting recording');
       await recording.startAsync();
 
       this.recording = recording;
       this.recordingState = 'recording';
 
-      console.log('🎤 Recording started');
+      console.log('✅ [AudioRecordingService] Recording started successfully');
     } catch (error) {
       this.recordingState = 'error';
-      console.error('Failed to start recording:', error);
+      console.error('❌ [AudioRecordingService] Failed to start recording:', error);
+      console.error('[AudioRecordingService] Error details:', {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined,
+        type: typeof error,
+        error: JSON.stringify(error, null, 2),
+      });
 
       throw this.createError(
         'RECORDING_FAILED',
         'Failed to start audio recording',
-        error instanceof Error ? error.message : undefined
+        error instanceof Error ? error.message : JSON.stringify(error)
       );
     }
   }
@@ -193,7 +213,8 @@ class AudioRecordingService {
       );
     } finally {
       // Reset audio mode
-      if (Audio.setAudioModeAsync) {
+      try {
+        console.log('[AudioRecordingService] Resetting audio mode');
         await Audio.setAudioModeAsync({
           allowsRecordingIOS: false,
           playsInSilentModeIOS: true,
@@ -203,6 +224,9 @@ class AudioRecordingService {
           shouldDuckAndroid: false,
           playThroughEarpieceAndroid: false,
         });
+        console.log('[AudioRecordingService] Audio mode reset successfully');
+      } catch (error) {
+        console.error('[AudioRecordingService] Failed to reset audio mode:', error);
       }
     }
   }
@@ -258,9 +282,10 @@ class AudioRecordingService {
    */
   static async deleteRecording(uri: string): Promise<void> {
     try {
-      const fileInfo = await FileSystem.getInfoAsync(uri);
-      if (fileInfo.exists) {
-        await FileSystem.deleteAsync(uri, { idempotent: true });
+      const file = new File(uri);
+      const exists = file.exists;
+      if (exists) {
+        await file.delete();
         console.log('🗑️ Recording deleted:', uri);
       }
     } catch (error) {

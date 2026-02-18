@@ -83,11 +83,14 @@ export function DailyReminderPicker({
 
     const time = formatTime(selectedHour, selectedMinute);
     onReminderChange({
+      userId: reminder?.userId || '',
       enabled: true,
       time,
       daysOfWeek: selectedDays,
       message: reminder?.message || 'Time to read scripture',
-      nextScheduledTime: new Date().getTime(),
+      title: reminder?.title || 'Daily Scripture Reading',
+      lastSentAt: reminder?.lastSentAt,
+      nextScheduledFor: new Date().getTime(),
     });
 
     setShowTimePicker(false);

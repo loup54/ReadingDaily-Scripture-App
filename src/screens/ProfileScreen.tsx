@@ -64,22 +64,22 @@ const ProfileScreen: React.FC = () => {
    * Load all profile data on mount
    */
   useEffect(() => {
-    if (user?.uid) {
+    if (user?.id) {
       loadAllData();
     }
-  }, [user?.uid]);
+  }, [user?.id]);
 
   /**
    * Load all data
    */
   const loadAllData = async () => {
-    if (!user?.uid) return;
+    if (!user?.id) return;
 
     try {
       await Promise.all([
-        loadProfile(user.uid),
-        loadStatistics(user.uid, 'month'),
-        loadAchievements(user.uid),
+        loadProfile(user.id),
+        loadStatistics(user.id, 'month'),
+        loadAchievements(user.id),
       ]);
     } catch (err) {
       console.error('[ProfileScreen] Error loading data:', err);
@@ -206,7 +206,7 @@ const ProfileScreen: React.FC = () => {
       >
         {user && (
           <ProgressDashboard
-            userId={user.uid}
+            userId={user.id}
           />
         )}
       </Modal>

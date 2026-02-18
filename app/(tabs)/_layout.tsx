@@ -6,12 +6,19 @@
  * Manages transitions between readings, practice, progress, notifications, and settings.
  */
 
-import React from 'react';
-import { Tabs } from 'expo-router';
+import React, { useEffect } from 'react';
+import { Tabs, useSegments } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '@constants';
 
 export default function TabsLayout() {
+  const segments = useSegments();
+
+  useEffect(() => {
+    console.log('[TAB_NAVIGATION] Current segments:', segments);
+    console.log('[TAB_NAVIGATION] Active route:', segments[segments.length - 1]);
+  }, [segments]);
+
   return (
     <Tabs
       screenOptions={{
@@ -33,6 +40,8 @@ export default function TabsLayout() {
         /**
          * Phase 4: Tab navigation uses standard animations
          * Quick transitions between tab screens
+         *
+         * LOGGING: Navigation state logged on every tab change
          */
       }}
     >
@@ -67,10 +76,24 @@ export default function TabsLayout() {
         name="notifications"
         options={{
           title: 'Notifications',
-          href: '/notifications',
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="notifications-outline" size={size} color={color} />
           ),
+        }}
+        listeners={{
+          tabPress: (e) => {
+            console.log('[TAB_PRESS] Notifications tab pressed', {
+              target: e.target,
+              canPreventDefault: e.defaultPrevented,
+              timestamp: new Date().toISOString(),
+            });
+          },
+          focus: () => {
+            console.log('[TAB_FOCUS] Notifications tab focused');
+          },
+          blur: () => {
+            console.log('[TAB_BLUR] Notifications tab blurred');
+          },
         }}
       />
       <Tabs.Screen

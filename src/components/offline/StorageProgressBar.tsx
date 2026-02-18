@@ -12,6 +12,7 @@ import {
   useColorScheme,
 } from 'react-native';
 import { Colors, Spacing, BorderRadius } from '@/constants';
+import { useTheme } from '@/hooks/useTheme';
 
 interface StorageProgressBarProps {
   usedBytes: number;
@@ -46,6 +47,7 @@ export const StorageProgressBar: React.FC<StorageProgressBarProps> = ({
   warningThreshold = 80,
   criticalThreshold = 90,
 }) => {
+  const { colors } = useTheme();
   const isDark = useColorScheme() === 'dark';
   const displayTotal = maxBytes || totalBytes;
 
@@ -80,7 +82,7 @@ export const StorageProgressBar: React.FC<StorageProgressBarProps> = ({
       {/* Storage Info Header */}
       <View style={styles.header}>
         <View style={styles.titleContainer}>
-          <Text style={[styles.title, { color: isDark ? Colors.text.white : Colors.text.primary }]}>
+          <Text style={[styles.title, { color: colors.text.primary }]}>
             Storage Usage
           </Text>
           {showWarning && percentageUsed >= warningThreshold && (
@@ -110,32 +112,32 @@ export const StorageProgressBar: React.FC<StorageProgressBarProps> = ({
       {/* Storage Details */}
       <View style={styles.details}>
         <View style={styles.detailItem}>
-          <Text style={[styles.detailLabel, { color: isDark ? Colors.text.secondary : Colors.text.secondary }]}>
+          <Text style={[styles.detailLabel, { color: colors.text.secondary }]}>
             Used
           </Text>
-          <Text style={[styles.detailValue, { color: isDark ? Colors.text.white : Colors.text.primary }]}>
+          <Text style={[styles.detailValue, { color: colors.text.primary }]}>
             {formatBytes(usedBytes)}
           </Text>
         </View>
 
-        <View style={styles.divider} />
+        <View style={[styles.divider, { backgroundColor: colors.ui.divider }]} />
 
         <View style={styles.detailItem}>
-          <Text style={[styles.detailLabel, { color: isDark ? Colors.text.secondary : Colors.text.secondary }]}>
+          <Text style={[styles.detailLabel, { color: colors.text.secondary }]}>
             Available
           </Text>
-          <Text style={[styles.detailValue, { color: isDark ? Colors.text.white : Colors.text.primary }]}>
+          <Text style={[styles.detailValue, { color: colors.text.primary }]}>
             {formatBytes(displayTotal - usedBytes)}
           </Text>
         </View>
 
-        <View style={styles.divider} />
+        <View style={[styles.divider, { backgroundColor: colors.ui.divider }]} />
 
         <View style={styles.detailItem}>
-          <Text style={[styles.detailLabel, { color: isDark ? Colors.text.secondary : Colors.text.secondary }]}>
+          <Text style={[styles.detailLabel, { color: colors.text.secondary }]}>
             Total
           </Text>
-          <Text style={[styles.detailValue, { color: isDark ? Colors.text.white : Colors.text.primary }]}>
+          <Text style={[styles.detailValue, { color: colors.text.primary }]}>
             {formatBytes(displayTotal)}
           </Text>
         </View>
@@ -143,8 +145,8 @@ export const StorageProgressBar: React.FC<StorageProgressBarProps> = ({
 
       {/* Warning Messages */}
       {showWarning && percentageUsed >= warningThreshold && (
-        <View style={[styles.warningContainer, { backgroundColor: isDark ? '#3A2A1F' : '#FFF3E0' }]}>
-          <Text style={[styles.warningText, { color: isDark ? '#FFB74D' : '#E65100' }]}>
+        <View style={[styles.warningContainer, { backgroundColor: colors.background.tertiary }]}>
+          <Text style={[styles.warningText, { color: colors.status.warning }]}>
             {percentageUsed >= criticalThreshold
               ? '⚠️ Storage critically low. Clear some data to continue.'
               : '⚠️ Storage usage is high. Consider clearing old readings.'}
@@ -210,16 +212,16 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   detailLabel: {
-    fontSize: 12,
+    fontSize: 13,
     marginBottom: 4,
+    fontWeight: '500',
   },
   detailValue: {
-    fontSize: 14,
+    fontSize: 15,
     fontWeight: '600',
   },
   divider: {
     width: 1,
-    backgroundColor: Colors.ui.divider,
   },
   warningContainer: {
     paddingHorizontal: Spacing.sm,

@@ -27,7 +27,7 @@ import { Colors, Typography, Spacing, BorderRadius, Shadows } from '@/constants'
 interface UpgradePromptBannerProps {
   title: string;
   message: string;
-  icon?: 'lock-closed' | 'star' | 'zap' | 'arrow-up-circle' | 'infinite';
+  icon?: 'lock-closed' | 'star' | 'flash' | 'arrow-up-circle' | 'infinite';
   variant?: 'primary' | 'success' | 'warning';
   onUpgradePress: () => void;
   onDismiss?: () => void;
@@ -63,19 +63,19 @@ export const UpgradePromptBanner: React.FC<UpgradePromptBannerProps> = ({
 
   const variantStyles = {
     primary: {
-      gradient: [Colors.primary.blue + '15', Colors.primary.blue + '08'],
+      gradient: [Colors.primary.blue + '15', Colors.primary.blue + '08'] as const,
       borderColor: Colors.primary.blue + '30',
       iconColor: Colors.primary.blue,
       titleColor: Colors.primary.blue,
     },
     success: {
-      gradient: [Colors.accent.green + '15', Colors.accent.green + '08'],
+      gradient: [Colors.accent.green + '15', Colors.accent.green + '08'] as const,
       borderColor: Colors.accent.green + '30',
       iconColor: Colors.accent.green,
       titleColor: Colors.accent.green,
     },
     warning: {
-      gradient: [Colors.ui.warning + '15', Colors.ui.warning + '08'],
+      gradient: [Colors.ui.warning + '15', Colors.ui.warning + '08'] as const,
       borderColor: Colors.ui.warning + '30',
       iconColor: Colors.ui.warning,
       titleColor: Colors.ui.warning,
@@ -90,8 +90,8 @@ export const UpgradePromptBanner: React.FC<UpgradePromptBannerProps> = ({
         return 'lock-closed';
       case 'star':
         return 'star';
-      case 'zap':
-        return 'zap';
+      case 'flash':
+        return 'flash';
       case 'arrow-up-circle':
         return 'arrow-up-circle';
       case 'infinite':
@@ -114,7 +114,7 @@ export const UpgradePromptBanner: React.FC<UpgradePromptBannerProps> = ({
         colors={style.gradient}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
-        style={[styles.banner, Shadows.md, { borderColor: style.borderColor }]}
+        style={[styles.banner, Shadows.md as any, { borderColor: style.borderColor }]}
       >
         <View style={styles.contentContainer}>
           <View style={[styles.iconContainer, { backgroundColor: style.iconColor + '20' }]}>

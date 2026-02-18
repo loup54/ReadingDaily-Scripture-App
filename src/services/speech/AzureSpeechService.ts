@@ -10,7 +10,8 @@
  */
 
 import * as sdk from 'microsoft-cognitiveservices-speech-sdk';
-import * as FileSystemLegacy from 'expo-file-system/legacy';
+import * as FileSystem from 'expo-file-system';
+import { File } from 'expo-file-system';
 import * as Crypto from 'expo-crypto';
 import { ENV } from '@/config/env';
 import {
@@ -20,9 +21,6 @@ import {
   PhonemeAssessment,
   PracticeError,
 } from '@/types/practice.types';
-
-// Use legacy API to avoid deprecation warnings
-const FileSystem = FileSystemLegacy;
 
 /**
  * Polyfill crypto.getRandomValues for React Native
@@ -146,7 +144,23 @@ class AzureSpeechService {
       // Perform recognition
       const result = await this.recognizeOnce(recognizer);
 
-      console.log('[AzureSpeechService] Recognition complete:', result.text);
+      console.log('[AzureSpeechService] Recognition complete:', result);
+      console.log('[AzureSpeechService] Result reason:', result.reason);
+      console.log('[AzureSpeechService] Result text:', result.text);
+
+      // Check if recognition was successful
+      if (result.reason !== sdk.ResultReason.RecognizedSpeech) {
+        const errorDetails = result.reason === sdk.ResultReason.NoMatch
+          ? 'No speech detected in audio'
+          : result.reason === sdk.ResultReason.Canceled
+          ? `Recognition canceled: ${result.errorDetails}`
+          : 'Unknown recognition error';
+        throw this.createError('ASSESSMENT_FAILED', `Speech recognition failed: ${errorDetails}`);
+      }
+
+      if (!result.text) {
+        throw this.createError('ASSESSMENT_FAILED', 'Recognition completed but no text was extracted');
+      }
 
       // Parse and return results
       const assessmentResult = this.parseAssessmentResult(result, referenceText);
@@ -216,20 +230,16 @@ class AzureSpeechService {
         // Already a data URI
         fileData = normalizedPath.split(',')[1];
       } else {
-        // Read from file system using base64 encoding
+        // Read from file system using new File API
         try {
-          const base64Data = await (FileSystem as any).readAsStringAsync(normalizedPath, {
-            encoding: 'base64',
-          });
-          fileData = base64Data;
+          const file = new File(normalizedPath);
+          fileData = await file.base64();
         } catch (fsError) {
           // If file:// doesn't work, try without it
           const pathWithoutPrefix = normalizedPath.replace('file://', '');
           console.log('[AudioFileLoad] Retrying without file:// prefix:', pathWithoutPrefix);
-          const base64Data = await (FileSystem as any).readAsStringAsync(pathWithoutPrefix, {
-            encoding: 'base64',
-          });
-          fileData = base64Data;
+          const file = new File(pathWithoutPrefix);
+          fileData = await file.base64();
         }
       }
 
@@ -277,36 +287,61 @@ class AzureSpeechService {
     result: sdk.SpeechRecognitionResult,
     referenceText: string
   ): PronunciationResult {
-    // Parse pronunciation assessment JSON from result
-    const pronunciationResult = sdk.PronunciationAssessmentResult.fromResult(result);
+    try {
+      // Parse pronunciation assessment JSON from result
+      const pronunciationResult = sdk.PronunciationAssessmentResult.fromResult(result);
 
-    // Extract scores
-    const scores: PronunciationScore = {
-      accuracyScore: pronunciationResult.accuracyScore,
-      fluencyScore: pronunciationResult.fluencyScore,
-      completenessScore: pronunciationResult.completenessScore,
-      prosodyScore: pronunciationResult.prosodyScore || 0,
-      overallScore: pronunciationResult.pronunciationScore,
-    };
+      // Extract scores
+      const scores: PronunciationScore = {
+        accuracyScore: pronunciationResult.accuracyScore ?? 0,
+        fluencyScore: pronunciationResult.fluencyScore ?? 0,
+        completenessScore: pronunciationResult.completenessScore ?? 0,
+        prosodyScore: pronunciationResult.prosodyScore || 0,
+        overallScore: pronunciationResult.pronunciationScore ?? 0,
+      };
 
-    // Extract word-level assessments
-    const words: WordAssessment[] = pronunciationResult.detailResult?.Words?.map((word: any) => ({
-      word: word.Word,
-      accuracyScore: word.PronunciationAssessment?.AccuracyScore || 0,
-      errorType: word.PronunciationAssessment?.ErrorType || 'None',
-      phonemes: word.Phonemes?.map((phoneme: any) => ({
-        phoneme: phoneme.Phoneme,
-        accuracyScore: phoneme.PronunciationAssessment?.AccuracyScore || 0,
-      })) as PhonemeAssessment[],
-    })) || [];
+      // Extract word-level assessments
+      const words: WordAssessment[] = pronunciationResult.detailResult?.Words?.map((word: any) => ({
+        word: word.Word,
+        accuracyScore: word.PronunciationAssessment?.AccuracyScore || 0,
+        errorType: word.PronunciationAssessment?.ErrorType || 'None',
+        phonemes: word.Phonemes?.map((phoneme: any) => ({
+          phoneme: phoneme.Phoneme,
+          accuracyScore: phoneme.PronunciationAssessment?.AccuracyScore || 0,
+        })) as PhonemeAssessment[],
+      })) || [];
 
-    return {
-      recognizedText: result.text || '',
-      scores,
-      words,
-      duration: result.duration / 10000000, // Convert from 100-nanosecond units to seconds
-      confidence: pronunciationResult.accuracyScore / 100,
-    };
+      return {
+        recognizedText: result.text || '',
+        scores,
+        words,
+        duration: result.duration / 10000000, // Convert from 100-nanosecond units to seconds
+        confidence: pronunciationResult.accuracyScore ? (pronunciationResult.accuracyScore / 100) : 0,
+      };
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : JSON.stringify(error);
+      console.error('[AzureSpeechService] Failed to parse assessment result:', errorMsg);
+      console.error('[AzureSpeechService] Result details:', {
+        text: result.text,
+        reason: result.reason,
+        duration: result.duration,
+      });
+
+      // Return a minimal valid result instead of crashing
+      return {
+        recognizedText: result.text || '',
+        scores: {
+          accuracyScore: 0,
+          fluencyScore: 0,
+          completenessScore: 0,
+          prosodyScore: 0,
+          overallScore: 0,
+        },
+        words: [],
+        duration: result.duration / 10000000,
+        confidence: 0,
+      };
+    }
   }
 
   /**

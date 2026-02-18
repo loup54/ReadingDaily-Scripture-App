@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Animated } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Typography, Spacing, BorderRadius, Shadows } from '@constants';
 import { useTheme } from '@/hooks/useTheme';
 import { AnimatedBookLoader } from './AnimatedBookLoader';
+import { getQuoteByIndex, WISDOM_QUOTES, type WisdomQuote } from '@/constants/wisdomQuotes';
 
 interface LoadingScreenProps {
   message?: string;
@@ -22,10 +23,14 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({
   const { colors } = useTheme();
   const [progress, setProgress] = useState(0);
   const [dotCount, setDotCount] = useState(0);
-  const fadeAnim = new Animated.Value(0.4);
+  const [quoteIndex, setQuoteIndex] = useState(0);
+  const [currentQuote, setCurrentQuote] = useState<WisdomQuote>(getQuoteByIndex(0));
+  const fadeAnim = useRef(new Animated.Value(0.4)).current;
+  const quoteOpacity = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
     console.log('[LoadingScreen] Mounted - AnimatedBookLoader should now be animating');
+    console.log('[LoadingScreen] Starting with quote:', currentQuote.text, '-', currentQuote.reference);
 
     // Subtle pulsing animation for the background
     Animated.loop(
@@ -43,6 +48,38 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({
       ])
     ).start();
   }, []);
+
+  // Rotate wisdom quotes every 4 seconds with fade animation
+  useEffect(() => {
+    const rotationInterval = setInterval(() => {
+      // Fade out
+      Animated.timing(quoteOpacity, {
+        toValue: 0,
+        duration: 400,
+        useNativeDriver: true,
+      }).start(() => {
+        // Change quote while faded out
+        const nextIndex = (quoteIndex + 1) % WISDOM_QUOTES.length;
+        const nextQuote = getQuoteByIndex(nextIndex);
+        setQuoteIndex(nextIndex);
+        setCurrentQuote(nextQuote);
+
+        console.log('[LoadingScreen] Quote rotated:', nextQuote.text, '-', nextQuote.reference);
+
+        // Fade in
+        Animated.timing(quoteOpacity, {
+          toValue: 1,
+          duration: 400,
+          useNativeDriver: true,
+        }).start();
+      });
+    }, 4000); // Rotate every 4 seconds
+
+    return () => {
+      clearInterval(rotationInterval);
+      console.log('[LoadingScreen] Quote rotation stopped');
+    };
+  }, [quoteIndex, quoteOpacity]);
 
   // Animated dots for "Loading..."
   useEffect(() => {
@@ -104,16 +141,16 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({
       <View style={styles.content}>
         {/* Animated Book Loader */}
         <View style={styles.loaderContainer}>
-          <AnimatedBookLoader size={140} color={colors.text.white} />
+          <AnimatedBookLoader size={120} color="rgba(255, 255, 255, 0.85)" />
         </View>
 
         {/* Main Message with Brand Touch */}
         <View style={styles.messageContainer}>
           <Text style={[styles.messageTitle, { color: colors.text.white }]}>
-            {message}
+            Keep smiling!
           </Text>
-          <Text style={[styles.loadingIndicator, { color: colors.text.white }]}>
-            {dots}
+          <Text style={[styles.messageSubtitle, { color: colors.text.white }]}>
+            Loading good things for you{dots}
           </Text>
         </View>
 
@@ -137,13 +174,21 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({
           </View>
         )}
 
-        {/* Motivational Quote */}
-        <View style={styles.quoteContainer}>
-          <Ionicons name="book-outline" size={14} color={colors.text.white} style={{ opacity: 0.6 }} />
+        {/* Rotating Wisdom Quote */}
+        <Animated.View
+          style={[
+            styles.quoteContainer,
+            { opacity: quoteOpacity }
+          ]}
+        >
+          <Ionicons name="book-outline" size={16} color={colors.text.white} style={{ opacity: 0.7, marginBottom: 4 }} />
           <Text style={[styles.quote, { color: colors.text.white }]}>
-            "In your light, we see light"
+            "{currentQuote.text}"
           </Text>
-        </View>
+          <Text style={[styles.quoteReference, { color: colors.text.white }]}>
+            — {currentQuote.reference}
+          </Text>
+        </Animated.View>
       </View>
     </LinearGradient>
   );
@@ -198,6 +243,9 @@ const styles = StyleSheet.create({
   loaderContainer: {
     alignItems: 'center',
     marginBottom: Spacing.sm,
+    padding: Spacing.lg,
+    borderRadius: BorderRadius.xl,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
   },
   messageContainer: {
     alignItems: 'center',
@@ -207,9 +255,19 @@ const styles = StyleSheet.create({
     ...Typography.body,
     color: Colors.text.white,
     textAlign: 'center',
-    fontSize: 18,
-    fontWeight: '600',
+    fontSize: 20,
+    fontWeight: '700',
     letterSpacing: 0.5,
+    marginBottom: 8,
+  },
+  messageSubtitle: {
+    ...Typography.body,
+    color: Colors.text.white,
+    textAlign: 'center',
+    fontSize: 16,
+    fontWeight: '500',
+    letterSpacing: 0.3,
+    opacity: 0.9,
   },
   loadingIndicator: {
     fontSize: 16,
@@ -257,12 +315,21 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.lg,
   },
   quote: {
-    fontSize: 13,
+    fontSize: 14,
     fontStyle: 'italic',
     color: Colors.text.white,
-    opacity: 0.7,
+    opacity: 0.85,
     textAlign: 'center',
     fontWeight: '500',
-    lineHeight: 20,
+    lineHeight: 22,
+    marginBottom: 4,
+  },
+  quoteReference: {
+    fontSize: 11,
+    color: Colors.text.white,
+    opacity: 0.6,
+    textAlign: 'center',
+    fontWeight: '400',
+    fontStyle: 'normal',
   },
 });

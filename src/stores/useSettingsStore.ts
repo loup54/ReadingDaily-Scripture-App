@@ -282,17 +282,32 @@ export const useSettingsStore = create<SettingsStoreState>()(
             error: null,
           });
 
-          // TODO: Schedule/cancel notifications based on settings (Phase 16)
-          if (notifications.enabled !== undefined) {
-            if (notifications.enabled) {
-              console.log('📅 Scheduling daily notifications...');
-              // await scheduleNotifications();
+          // Schedule/cancel notifications based on settings
+          const updatedSettings = {
+            ...currentSettings.notifications,
+            ...notifications,
+          };
+
+          // Import dynamically to avoid circular dependencies
+          const { dailyReminderScheduler } = await import(
+            '@/services/notifications/DailyReminderScheduler'
+          );
+
+          if (notifications.enabled !== undefined || notifications.dailyReadingTime !== undefined || notifications.soundEnabled !== undefined) {
+            if (updatedSettings.enabled && updatedSettings.reminderEnabled) {
+              console.log('📅 Scheduling daily notifications for', updatedSettings.dailyReadingTime);
+              await dailyReminderScheduler.scheduleDailyReminder({
+                enabled: true,
+                time: updatedSettings.dailyReadingTime,
+                soundEnabled: updatedSettings.soundEnabled,
+              });
             } else {
-              console.log('🔕 Cancelling notifications...');
-              // await cancelNotifications();
+              console.log('🔕 Cancelling daily notifications');
+              await dailyReminderScheduler.cancelDailyReminder();
             }
           }
         } catch (error) {
+          console.error('[SettingsStore] Error updating notification settings:', error);
           set({
             error: error instanceof Error ? error.message : 'Failed to update notification settings',
           });
@@ -515,10 +530,14 @@ export const useSettingsStore = create<SettingsStoreState>()(
           persistedState.settings.audio = DEFAULT_SETTINGS.audio;
         }
 
-        // ALWAYS disable audio highlighting (both for new and existing users)
-        // This ensures graceful degradation until timing data is available
-        console.log('[SettingsStore] ✅ Persist migration: setting enableAudioHighlighting to false');
-        persistedState.settings.audio.enableAudioHighlighting = false;
+        // Only disable for NEW users (when setting doesn't exist in persisted state)
+        // Respect existing users' choices to preserve their preference
+        if (version === 0 && persistedState.settings.audio && !persistedState.settings.audio.hasOwnProperty('enableAudioHighlighting')) {
+          console.log('[SettingsStore] ✅ New user: setting enableAudioHighlighting to false (default)');
+          persistedState.settings.audio.enableAudioHighlighting = false;
+        } else {
+          console.log('[SettingsStore] Existing user: preserving enableAudioHighlighting setting:', persistedState.settings.audio?.enableAudioHighlighting);
+        }
 
         return persistedState;
       },

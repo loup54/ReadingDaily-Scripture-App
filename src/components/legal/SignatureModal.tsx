@@ -1,14 +1,13 @@
 /**
  * Signature Modal Component
  *
- * Allows users to sign documents with two methods:
- * 1. Sketch-based signature (drawing)
- * 2. Typed name signature
+ * Allows users to sign documents by typing their full name.
+ * Validates that the signature name matches the user's registered name.
  *
  * Captures complete metadata for compliance tracking
  */
 
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -20,15 +19,15 @@ import {
   TextInput,
   Platform,
   Alert,
-  Dimensions,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Typography, Spacing, BorderRadius, Shadows } from '@/constants';
 import { useTheme } from '@/hooks/useTheme';
+import { useAuthStore } from '@/stores/useAuthStore';
 
 export interface CapturedSignature {
-  type: 'sketch' | 'typed';
-  data: string; // Base64 for sketch, plain text for typed
+  type: 'typed';
+  data: string; // User's full name
   timestamp: number;
   device: string; // iOS/Android
 }
@@ -42,113 +41,8 @@ interface SignatureModalProps {
   loading?: boolean;
 }
 
-type SignatureMode = 'choose' | 'sketch' | 'typed';
+type SignatureMode = 'typed'; // Removed 'choose' and 'sketch' - typed name only
 
-/**
- * Sketch Signature Canvas Component
- * Allows users to draw their signature with touch events
- */
-const SketchCanvas: React.FC<{
-  onSignatureReady: (signature: string) => void;
-  colors: any;
-}> = ({ onSignatureReady, colors }) => {
-  const canvasRef = useRef<any>(null);
-  const [hasSignature, setHasSignature] = useState(false);
-  const [strokes, setStrokes] = useState<Array<Array<{ x: number; y: number }>>>([]);
-  const [currentStroke, setCurrentStroke] = useState<Array<{ x: number; y: number }>>([]);
-
-  const handleTouchStart = (e: any) => {
-    const { locationX, locationY } = e.nativeEvent;
-    setCurrentStroke([{ x: locationX, y: locationY }]);
-  };
-
-  const handleTouchMove = (e: any) => {
-    const { locationX, locationY } = e.nativeEvent;
-    setCurrentStroke(prev => [...prev, { x: locationX, y: locationY }]);
-    if (!hasSignature && currentStroke.length === 0) {
-      setHasSignature(true);
-    }
-  };
-
-  const handleTouchEnd = () => {
-    if (currentStroke.length > 0) {
-      setStrokes(prev => [...prev, currentStroke]);
-      setCurrentStroke([]);
-    }
-  };
-
-  const handleClear = () => {
-    setStrokes([]);
-    setCurrentStroke([]);
-    setHasSignature(false);
-  };
-
-  const handleFinish = () => {
-    if (!hasSignature && strokes.length === 0) {
-      Alert.alert('Empty Signature', 'Please draw your signature first');
-      return;
-    }
-    // Convert strokes to base64 format for storage
-    const signatureData = JSON.stringify(strokes);
-    const base64 = Buffer.from(signatureData).toString('base64');
-    onSignatureReady(base64);
-  };
-
-  return (
-    <View style={styles.canvasContainer}>
-      <View
-        style={[
-          styles.sketchArea,
-          {
-            backgroundColor: colors.background.primary,
-            borderColor: colors.ui.border,
-          }
-        ]}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
-        ref={canvasRef}
-      >
-        {!hasSignature && (
-          <Text style={[styles.sketchPlaceholder, { color: colors.text.tertiary }]}>
-            Draw your signature here
-          </Text>
-        )}
-        {/* Visual feedback showing signature strokes */}
-        {(strokes.length > 0 || currentStroke.length > 0) && (
-          <Text style={[styles.sketchHint, { color: colors.accent.green }]}>
-            ✓ Signature captured
-          </Text>
-        )}
-      </View>
-
-      <View style={styles.sketchControls}>
-        <TouchableOpacity
-          style={[styles.controlButton, { backgroundColor: colors.ui.border }]}
-          onPress={handleClear}
-        >
-          <Ionicons name="trash-outline" size={18} color={colors.text.primary} />
-          <Text style={[styles.controlButtonText, { color: colors.text.primary }]}>
-            Clear
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[
-            styles.controlButton,
-            { backgroundColor: colors.primary.blue },
-            !hasSignature && strokes.length === 0 && { opacity: 0.5 },
-          ]}
-          onPress={handleFinish}
-          disabled={!hasSignature && strokes.length === 0}
-        >
-          <Ionicons name="checkmark-outline" size={18} color="#FFFFFF" />
-          <Text style={[styles.controlButtonText, { color: '#FFFFFF' }]}>Done</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
-  );
-};
 
 /**
  * Typed Name Input Component
@@ -156,15 +50,27 @@ const SketchCanvas: React.FC<{
 const TypedNameInput: React.FC<{
   onSignatureReady: (signature: string) => void;
   colors: any;
-}> = ({ onSignatureReady, colors }) => {
-  const [name, setName] = useState('');
+  userFullName?: string;
+}> = ({ onSignatureReady, colors, userFullName }) => {
+  const [name, setName] = useState(userFullName || '');
 
   const handleSubmit = () => {
-    if (!name.trim()) {
-      Alert.alert('Empty Name', 'Please enter your name');
+    const trimmedName = name.trim();
+    if (!trimmedName) {
+      Alert.alert('Empty Name', 'Please enter your full name');
       return;
     }
-    onSignatureReady(name.trim());
+
+    // Validate name matches user's registered name
+    if (userFullName && trimmedName.toLowerCase() !== userFullName.toLowerCase()) {
+      Alert.alert(
+        'Name Mismatch',
+        `The signature name "${trimmedName}" does not match your registered name "${userFullName}".\n\nFor legal compliance, you must sign with your registered name.`
+      );
+      return;
+    }
+
+    onSignatureReady(trimmedName);
   };
 
   return (
@@ -234,7 +140,8 @@ export const SignatureModal: React.FC<SignatureModalProps> = ({
   loading = false,
 }) => {
   const { colors } = useTheme();
-  const [mode, setMode] = useState<SignatureMode>('choose');
+  const user = useAuthStore(state => state.user);
+  const [mode, setMode] = useState<SignatureMode>('typed');
   const [capturing, setCapturing] = useState(false);
 
   const handleSignatureReady = async (signatureData: string) => {
@@ -242,7 +149,7 @@ export const SignatureModal: React.FC<SignatureModalProps> = ({
       setCapturing(true);
 
       const signature: CapturedSignature = {
-        type: mode === 'sketch' ? 'sketch' : 'typed',
+        type: 'typed',
         data: signatureData,
         timestamp: Date.now(),
         device: Platform.OS,
@@ -250,8 +157,7 @@ export const SignatureModal: React.FC<SignatureModalProps> = ({
 
       await onSignatureCapture(signature);
 
-      // Reset modal state
-      setMode('choose');
+      // Close modal
       onClose();
     } catch (error) {
       console.error('[SignatureModal] Error capturing signature:', error);
@@ -262,11 +168,7 @@ export const SignatureModal: React.FC<SignatureModalProps> = ({
   };
 
   const handleClose = () => {
-    if (mode !== 'choose') {
-      setMode('choose');
-    } else {
-      onClose();
-    }
+    onClose();
   };
 
   return (
@@ -299,86 +201,25 @@ export const SignatureModal: React.FC<SignatureModalProps> = ({
         <ScrollView
           style={styles.content}
           contentContainerStyle={styles.contentContainer}
-          scrollEnabled={mode === 'choose'}
         >
-          {mode === 'choose' && (
-            <>
-              <Text style={[styles.instructionText, { color: colors.text.primary }]}>
-                Choose how you'd like to sign this document:
-              </Text>
+          <Text style={[styles.instructionText, { color: colors.text.primary }]}>
+            Please sign by entering your full name as it appears in your account:
+          </Text>
 
-              {/* Sketch Option */}
-              <TouchableOpacity
-                style={[styles.modeCard, { backgroundColor: colors.background.card }]}
-                onPress={() => setMode('sketch')}
-              >
-                <View style={styles.modeCardContent}>
-                  <View
-                    style={[
-                      styles.modeIcon,
-                      { backgroundColor: colors.primary.blue + '20' },
-                    ]}
-                  >
-                    <Ionicons name="pencil" size={28} color={colors.primary.blue} />
-                  </View>
+          {/* Legal Notice */}
+          <View style={[styles.noticeBox, { backgroundColor: colors.background.card }]}>
+            <Ionicons name="shield-checkmark" size={20} color={colors.primary.blue} />
+            <Text style={[styles.noticeText, { color: colors.text.secondary }]}>
+              Your signature will be legally binding and recorded for compliance purposes.
+            </Text>
+          </View>
 
-                  <View style={{ flex: 1 }}>
-                    <Text style={[styles.modeTitle, { color: colors.text.primary }]}>
-                      Draw Signature
-                    </Text>
-                    <Text style={[styles.modeDescription, { color: colors.text.secondary }]}>
-                      Use your finger or stylus to draw your signature
-                    </Text>
-                  </View>
-
-                  <Ionicons name="chevron-forward" size={24} color={colors.text.tertiary} />
-                </View>
-              </TouchableOpacity>
-
-              {/* Typed Option */}
-              <TouchableOpacity
-                style={[styles.modeCard, { backgroundColor: colors.background.card }]}
-                onPress={() => setMode('typed')}
-              >
-                <View style={styles.modeCardContent}>
-                  <View
-                    style={[
-                      styles.modeIcon,
-                      { backgroundColor: colors.primary.blue + '20' },
-                    ]}
-                  >
-                    <Ionicons name="text" size={28} color={colors.primary.blue} />
-                  </View>
-
-                  <View style={{ flex: 1 }}>
-                    <Text style={[styles.modeTitle, { color: colors.text.primary }]}>
-                      Type Name
-                    </Text>
-                    <Text style={[styles.modeDescription, { color: colors.text.secondary }]}>
-                      Enter your full name as your signature
-                    </Text>
-                  </View>
-
-                  <Ionicons name="chevron-forward" size={24} color={colors.text.tertiary} />
-                </View>
-              </TouchableOpacity>
-
-              {/* Legal Notice */}
-              <View style={[styles.noticeBox, { backgroundColor: colors.background.card }]}>
-                <Ionicons name="shield-checkmark" size={20} color={colors.primary.blue} />
-                <Text style={[styles.noticeText, { color: colors.text.secondary }]}>
-                  Your signature will be legally binding and recorded for compliance purposes.
-                </Text>
-              </View>
-            </>
-          )}
-
-          {mode === 'sketch' && !capturing && (
-            <SketchCanvas onSignatureReady={handleSignatureReady} colors={colors} />
-          )}
-
-          {mode === 'typed' && !capturing && (
-            <TypedNameInput onSignatureReady={handleSignatureReady} colors={colors} />
+          {!capturing && (
+            <TypedNameInput
+              onSignatureReady={handleSignatureReady}
+              colors={colors}
+              userFullName={user?.fullName}
+            />
           )}
 
           {(capturing || loading) && (
@@ -429,31 +270,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: Spacing.md,
   },
-  modeCard: {
-    borderRadius: BorderRadius.lg,
-    padding: Spacing.md,
-    ...Shadows.md,
-  },
-  modeCardContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.md,
-  },
-  modeIcon: {
-    width: 56,
-    height: 56,
-    borderRadius: BorderRadius.lg,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  modeTitle: {
-    ...Typography.body,
-    fontWeight: '700',
-    marginBottom: Spacing.xs,
-  },
-  modeDescription: {
-    ...Typography.caption,
-  },
   noticeBox: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -465,45 +281,6 @@ const styles = StyleSheet.create({
   noticeText: {
     ...Typography.caption,
     flex: 1,
-  },
-
-  // Sketch Canvas Styles
-  canvasContainer: {
-    gap: Spacing.md,
-  },
-  sketchArea: {
-    height: 250,
-    borderRadius: BorderRadius.lg,
-    borderWidth: 2,
-    borderColor: 'rgba(59, 130, 246, 0.2)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  sketchPlaceholder: {
-    ...Typography.caption,
-  },
-  sketchHint: {
-    ...Typography.caption,
-    fontWeight: '600',
-    marginTop: Spacing.sm,
-  },
-  sketchControls: {
-    flexDirection: 'row',
-    gap: Spacing.md,
-    justifyContent: 'space-between',
-  },
-  controlButton: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: Spacing.md,
-    borderRadius: BorderRadius.lg,
-    gap: Spacing.sm,
-  },
-  controlButtonText: {
-    ...Typography.caption,
-    fontWeight: '600',
   },
 
   // Typed Name Styles

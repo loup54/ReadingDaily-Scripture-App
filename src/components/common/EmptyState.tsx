@@ -72,8 +72,8 @@ export interface EmptyStateProps {
  *   title="No Notifications Yet"
  *   message="You haven't received any notifications yet"
  *   tips={[
- *     '✓ Enable notifications in Settings',
- *     '✓ Turn on Daily Reminders',
+ *     '✓ Allow notifications in iOS Settings if prompted',
+ *     '✓ Turn on Daily Reminders in Settings',
  *   ]}
  *   actionButton={{
  *     label: 'Go to Settings',

@@ -1,8 +1,8 @@
 /**
- * Google Play Billing Service
- * Phase 13.2: Google Play Integration
+ * Apple In-App Purchase Service
+ * Phase 13.1: Apple IAP Integration
  *
- * Google Play Billing implementation for Android in-app purchases.
+ * Apple StoreKit implementation for iOS in-app purchases.
  * Uses react-native-iap for cross-platform IAP support.
  */
 
@@ -14,60 +14,60 @@ import {
   PaymentResult,
   RestoreResult,
   PurchaseRecord,
-  GooglePurchaseData,
+  AppleReceiptData,
   SubscriptionStatus,
   CancellationResult,
 } from '../../types/payment.types';
 import { Platform } from 'react-native';
 import * as RNIap from 'react-native-iap';
 import * as Crypto from 'expo-crypto';
+import { getFunctions, httpsCallable } from 'firebase/functions';
+import { app } from '@/config/firebase';
 import { analyticsService } from '../analytics/AnalyticsService';
 
-// Product IDs from Google Play Console
+// Product IDs from Apple App Store Connect
+// Updated to .v2 after recreating IAPs in App Store Connect (January 24, 2026)
 const PRODUCT_IDS = [
-  'com.readingdaily.lifetime.access',
+  'com.readingdaily.lifetime.access.v2',
   // Phase 7: Subscription products
-  'com.readingdaily.basic.monthly',
-  'com.readingdaily.basic.yearly',
+  'com.readingdaily.basic.monthly.v2',
+  'com.readingdaily.basic.yearly.v2',
 ];
 
-export class GooglePlayService implements IPaymentService {
-  readonly provider: PaymentProvider = 'google';
+export class AppleIAPService implements IPaymentService {
+  readonly provider: PaymentProvider = 'apple';
 
   private products: PaymentProduct[] = [];
   private purchaseUpdateSubscription: any = null;
   private purchaseErrorSubscription: any = null;
+  private functions = getFunctions(app);
+  private isInitialized: boolean = false;
 
   async initialize(): Promise<void> {
-    console.log('[GooglePlayService] Initializing...');
+    console.log('[AppleIAPService] Initializing...');
 
-    if (Platform.OS !== 'android') {
-      throw new Error('GooglePlayService is only available on Android');
+    if (Platform.OS !== 'ios') {
+      throw new Error('AppleIAPService is only available on iOS');
     }
 
     try {
-      // Initialize connection to Google Play Billing
+      // Initialize connection to Apple App Store
       await RNIap.initConnection();
-      console.log('[GooglePlayService] Connection initialized');
-
-      // Flush pending transactions (recommended by Google)
-      await RNIap.flushFailedPurchasesCachedAsPendingAndroid();
+      console.log('[AppleIAPService] Connection initialized');
 
       // Set up purchase update listener
       this.purchaseUpdateSubscription = RNIap.purchaseUpdatedListener(
         async (purchase: RNIap.Purchase) => {
-          console.log('[GooglePlayService] Purchase updated:', purchase.transactionId);
+          console.log('[AppleIAPService] Purchase updated:', purchase.transactionId);
 
-          // Get purchase token
-          const token = purchase.purchaseToken;
-          if (token) {
-            // Acknowledge purchase (required by Google)
-            if (Platform.OS === 'android') {
-              await RNIap.acknowledgePurchaseAndroid({
-                token,
-                developerPayload: purchase.productId,
+          const receipt = purchase.transactionReceipt;
+          if (receipt) {
+            // Finish the transaction
+            if (Platform.OS === 'ios') {
+              await RNIap.finishTransaction({
+                purchase,
+                isConsumable: false, // Lifetime access is non-consumable
               });
-              console.log('[GooglePlayService] Purchase acknowledged');
             }
           }
         }
@@ -75,21 +75,24 @@ export class GooglePlayService implements IPaymentService {
 
       // Set up purchase error listener
       this.purchaseErrorSubscription = RNIap.purchaseErrorListener((error: any) => {
-        console.error('[GooglePlayService] Purchase error:', error);
+        console.error('[AppleIAPService] Purchase error:', error);
       });
 
       // Load available products
       await this.loadProducts();
 
-      console.log('[GooglePlayService] Initialized successfully');
+      // Mark as initialized
+      this.isInitialized = true;
+      console.log('[AppleIAPService] Initialized successfully');
     } catch (error) {
-      console.error('[GooglePlayService] Initialization failed:', error);
+      console.error('[AppleIAPService] Initialization failed:', error);
+      this.isInitialized = false;
       throw error;
     }
   }
 
   async isAvailable(): Promise<boolean> {
-    return Platform.OS === 'android';
+    return Platform.OS === 'ios';
   }
 
   async getProducts(): Promise<PaymentProduct[]> {
@@ -100,14 +103,14 @@ export class GooglePlayService implements IPaymentService {
   }
 
   async createPaymentIntent(productId: string): Promise<PaymentIntent> {
-    console.log('[GooglePlayService] Creating payment intent:', productId);
+    console.log('[AppleIAPService] Creating payment intent:', productId);
 
     const product = this.products.find((p) => p.id === productId);
     if (!product) {
       throw new Error(`Product not found: ${productId}`);
     }
 
-    // For Google Play, we don't create separate intents
+    // For Apple IAP, we don't create separate intents
     // The intent is implicit in the purchase request
     const intentId = await Crypto.digestStringAsync(
       Crypto.CryptoDigestAlgorithm.SHA256,
@@ -126,9 +129,46 @@ export class GooglePlayService implements IPaymentService {
   }
 
   async purchase(productId: string): Promise<PaymentResult> {
-    console.log('[GooglePlayService] Processing purchase:', productId);
+    console.log('[AppleIAPService] Processing purchase:', productId);
+
+
+    // Auto-initialize if not already initialized
+    if (!this.isInitialized) {
+      console.log('⚠️ [IAP] Service not initialized, auto-initializing...');
+      try {
+        await this.initialize();
+        
+        // Verify initialization actually succeeded
+        if (!this.isInitialized) {
+          throw new Error('Initialization completed but isInitialized flag not set');
+        }
+        
+        console.log('✅ [IAP] Auto-initialization successful');
+      } catch (error) {
+        console.error('❌ [IAP] Auto-initialization failed:', error);
+        throw new Error(`Unable to initialize payment service: ${error.message}`);
+      }
+    }
+
+
+    // Debug logging: Check service state before purchase
+    console.log('[AppleIAPService] Pre-purchase state check:', {
+      productsLoaded: this.products.length,
+      productsArray: this.products,
+      requestedProductId: productId,
+      productExists: this.products.some((p) => p.id === productId),
+      storeKitInitialized: this.purchaseUpdateSubscription !== null,
+      isInitialized: this.isInitialized,
+    });
 
     try {
+      // Ensure products are loaded before attempting purchase
+      if (this.products.length === 0) {
+        console.log('[AppleIAPService] Products not loaded, loading now...');
+        await this.loadProducts();
+        console.log('[AppleIAPService] Products loaded:', this.products.length);
+      }
+
       // Get product to determine if it's a subscription
       const product = this.products.find((p) => p.id === productId);
 
@@ -138,9 +178,10 @@ export class GooglePlayService implements IPaymentService {
 
       // Phase 7: Handle subscription purchases differently
       if (product.type === 'subscription') {
-        console.log('[GooglePlayService] Purchasing subscription:', productId);
+        console.log('[AppleIAPService] Purchasing subscription:', productId);
         const purchase = await RNIap.requestSubscription({
           sku: productId,
+          andDangerouslyFinishTransactionAutomaticallyIOS: false,
         });
 
         if (!purchase) {
@@ -152,27 +193,11 @@ export class GooglePlayService implements IPaymentService {
           };
         }
 
-        const transactionId = purchase.transactionId || purchase.purchaseToken || 'unknown';
-        const subscriptionId = purchase.transactionId || productId;
-        const receipt = JSON.stringify({
-          orderId: purchase.transactionId,
-          packageName: 'com.readingdaily.scripture',
-          productId: purchase.productId,
-          purchaseTime: purchase.transactionDate,
-          purchaseToken: purchase.purchaseToken,
-          signature: purchase.signatureAndroid,
-        });
+        const transactionId = purchase.transactionId || 'unknown';
+        const receipt = purchase.transactionReceipt || '';
+        const subscriptionId = purchase.productId || productId;
 
-        // Acknowledge subscription (required by Google Play)
-        if (purchase.purchaseToken) {
-          await RNIap.acknowledgePurchaseAndroid({
-            token: purchase.purchaseToken,
-            developerPayload: productId,
-          });
-          console.log('[GooglePlayService] Subscription acknowledged');
-        }
-
-        console.log('[GooglePlayService] Subscription purchase successful:', transactionId);
+        console.log('[AppleIAPService] Subscription purchase successful:', transactionId);
 
         return {
           success: true,
@@ -185,12 +210,12 @@ export class GooglePlayService implements IPaymentService {
       }
 
       // One-time purchase
-      // Request purchase
       const purchase = await RNIap.requestPurchase({
         sku: productId,
+        andDangerouslyFinishTransactionAutomaticallyIOS: false,
       });
 
-      console.log('[GooglePlayService] Purchase response:', purchase);
+      console.log('[AppleIAPService] Purchase response:', purchase);
 
       if (!purchase) {
         return {
@@ -202,26 +227,10 @@ export class GooglePlayService implements IPaymentService {
       }
 
       // Extract transaction details
-      const transactionId = purchase.transactionId || purchase.purchaseToken || 'unknown';
-      const receipt = JSON.stringify({
-        orderId: purchase.transactionId,
-        packageName: 'com.readingdaily.scripture',
-        productId: purchase.productId,
-        purchaseTime: purchase.transactionDate,
-        purchaseToken: purchase.purchaseToken,
-        signature: purchase.signatureAndroid,
-      });
+      const transactionId = purchase.transactionId || 'unknown';
+      const receipt = purchase.transactionReceipt || '';
 
-      // Acknowledge purchase (required by Google Play)
-      if (purchase.purchaseToken) {
-        await RNIap.acknowledgePurchaseAndroid({
-          token: purchase.purchaseToken,
-          developerPayload: productId,
-        });
-        console.log('[GooglePlayService] Purchase acknowledged');
-      }
-
-      console.log('[GooglePlayService] Purchase successful:', transactionId);
+      console.log('[AppleIAPService] Purchase successful:', transactionId);
 
       return {
         success: true,
@@ -231,20 +240,31 @@ export class GooglePlayService implements IPaymentService {
         timestamp: Date.now(),
       };
     } catch (error: any) {
-      console.error('[GooglePlayService] Purchase failed:', error);
+      // Detailed error logging
+      console.error('[AppleIAPService] Purchase failed:', error);
+      console.error('[AppleIAPService] Error details:', {
+        productId,
+        errorCode: error?.code,
+        errorMessage: error?.message,
+        errorName: error?.name,
+        errorStack: error?.stack,
+        fullError: JSON.stringify(error, Object.getOwnPropertyNames(error)),
+      });
 
       // Handle specific error codes
       let errorMessage = 'Purchase failed';
       if (error.code === 'E_USER_CANCELLED') {
         errorMessage = 'Purchase cancelled by user';
+        console.log('[AppleIAPService] User cancelled the purchase');
       } else if (error.code === 'E_NETWORK_ERROR') {
         errorMessage = 'Network error. Please check your connection.';
+        console.error('[AppleIAPService] Network error during purchase');
       } else if (error.code === 'E_ALREADY_OWNED') {
         errorMessage = 'You already own this item. Try restoring purchases.';
-      } else if (error.code === 'E_DEVELOPER_ERROR') {
-        errorMessage = 'Configuration error. Please contact support.';
-      } else if (error.code === 'E_ITEM_UNAVAILABLE') {
-        errorMessage = 'This item is not available for purchase.';
+        console.warn('[AppleIAPService] User already owns this product');
+      } else {
+        // Log unknown error codes
+        console.error('[AppleIAPService] Unknown error code:', error.code);
       }
 
       // Log analytics: payment failed
@@ -253,7 +273,7 @@ export class GooglePlayService implements IPaymentService {
         provider: this.provider,
         errorCode: error.code,
         errorMessage,
-        retryable: error.code !== 'E_USER_CANCELLED' && error.code !== 'E_DEVELOPER_ERROR',
+        retryable: error.code !== 'E_USER_CANCELLED',
       });
 
       return {
@@ -266,12 +286,12 @@ export class GooglePlayService implements IPaymentService {
   }
 
   async restorePurchases(): Promise<RestoreResult> {
-    console.log('[GooglePlayService] Restoring purchases');
+    console.log('[AppleIAPService] Restoring purchases');
 
     try {
-      // Get available purchases (unacknowledged purchases)
+      // Get available purchases (unfinished transactions)
       const availablePurchases = await RNIap.getAvailablePurchases();
-      console.log('[GooglePlayService] Available purchases:', availablePurchases.length);
+      console.log('[AppleIAPService] Available purchases:', availablePurchases.length);
 
       if (availablePurchases.length === 0) {
         return {
@@ -289,15 +309,11 @@ export class GooglePlayService implements IPaymentService {
           );
 
           return {
-            userId: 'android_user', // TODO: Replace with actual user ID
+            userId: 'ios_user', // TODO: Replace with actual user ID
             productId: purchase.productId,
             provider: this.provider,
-            transactionId: purchase.transactionId || purchase.purchaseToken || 'unknown',
-            receipt: JSON.stringify({
-              orderId: purchase.transactionId,
-              purchaseToken: purchase.purchaseToken,
-              signature: purchase.signatureAndroid,
-            }),
+            transactionId: purchase.transactionId || 'unknown',
+            receipt: purchase.transactionReceipt,
             purchaseDate: purchase.transactionDate || Date.now(),
             deviceFingerprint,
             validated: true, // TODO: Validate with server
@@ -307,28 +323,17 @@ export class GooglePlayService implements IPaymentService {
 
       // Filter for lifetime access product
       const lifetimePurchases = purchases.filter(
-        (p) => p.productId === 'com.readingdaily.lifetime.access'
+        (p) => p.productId === 'com.readingdaily.lifetime.access.v2'
       );
 
-      // Acknowledge any unacknowledged purchases
-      for (const purchase of availablePurchases) {
-        if (purchase.purchaseToken && !purchase.isAcknowledgedAndroid) {
-          await RNIap.acknowledgePurchaseAndroid({
-            token: purchase.purchaseToken,
-            developerPayload: purchase.productId,
-          });
-          console.log('[GooglePlayService] Acknowledged restored purchase:', purchase.productId);
-        }
-      }
-
-      console.log('[GooglePlayService] Restored purchases:', lifetimePurchases.length);
+      console.log('[AppleIAPService] Restored purchases:', lifetimePurchases.length);
 
       return {
         success: true,
         purchases: lifetimePurchases,
       };
     } catch (error) {
-      console.error('[GooglePlayService] Restore failed:', error);
+      console.error('[AppleIAPService] Restore failed:', error);
       return {
         success: false,
         purchases: [],
@@ -337,53 +342,34 @@ export class GooglePlayService implements IPaymentService {
     }
   }
 
-  async validateReceipt(receipt: string): Promise<boolean> {
-    console.log('[GooglePlayService] Validating purchase token');
+  async validateReceipt(receipt: string, productId?: string): Promise<boolean> {
+    console.log('[AppleIAPService] Validating receipt');
 
-    // TODO: Implement server-side validation
-    // For now, accept all receipts (development only)
+    // Development mode: skip validation
     if (__DEV__) {
-      console.warn('[GooglePlayService] DEV MODE: Receipt validation skipped');
+      console.warn('[AppleIAPService] DEV MODE: Receipt validation skipped');
       return true;
     }
 
-    // Production: Send receipt to backend for validation
-    // Backend should call Google Play Developer API
+    // Production: Call Firebase Cloud Function for validation
     try {
-      const backendUrl = process.env.EXPO_PUBLIC_PAYMENT_BACKEND_URL;
-      if (!backendUrl) {
-        throw new Error('Backend URL not configured');
-      }
+      const validateAppleReceipt = httpsCallable(this.functions, 'validateAppleReceipt');
 
-      const purchaseData = JSON.parse(receipt);
-
-      const response = await fetch(`${backendUrl}/validateGooglePurchase`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          packageName: purchaseData.packageName,
-          productId: purchaseData.productId,
-          purchaseToken: purchaseData.purchaseToken,
-          signature: purchaseData.signature,
-        }),
+      const result = await validateAppleReceipt({
+        receipt,
+        productId: productId || 'com.readingdaily.lifetime.access.v2',
       });
 
-      if (!response.ok) {
-        return false;
-      }
-
-      const result = await response.json();
-      return result.valid === true;
+      const data = result.data as { valid: boolean };
+      return data.valid === true;
     } catch (error) {
-      console.error('[GooglePlayService] Validation failed:', error);
+      console.error('[AppleIAPService] Validation failed:', error);
       return false;
     }
   }
 
   async cleanup(): Promise<void> {
-    console.log('[GooglePlayService] Cleaning up');
+    console.log('[AppleIAPService] Cleaning up');
 
     // Remove listeners
     if (this.purchaseUpdateSubscription) {
@@ -399,50 +385,65 @@ export class GooglePlayService implements IPaymentService {
     // End connection
     try {
       await RNIap.endConnection();
-      console.log('[GooglePlayService] Connection ended');
+      console.log('[AppleIAPService] Connection ended');
     } catch (error) {
-      console.error('[GooglePlayService] Cleanup failed:', error);
+      console.error('[AppleIAPService] Cleanup failed:', error);
     }
+
+    // Reset initialization flag
+    this.isInitialized = false;
   }
 
   // Phase 7: Subscription management methods
 
   /**
    * Cancel a subscription
-   * Note: Google Play subscriptions are managed by the user through their Google Account
-   * This method cannot directly cancel subscriptions
+   * Note: Apple subscriptions are managed by the user through their Apple Account Settings
+   * This method cannot directly cancel subscriptions - it only reflects the user's action
    */
   async cancelSubscription(subscriptionId: string): Promise<CancellationResult> {
-    console.log('[GooglePlayService] Subscription cancellation initiated:', subscriptionId);
+    console.log('[AppleIAPService] Subscription cancellation initiated:', subscriptionId);
 
-    // Google Play doesn't provide a programmatic way to cancel subscriptions
-    // Users must manage subscriptions through Google Play app or account settings
+    // Apple doesn't provide a programmatic way to cancel subscriptions
+    // Users must manage subscriptions through their Apple Account Settings
     // This is a platform limitation, not an error
 
     return {
       success: false,
       subscriptionId,
-      error: 'Subscriptions must be managed through Google Play. Go to Google Play app > Tap account icon > Manage subscriptions.',
+      error: 'Subscriptions must be managed through Apple Account Settings. Go to Settings > [Your Name] > Subscriptions.',
     };
   }
 
   /**
    * Get subscription status
-   * Queries subscription status from Google Play Developer API
+   * Queries local receipt or validates with Apple
    */
   async getSubscriptionStatus(subscriptionId: string): Promise<SubscriptionStatus> {
-    console.log('[GooglePlayService] Getting subscription status:', subscriptionId);
+    console.log('[AppleIAPService] Getting subscription status:', subscriptionId);
 
     try {
-      // TODO: Implement server-side validation with Google Play Developer API
-      // For now, return inactive status
+      // Call Firebase Cloud Function to validate subscription with Apple
+      const validateAppleSubscription = httpsCallable(
+        this.functions,
+        'validateAppleSubscription'
+      );
+
+      const result = await validateAppleSubscription({ subscriptionId });
+      const data = result.data as {
+        isActive: boolean;
+        expiryDate?: number;
+        autoRenewEnabled?: boolean;
+      };
+
       return {
-        isActive: false,
-        willRenew: false,
-        autoRenewEnabled: false,
+        isActive: data.isActive,
+        expiryDate: data.expiryDate,
+        willRenew: data.isActive && data.autoRenewEnabled !== false,
+        autoRenewEnabled: data.autoRenewEnabled !== false,
       };
     } catch (error) {
-      console.error('[GooglePlayService] Get status failed:', error);
+      console.error('[AppleIAPService] Get status failed:', error);
       return {
         isActive: false,
         willRenew: false,
@@ -453,30 +454,30 @@ export class GooglePlayService implements IPaymentService {
 
   /**
    * Update payment method for subscription
-   * Opens Google Play app where user can manage payment method
+   * Opens Apple Account Settings where user can manage payment method
    */
   async updatePaymentMethod(subscriptionId: string): Promise<PaymentResult> {
-    console.log('[GooglePlayService] Update payment method for subscription:', subscriptionId);
+    console.log('[AppleIAPService] Update payment method for subscription:', subscriptionId);
 
-    // Google Play doesn't provide a direct API to change payment methods
-    // Users must manage this through Google Play app or Google Account
+    // Apple doesn't provide a direct API to change payment methods
+    // Users must manage this through their Apple Account Settings
     return {
       success: false,
       provider: this.provider,
-      error: 'Payment methods must be updated through Google Play. Go to Google Play app > Tap account icon > Manage subscriptions.',
+      error: 'Payment methods must be updated through Apple Account Settings. Go to Settings > [Your Name] > Payment & Shipping.',
       timestamp: Date.now(),
     };
   }
 
   /**
-   * Load available products from Google Play Store
+   * Load available products from App Store
    */
   private async loadProducts(): Promise<void> {
     try {
-      console.log('[GooglePlayService] Loading products:', PRODUCT_IDS);
+      console.log('[AppleIAPService] Loading products:', PRODUCT_IDS);
 
       const products = await RNIap.getProducts({ skus: PRODUCT_IDS });
-      console.log('[GooglePlayService] Products loaded:', products.length);
+      console.log('[AppleIAPService] Products loaded:', products.length);
 
       this.products = products.map((product) => {
         // Detect subscription vs one-time based on product ID
@@ -502,29 +503,29 @@ export class GooglePlayService implements IPaymentService {
             ...baseProduct,
             billingPeriod,
             renewalPrice: parseFloat(product.price),
-            trialPeriodDays: 0, // Google Play trial setup varies
+            trialPeriodDays: 30, // Apple subscriptions typically include trial
           };
         }
 
         return baseProduct;
       });
     } catch (error) {
-      console.error('[GooglePlayService] Failed to load products:', error);
+      console.error('[AppleIAPService] Failed to load products:', error);
 
       // Fallback to hardcoded products (for development)
       if (__DEV__) {
-        console.warn('[GooglePlayService] Using fallback products');
+        console.warn('[AppleIAPService] Using fallback products');
         this.products = [
           {
-            id: 'com.readingdaily.lifetime.access',
+            id: 'com.readingdaily.lifetime.access.v2',
             name: 'Lifetime Access',
             description: 'Unlock all features forever',
-            price: 4.99,
+            price: 49.99,
             currency: 'USD',
             type: 'one_time',
           },
           {
-            id: 'com.readingdaily.basic.monthly',
+            id: 'com.readingdaily.basic.monthly.v2',
             name: 'Basic Monthly',
             description: 'Unlimited daily practice + full AI feedback',
             price: 2.99,
@@ -532,10 +533,10 @@ export class GooglePlayService implements IPaymentService {
             type: 'subscription',
             billingPeriod: 'monthly',
             renewalPrice: 2.99,
-            trialPeriodDays: 0,
+            trialPeriodDays: 30,
           },
           {
-            id: 'com.readingdaily.basic.yearly',
+            id: 'com.readingdaily.basic.yearly.v2',
             name: 'Basic Yearly',
             description: 'Unlimited daily practice + full AI feedback (save 2 months!)',
             price: 27.99,
@@ -543,7 +544,7 @@ export class GooglePlayService implements IPaymentService {
             type: 'subscription',
             billingPeriod: 'yearly',
             renewalPrice: 27.99,
-            trialPeriodDays: 0,
+            trialPeriodDays: 30,
           },
         ];
       }

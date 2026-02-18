@@ -301,8 +301,16 @@ export const usePracticeStore = create<PracticeStoreState>((set, get) => ({
     set({ isAssessing: true, error: null });
 
     try {
-      // Perform pronunciation assessment
-      const result = await AzureSpeechService.assessPronunciation(audioUri, referenceText);
+      // Perform pronunciation assessment with 30-second timeout
+      // This prevents infinite "Analyzing..." state if Azure API hangs
+      const timeoutPromise = new Promise<never>((_, reject) => {
+        setTimeout(() => {
+          reject(new Error('Pronunciation assessment timed out after 30 seconds. Please check your internet connection and try again.'));
+        }, 30000);
+      });
+
+      const assessmentPromise = AzureSpeechService.assessPronunciation(audioUri, referenceText);
+      const result = await Promise.race([assessmentPromise, timeoutPromise]);
 
       // Create attempt record
       const attempt: PracticeAttempt = {

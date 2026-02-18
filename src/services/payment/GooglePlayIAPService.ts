@@ -21,7 +21,7 @@ import * as Crypto from 'expo-crypto';
 import { getFunctions, httpsCallable } from 'firebase/functions';
 import { app } from '@/config/firebase';
 
-const PRODUCT_IDS = ['lifetime_access_001']; // Your Google Play product ID
+const PRODUCT_IDS = ['com.readingdaily.lifetime.access']; // Your Google Play product ID
 
 export class GooglePlayIAPService implements IPaymentService {
   readonly provider: PaymentProvider = 'google';
@@ -215,7 +215,7 @@ export class GooglePlayIAPService implements IPaymentService {
 
       // Filter for lifetime access product
       const lifetimePurchases = purchases.filter(
-        (p) => p.productId === 'lifetime_access_001'
+        (p) => p.productId === 'com.readingdaily.lifetime.access'
       );
 
       console.log('[GooglePlayIAPService] Restored purchases:', lifetimePurchases.length);
@@ -249,7 +249,7 @@ export class GooglePlayIAPService implements IPaymentService {
 
       const result = await validateGoogleReceipt({
         receipt,
-        productId: productId || 'lifetime_access_001',
+        productId: productId || 'com.readingdaily.lifetime.access',
       });
 
       const data = result.data as { valid: boolean };
@@ -309,7 +309,7 @@ export class GooglePlayIAPService implements IPaymentService {
         console.warn('[GooglePlayIAPService] Using fallback product');
         this.products = [
           {
-            id: 'lifetime_access_001',
+            id: 'com.readingdaily.lifetime.access',
             name: 'Lifetime Access',
             description: 'Unlock all features forever',
             price: 4.99,

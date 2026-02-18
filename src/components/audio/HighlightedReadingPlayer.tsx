@@ -28,6 +28,7 @@ import {
 } from '@/components/audio/HighlightedTextDisplay';
 import { SentenceTimingData } from '@/types';
 import { Colors, Typography, Spacing, BorderRadius } from '@/constants';
+import { useSettingsStore } from '@/stores/useSettingsStore';
 
 interface HighlightedReadingPlayerProps {
   /** Reading ID (e.g., "gospel_2025-11-11") */
@@ -128,7 +129,7 @@ const ControlBar: React.FC<{
       {/* Rewind button */}
       <TouchableOpacity onPress={onRewind} disabled={isLoading}>
         <Ionicons
-          name="play-back-10"
+          name="play-skip-back"
           size={28}
           color={isLoading ? Colors.text.tertiary : Colors.primary.blue}
         />
@@ -154,7 +155,7 @@ const ControlBar: React.FC<{
       {/* Forward button */}
       <TouchableOpacity onPress={onForward} disabled={isLoading}>
         <Ionicons
-          name="play-forward-10"
+          name="play-skip-forward"
           size={28}
           color={isLoading ? Colors.text.tertiary : Colors.primary.blue}
         />
@@ -179,11 +180,15 @@ export const HighlightedReadingPlayer: React.FC<HighlightedReadingPlayerProps> =
 }) => {
   const isDark = useColorScheme() === 'dark';
 
+  // Check if word highlighting is enabled in settings
+  const { settings } = useSettingsStore();
+  const wordHighlightingEnabled = settings?.audio?.wordHighlightingEnabled ?? true; // Default to true for backward compatibility
+
   // Audio playback
   const soundRef = useRef<Audio.Sound | null>(null);
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
 
-  // Highlighting
+  // Highlighting (only if enabled)
   const {
     currentWord,
     currentWordIndex,
@@ -194,6 +199,7 @@ export const HighlightedReadingPlayer: React.FC<HighlightedReadingPlayerProps> =
     resume,
     seek,
   } = useWordHighlighting(readingId, readingType, {
+    enabled: wordHighlightingEnabled, // Pass enabled state to hook
     config: {
       highlightColor: Colors.primary.blue,
       highlightTextColor: Colors.text.white,
