@@ -2,6 +2,7 @@
   "expo": {
     "name": "ReadingDaily Scripture App",
     "slug": "readingdaily-scripture-app",
+    "scheme": "readingdaily",
     "version": "1.1.6",
     "icon": "./assets/icon.png",
     "orientation": "portrait",
@@ -16,24 +17,35 @@
     },
     "ios": {
       "bundleIdentifier": "com.readingdaily.scripture",
-      "buildNumber": "103",
-      "supportsTabletMode": true,
+      "buildNumber": "104",
       "splash": {
         "image": "./assets/splash.png",
         "resizeMode": "contain",
         "backgroundColor": "#7C3AED"
       },
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSMicrophoneUsageDescription": "This app needs access to your microphone to practice pronunciation of sacred scripture.",
+        "NSUserNotificationsUsageDescription": "This app needs permission to send you daily reading reminders to help you maintain your spiritual practice."
       }
     },
     "android": {
-      "useNextNotificationChannelOnAndroid": true,
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/icon.png",
+        "backgroundColor": "#7C3AED"
+      },
       "splash": {
         "image": "./assets/splash.png",
         "resizeMode": "contain",
         "backgroundColor": "#7C3AED"
-      }
+      },
+      "package": "com.readingdaily.scripture",
+      "compileSdkVersion": 35,
+      "targetSdkVersion": 35,
+      "minSdkVersion": 24,
+      "permissions": [
+        "android.permission.RECORD_AUDIO"
+      ]
     },
     "plugins": [
       [
@@ -46,6 +58,15 @@
           "android": {
             "useNextNotificationChannelOnAndroid": true
           }
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/icon.png",
+          "color": "#7C3AED",
+          "sounds": ["./assets/notification-sound.wav"],
+          "mode": "production"
         }
       ]
     ],
