@@ -369,6 +369,20 @@ export class AppleIAPService implements IPaymentService {
         })
       );
 
+      // Finish all transactions to clear pending state
+      console.log('[AppleIAPService] Finishing', availablePurchases.length, 'transactions');
+      for (const purchase of availablePurchases) {
+        try {
+          await RNIap.finishTransaction({
+            purchase,
+            isConsumable: false,
+          });
+          console.log('[AppleIAPService] Finished transaction:', purchase.id);
+        } catch (error) {
+          console.error('[AppleIAPService] Failed to finish transaction:', purchase.id, error);
+        }
+      }
+
       // Filter for lifetime access product
       const lifetimePurchases = purchases.filter(
         (p) => p.productId === 'com.readingdaily.lifetime.access.v2'
