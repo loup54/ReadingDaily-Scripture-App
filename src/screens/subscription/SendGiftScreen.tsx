@@ -39,6 +39,9 @@ export const SendGiftScreen: React.FC<SendGiftScreenProps> = ({
   const { colors } = useTheme();
   const { user } = useAuthStore();
 
+  // Check if user is authenticated with Firebase
+  const isAuthenticated = !!auth.currentUser;
+
   // Form state
   const [selectedTier, setSelectedTier] = useState<SubscriptionTier>('basic');
   const [recipientEmail, setRecipientEmail] = useState('');
@@ -171,53 +174,124 @@ export const SendGiftScreen: React.FC<SendGiftScreenProps> = ({
           </View>
         </LinearGradient>
 
-        {/* Step Indicator */}
-        <View style={[styles.stepIndicator, { backgroundColor: colors.background.secondary }]}>
-          {['Select', 'Details', 'Confirm'].map((stepName, idx) => (
-            <View key={stepName} style={styles.stepItem}>
+        {/* Authentication Required Message */}
+        {!isAuthenticated && (
+          <View style={styles.content}>
+            <View
+              style={[
+                styles.authRequiredCard,
+                {
+                  backgroundColor: colors.background.card,
+                  borderColor: colors.accent.orange,
+                },
+              ]}
+            >
+              <Ionicons
+                name="person-add"
+                size={48}
+                color={colors.accent.orange}
+                style={styles.authIcon}
+              />
+              <Text style={[styles.authTitle, { color: colors.text.primary }]}>
+                Account Required
+              </Text>
+              <Text style={[styles.authMessage, { color: colors.text.secondary }]}>
+                To send gifts, you need to create an account. This ensures secure delivery
+                and tracking of your gift subscriptions.
+              </Text>
+              <View style={styles.authFeatures}>
+                <View style={styles.authFeature}>
+                  <Ionicons name="checkmark-circle" size={20} color={colors.accent.green} />
+                  <Text style={[styles.authFeatureText, { color: colors.text.secondary }]}>
+                    Send unlimited gifts
+                  </Text>
+                </View>
+                <View style={styles.authFeature}>
+                  <Ionicons name="checkmark-circle" size={20} color={colors.accent.green} />
+                  <Text style={[styles.authFeatureText, { color: colors.text.secondary }]}>
+                    Track gift redemptions
+                  </Text>
+                </View>
+                <View style={styles.authFeature}>
+                  <Ionicons name="checkmark-circle" size={20} color={colors.accent.green} />
+                  <Text style={[styles.authFeatureText, { color: colors.text.secondary }]}>
+                    Add personal messages
+                  </Text>
+                </View>
+              </View>
               <View
                 style={[
-                  styles.stepCircle,
-                  {
-                    backgroundColor:
-                      step === ['select', 'details', 'confirm'][idx]
-                        ? colors.primary.blue
-                        : colors.background.card,
-                  },
+                  styles.authNote,
+                  { backgroundColor: colors.background.secondary },
                 ]}
               >
+                <Ionicons name="information-circle" size={16} color={colors.primary.blue} />
+                <Text style={[styles.authNoteText, { color: colors.text.secondary }]}>
+                  Account creation is free and takes less than 1 minute. You can keep your
+                  existing lifetime access.
+                </Text>
+              </View>
+              <Button
+                title="Go Back"
+                onPress={onBack}
+                variant="secondary"
+                style={styles.authButton}
+              />
+            </View>
+          </View>
+        )}
+
+        {/* Step Indicator */}
+        {isAuthenticated && (
+          <View style={[styles.stepIndicator, { backgroundColor: colors.background.secondary }]}>
+            {['Select', 'Details', 'Confirm'].map((stepName, idx) => (
+              <View key={stepName} style={styles.stepItem}>
+                <View
+                  style={[
+                    styles.stepCircle,
+                    {
+                      backgroundColor:
+                        step === ['select', 'details', 'confirm'][idx]
+                          ? colors.primary.blue
+                          : colors.background.card,
+                    },
+                  ]}
+                >
+                  <Text
+                    style={[
+                      styles.stepNumber,
+                      {
+                        color:
+                          step === ['select', 'details', 'confirm'][idx]
+                            ? colors.text.white
+                            : colors.text.secondary,
+                      },
+                    ]}
+                  >
+                    {idx + 1}
+                  </Text>
+                </View>
                 <Text
                   style={[
-                    styles.stepNumber,
+                    styles.stepLabel,
                     {
                       color:
                         step === ['select', 'details', 'confirm'][idx]
-                          ? colors.text.white
+                          ? colors.primary.blue
                           : colors.text.secondary,
                     },
                   ]}
                 >
-                  {idx + 1}
+                  {stepName}
                 </Text>
               </View>
-              <Text
-                style={[
-                  styles.stepLabel,
-                  {
-                    color:
-                      step === ['select', 'details', 'confirm'][idx]
-                        ? colors.primary.blue
-                        : colors.text.secondary,
-                  },
-                ]}
-              >
-                {stepName}
-              </Text>
-            </View>
-          ))}
-        </View>
+            ))}
+          </View>
+        )}
 
         {/* Content based on step */}
+        {isAuthenticated && (
+        <>
         {step === 'select' && (
           <View style={styles.content}>
             <Text style={[styles.sectionTitle, { color: colors.text.primary }]}>
@@ -508,6 +582,8 @@ export const SendGiftScreen: React.FC<SendGiftScreenProps> = ({
             </View>
           </View>
         )}
+        </>
+        )}
 
         {/* Loading Overlay */}
         {loading && (
@@ -730,5 +806,55 @@ const styles = StyleSheet.create({
     fontSize: FontSizes.md,
     fontWeight: FontWeights.semibold,
     marginTop: Spacing.md,
+  },
+  authRequiredCard: {
+    borderRadius: BorderRadius.lg,
+    borderWidth: 2,
+    padding: Spacing.xl,
+    alignItems: 'center',
+  },
+  authIcon: {
+    marginBottom: Spacing.lg,
+  },
+  authTitle: {
+    fontSize: FontSizes.xl,
+    fontWeight: FontWeights.bold,
+    marginBottom: Spacing.md,
+    textAlign: 'center',
+  },
+  authMessage: {
+    fontSize: FontSizes.md,
+    lineHeight: 22,
+    textAlign: 'center',
+    marginBottom: Spacing.lg,
+  },
+  authFeatures: {
+    width: '100%',
+    gap: Spacing.md,
+    marginBottom: Spacing.lg,
+  },
+  authFeature: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm,
+  },
+  authFeatureText: {
+    fontSize: FontSizes.md,
+    flex: 1,
+  },
+  authNote: {
+    flexDirection: 'row',
+    padding: Spacing.md,
+    borderRadius: BorderRadius.md,
+    marginBottom: Spacing.lg,
+    gap: Spacing.sm,
+  },
+  authNoteText: {
+    fontSize: FontSizes.sm,
+    flex: 1,
+    lineHeight: 18,
+  },
+  authButton: {
+    width: '100%',
   },
 });
