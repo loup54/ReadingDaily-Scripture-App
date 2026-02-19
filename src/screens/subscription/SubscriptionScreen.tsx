@@ -61,8 +61,8 @@ export const SubscriptionScreen: React.FC<SubscriptionScreenProps> = ({
     // Registration is OPTIONAL for syncing across devices
     setPurchasing(true);
     try {
-      const success = await purchaseLifetimeAccess();
-      if (success) {
+      const result = await purchaseLifetimeAccess();
+      if (result.success) {
         // Purchase successful - offer optional sign-in for device sync
         if (isGuest || !user) {
           Alert.alert(
@@ -98,13 +98,14 @@ export const SubscriptionScreen: React.FC<SubscriptionScreenProps> = ({
       } else {
         Alert.alert(
           'Purchase Failed',
-          'Unable to complete your purchase. Please try again.'
+          result.error || 'Unable to complete your purchase. Please try again.'
         );
       }
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : 'An unexpected error occurred';
       Alert.alert(
         'Error',
-        'An unexpected error occurred. Please try again later.'
+        errorMsg + '\n\nPlease try again later.'
       );
     } finally {
       setPurchasing(false);

@@ -48,7 +48,7 @@ interface TrialStoreState extends TrialState {
   initializeTrial: () => Promise<void>;
   startTrial: () => Promise<void>;
   checkTrialStatus: () => Promise<void>;
-  purchaseLifetimeAccess: () => Promise<boolean>;
+  purchaseLifetimeAccess: () => Promise<{ success: boolean; error?: string }>;
   restorePurchase: () => Promise<boolean>;
 
   // Subscription actions (NEW - Phase 1)
@@ -227,7 +227,7 @@ export const useTrialStore = create<TrialStoreState>()(
       },
 
       // Purchase lifetime access
-      purchaseLifetimeAccess: async (): Promise<boolean> => {
+      purchaseLifetimeAccess: async (): Promise<{ success: boolean; error?: string }> => {
         try {
           const state = get();
 
@@ -259,14 +259,15 @@ export const useTrialStore = create<TrialStoreState>()(
               isActive: false,
               hasExpired: false,
             });
-            return true;
+            return { success: true };
           } else {
             console.error('❌ Purchase failed:', result.error);
-            return false;
+            return { success: false, error: result.error || 'Purchase failed' };
           }
         } catch (error) {
+          const errorMsg = error instanceof Error ? error.message : 'Purchase exception';
           console.error('Purchase exception:', error);
-          return false;
+          return { success: false, error: errorMsg };
         }
       },
 
