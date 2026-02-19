@@ -93,7 +93,7 @@ class GoogleTTSService {
       // Save audio to local file (base64 decoded)
       const audioUri = `${cacheDirectory}tts_${Date.now()}.mp3`;
       await FileSystem.writeAsStringAsync(audioUri, data.audioContent, {
-        encoding: FileSystem.EncodingType.Base64,
+        encoding: 'base64',
       });
 
       console.log('[GoogleTTS] Audio saved to:', audioUri);
