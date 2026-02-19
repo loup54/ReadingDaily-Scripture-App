@@ -235,11 +235,12 @@ export const AudioComparison: React.FC<AudioComparisonProps> = ({
                       : playingSource === 'tts'
                       ? `${colors.text.white}80`
                       : colors.text.secondary,
-                    fontSize: ttsError ? 11 : 12,
+                    fontSize: ttsError ? 10 : 12,
                   },
                 ]}
+                numberOfLines={2}
               >
-                {ttsError ? 'API Not Configured' : 'Text-to-Speech'}
+                {ttsError ? ttsError : 'Text-to-Speech'}
               </Text>
             </View>
           </View>
@@ -310,7 +311,7 @@ export const AudioComparison: React.FC<AudioComparisonProps> = ({
           }
         ]}>
           {ttsError
-            ? 'Google Cloud TTS API is not configured. You can still practice with your recording.'
+            ? `TTS Error: ${ttsError} - You can still practice with your recording.`
             : 'Play both audios multiple times to identify differences'}
         </Text>
       </View>

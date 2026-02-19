@@ -31,6 +31,11 @@ class GoogleTTSService {
     voiceName?: string
   ): Promise<string> {
     try {
+      // Debug logging for environment variable
+      console.log('[GoogleTTS] ENV.GOOGLE_CLOUD_API_KEY exists:', !!ENV.GOOGLE_CLOUD_API_KEY);
+      console.log('[GoogleTTS] ENV.GOOGLE_CLOUD_API_KEY length:', ENV.GOOGLE_CLOUD_API_KEY?.length || 0);
+      console.log('[GoogleTTS] ENV.GOOGLE_CLOUD_API_KEY prefix:', ENV.GOOGLE_CLOUD_API_KEY?.substring(0, 8) || 'N/A');
+
       // Validate API key before making request
       if (!ENV.GOOGLE_CLOUD_API_KEY || ENV.GOOGLE_CLOUD_API_KEY.trim() === '') {
         const errorMsg = 'Google Cloud API key is not configured. Please set EXPO_PUBLIC_GOOGLE_CLOUD_API_KEY in your environment.';
@@ -67,8 +72,16 @@ class GoogleTTSService {
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(`TTS API error (${response.status}): ${JSON.stringify(errorData)}`);
+        let errorData;
+        try {
+          errorData = await response.json();
+        } catch (e) {
+          errorData = { error: 'Failed to parse error response' };
+        }
+        const errorMsg = `TTS API error (${response.status}): ${JSON.stringify(errorData)}`;
+        console.error('[GoogleTTS]', errorMsg);
+        console.error('[GoogleTTS] Request URL:', `${GoogleTTSService.API_URL}?key=${ENV.GOOGLE_CLOUD_API_KEY.substring(0, 10)}...`);
+        throw new Error(errorMsg);
       }
 
       const data = await response.json();
