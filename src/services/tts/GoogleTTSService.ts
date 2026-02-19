@@ -5,7 +5,7 @@
  */
 
 import { ENV } from '@/config/env';
-import * as FileSystem from 'expo-file-system';
+import * as FileSystem from 'expo-file-system/legacy';
 
 const cacheDirectory = FileSystem.cacheDirectory || FileSystem.documentDirectory || '';
 
@@ -124,7 +124,7 @@ class GoogleTTSService {
 
       // Check if already cached
       try {
-        const fileInfo = await (FileSystem as any).getInfoAsync(cachedUri);
+        const fileInfo = await FileSystem.getInfoAsync(cachedUri);
         if (fileInfo.exists) {
           console.log('[GoogleTTS] Using cached audio for word:', word);
           return cachedUri;
@@ -139,7 +139,7 @@ class GoogleTTSService {
       // Rename to cache location if different
       if (audioUri !== cachedUri) {
         try {
-          await (FileSystem as any).moveAsync({
+          await FileSystem.moveAsync({
             from: audioUri,
             to: cachedUri,
           });
@@ -168,13 +168,13 @@ class GoogleTTSService {
       const dir = cacheDirectory;
       if (!dir) return;
 
-      const files = await (FileSystem as any).readDirectoryAsync(dir);
+      const files = await FileSystem.readDirectoryAsync(dir);
       const ttsFiles = files.filter((f: string) =>
         (f.startsWith('tts_') || f.startsWith('word_')) && f.endsWith('.mp3')
       );
 
       for (const file of ttsFiles) {
-        await (FileSystem as any).deleteAsync(`${dir}${file}`, { idempotent: true });
+        await FileSystem.deleteAsync(`${dir}${file}`, { idempotent: true });
       }
 
       console.log(`[GoogleTTS] Cleaned up ${ttsFiles.length} TTS files`);
