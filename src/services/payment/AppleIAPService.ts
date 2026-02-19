@@ -58,9 +58,9 @@ export class AppleIAPService implements IPaymentService {
       // Set up purchase update listener
       this.purchaseUpdateSubscription = RNIap.purchaseUpdatedListener(
         async (purchase: RNIap.Purchase) => {
-          console.log('[AppleIAPService] Purchase updated:', purchase.transactionId);
+          console.log('[AppleIAPService] Purchase updated:', purchase.id);
 
-          const receipt = purchase.transactionReceipt;
+          const receipt = purchase.purchaseToken;
           if (receipt) {
             // Finish the transaction
             if (Platform.OS === 'ios') {
@@ -179,12 +179,12 @@ export class AppleIAPService implements IPaymentService {
       // Phase 7: Handle subscription purchases differently
       if (product.type === 'subscription') {
         console.log('[AppleIAPService] Purchasing subscription:', productId);
-        const purchase = await RNIap.requestSubscription({
-          sku: productId,
-          andDangerouslyFinishTransactionAutomaticallyIOS: false,
+        const purchaseResult = await RNIap.requestPurchase({
+          request: { apple: { sku: productId, andDangerouslyFinishTransactionAutomatically: false } },
+          type: 'subs',
         });
 
-        if (!purchase) {
+        if (!purchaseResult) {
           return {
             success: false,
             provider: this.provider,
@@ -193,8 +193,9 @@ export class AppleIAPService implements IPaymentService {
           };
         }
 
-        const transactionId = purchase.transactionId || 'unknown';
-        const receipt = purchase.transactionReceipt || '';
+        const purchase = Array.isArray(purchaseResult) ? purchaseResult[0] : purchaseResult;
+        const transactionId = purchase.id || 'unknown';
+        const receipt = purchase.purchaseToken || '';
         const subscriptionId = purchase.productId || productId;
 
         console.log('[AppleIAPService] Subscription purchase successful:', transactionId);
@@ -210,14 +211,14 @@ export class AppleIAPService implements IPaymentService {
       }
 
       // One-time purchase
-      const purchase = await RNIap.requestPurchase({
-        sku: productId,
-        andDangerouslyFinishTransactionAutomaticallyIOS: false,
+      const purchaseResult = await RNIap.requestPurchase({
+        request: { apple: { sku: productId, andDangerouslyFinishTransactionAutomatically: false } },
+        type: 'in-app',
       });
 
-      console.log('[AppleIAPService] Purchase response:', purchase);
+      console.log('[AppleIAPService] Purchase response:', purchaseResult);
 
-      if (!purchase) {
+      if (!purchaseResult) {
         return {
           success: false,
           provider: this.provider,
@@ -226,9 +227,11 @@ export class AppleIAPService implements IPaymentService {
         };
       }
 
+      const purchase = Array.isArray(purchaseResult) ? purchaseResult[0] : purchaseResult;
+
       // Extract transaction details
-      const transactionId = purchase.transactionId || 'unknown';
-      const receipt = purchase.transactionReceipt || '';
+      const transactionId = purchase.id || 'unknown';
+      const receipt = purchase.purchaseToken || '';
 
       console.log('[AppleIAPService] Purchase successful:', transactionId);
 
@@ -312,8 +315,8 @@ export class AppleIAPService implements IPaymentService {
             userId: 'ios_user', // TODO: Replace with actual user ID
             productId: purchase.productId,
             provider: this.provider,
-            transactionId: purchase.transactionId || 'unknown',
-            receipt: purchase.transactionReceipt,
+            transactionId: purchase.id || 'unknown',
+            receipt: purchase.purchaseToken ?? undefined,
             purchaseDate: purchase.transactionDate || Date.now(),
             deviceFingerprint,
             validated: true, // TODO: Validate with server
@@ -476,23 +479,26 @@ export class AppleIAPService implements IPaymentService {
     try {
       console.log('[AppleIAPService] Loading products:', PRODUCT_IDS);
 
-      const products = await RNIap.getProducts(PRODUCT_IDS);
-      console.log('[AppleIAPService] Products loaded:', products.length);
+      const products = await RNIap.fetchProducts({ skus: PRODUCT_IDS, type: 'all' });
+      console.log('[AppleIAPService] Products loaded:', products?.length ?? 0);
+
+      if (!products) {
+        console.warn('[AppleIAPService] No products returned from store');
+        return;
+      }
 
       this.products = products.map((product) => {
-        // Detect subscription vs one-time based on product ID
-        const isSubscription =
-          product.productId.includes('monthly') || product.productId.includes('yearly');
-
-        const billingPeriod = product.productId.includes('yearly')
-          ? 'yearly'
-          : 'monthly';
+        // v14: product.type is 'in-app' | 'subs', product.id is the SKU
+        const isSubscription = product.type === 'subs';
+        const billingPeriod = product.id.includes('yearly') ? 'yearly' : 'monthly';
+        // v14: product.price is already a number (or null)
+        const price = product.price ?? 0;
 
         const baseProduct: PaymentProduct = {
-          id: product.productId,
+          id: product.id,
           name: product.title,
           description: product.description,
-          price: parseFloat(product.price),
+          price,
           currency: product.currency,
           type: isSubscription ? 'subscription' : 'one_time',
         };
@@ -502,7 +508,7 @@ export class AppleIAPService implements IPaymentService {
           return {
             ...baseProduct,
             billingPeriod,
-            renewalPrice: parseFloat(product.price),
+            renewalPrice: price,
             trialPeriodDays: 30, // Apple subscriptions typically include trial
           };
         }
