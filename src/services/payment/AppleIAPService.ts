@@ -172,6 +172,33 @@ export class AppleIAPService implements IPaymentService {
         console.log('[AppleIAPService] Products loaded:', this.products.length);
       }
 
+      // CRITICAL FIX: Clear any pending transactions BEFORE attempting new purchase
+      // If there's a pending unfinished transaction, StoreKit returns [] and blocks new purchases
+      console.log('[AppleIAPService] Checking for pending transactions before purchase...');
+      try {
+        const availablePurchases = await RNIap.getAvailablePurchases();
+        if (availablePurchases.length > 0) {
+          console.log('[AppleIAPService] Found', availablePurchases.length, 'pending transaction(s), clearing them now...');
+          for (const purchase of availablePurchases) {
+            try {
+              await RNIap.finishTransaction({
+                purchase,
+                isConsumable: false,
+              });
+              console.log('[AppleIAPService] ✅ Cleared pending transaction:', purchase.id);
+            } catch (finishError) {
+              console.error('[AppleIAPService] ⚠️ Failed to clear transaction:', purchase.id, finishError);
+            }
+          }
+          console.log('[AppleIAPService] ✅ All pending transactions cleared');
+        } else {
+          console.log('[AppleIAPService] ✅ No pending transactions found');
+        }
+      } catch (error) {
+        console.error('[AppleIAPService] ⚠️ Error checking pending transactions:', error);
+        // Continue with purchase attempt even if clearing fails
+      }
+
       // Get product to determine if it's a subscription
       const product = this.products.find((p) => p.id === productId);
 
