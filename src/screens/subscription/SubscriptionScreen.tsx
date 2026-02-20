@@ -17,7 +17,6 @@ import { Colors, Typography, Spacing, BorderRadius, Shadows } from '@constants';
 import { useTrialStore } from '@stores/useTrialStore';
 import { useAuthStore } from '@stores/useAuthStore';
 import { useTheme } from '@/hooks/useTheme';
-import { auth } from '@/config/firebase';
 
 // iPad detection
 const { width } = Dimensions.get('window');
@@ -639,7 +638,7 @@ export const SubscriptionScreen: React.FC<SubscriptionScreenProps> = ({
           )}
 
           {/* Gifting Section - Only show for authenticated users */}
-          {auth.currentUser && (
+          {user && !isGuest && (
             <View style={styles.giftingSection}>
               <Text style={[styles.giftingTitle, { color: colors.text.primary }]}>
                 Share the Gift
