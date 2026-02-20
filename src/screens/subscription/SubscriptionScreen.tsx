@@ -48,14 +48,6 @@ export const SubscriptionScreen: React.FC<SubscriptionScreenProps> = ({
   const [purchasing, setPurchasing] = useState(false);
   const [restoring, setRestoring] = useState(false);
 
-  const handleSendGift = () => {
-    router.push('/(tabs)/subscription/send-gift');
-  };
-
-  const handleRedeemGift = () => {
-    router.push('/(tabs)/subscription/redeem-gift');
-  };
-
   const handlePurchase = async () => {
     // Apple Guideline 5.1.1 Compliance: Allow guest users to purchase IAP
     // Registration is OPTIONAL for syncing across devices
@@ -637,37 +629,8 @@ export const SubscriptionScreen: React.FC<SubscriptionScreenProps> = ({
             </View>
           )}
 
-          {/* Gifting Section - Only show for authenticated users */}
-          {user && !isGuest && (
-            <View style={styles.giftingSection}>
-              <Text style={[styles.giftingTitle, { color: colors.text.primary }]}>
-                Share the Gift
-              </Text>
-              <Text style={[styles.giftingSubtitle, { color: colors.text.secondary }]}>
-                Send access to friends and family
-              </Text>
-
-              <Button
-                title="Send a Gift"
-                icon="gift"
-                variant="secondary"
-                size="md"
-                fullWidth
-                onPress={handleSendGift}
-                style={styles.giftButton}
-              />
-
-              <Button
-                title="Redeem a Gift Code"
-                icon="checkmark-circle"
-                variant="outline"
-                size="md"
-                fullWidth
-                onPress={handleRedeemGift}
-                style={styles.giftButton}
-              />
-            </View>
-          )}
+          {/* Gifting Section - Temporarily removed for v1.1.6 submission */}
+          {/* Will be re-enabled in v1.1.7 after auth improvements */}
         </ScrollView>
       </LinearGradient>
     </SafeAreaView>
