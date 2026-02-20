@@ -17,6 +17,7 @@ import { Colors, Typography, Spacing, BorderRadius, Shadows } from '@constants';
 import { useTrialStore } from '@stores/useTrialStore';
 import { useAuthStore } from '@stores/useAuthStore';
 import { useTheme } from '@/hooks/useTheme';
+import { auth } from '@/config/firebase';
 
 // iPad detection
 const { width } = Dimensions.get('window');
@@ -637,35 +638,37 @@ export const SubscriptionScreen: React.FC<SubscriptionScreenProps> = ({
             </View>
           )}
 
-          {/* Gifting Section */}
-          <View style={styles.giftingSection}>
-            <Text style={[styles.giftingTitle, { color: colors.text.primary }]}>
-              Share the Gift
-            </Text>
-            <Text style={[styles.giftingSubtitle, { color: colors.text.secondary }]}>
-              Send access to friends and family
-            </Text>
+          {/* Gifting Section - Only show for authenticated users */}
+          {auth.currentUser && (
+            <View style={styles.giftingSection}>
+              <Text style={[styles.giftingTitle, { color: colors.text.primary }]}>
+                Share the Gift
+              </Text>
+              <Text style={[styles.giftingSubtitle, { color: colors.text.secondary }]}>
+                Send access to friends and family
+              </Text>
 
-            <Button
-              title="Send a Gift"
-              icon="gift"
-              variant="secondary"
-              size="md"
-              fullWidth
-              onPress={handleSendGift}
-              style={styles.giftButton}
-            />
+              <Button
+                title="Send a Gift"
+                icon="gift"
+                variant="secondary"
+                size="md"
+                fullWidth
+                onPress={handleSendGift}
+                style={styles.giftButton}
+              />
 
-            <Button
-              title="Redeem a Gift Code"
-              icon="checkmark-circle"
-              variant="outline"
-              size="md"
-              fullWidth
-              onPress={handleRedeemGift}
-              style={styles.giftButton}
-            />
-          </View>
+              <Button
+                title="Redeem a Gift Code"
+                icon="checkmark-circle"
+                variant="outline"
+                size="md"
+                fullWidth
+                onPress={handleRedeemGift}
+                style={styles.giftButton}
+              />
+            </View>
+          )}
         </ScrollView>
       </LinearGradient>
     </SafeAreaView>
