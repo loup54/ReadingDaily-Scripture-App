@@ -48,61 +48,35 @@ export const SubscriptionScreen: React.FC<SubscriptionScreenProps> = ({
   const [purchasing, setPurchasing] = useState(false);
   const [restoring, setRestoring] = useState(false);
 
-  const handlePurchase = async () => {
-    // Apple Guideline 5.1.1 Compliance: Allow guest users to purchase IAP
-    // Registration is OPTIONAL for syncing across devices
-    setPurchasing(true);
-    try {
-      const result = await purchaseLifetimeAccess();
-      if (result.success) {
-        // Purchase successful - offer optional sign-in for device sync
-        if (isGuest || !user) {
-          Alert.alert(
-            'Purchase Successful!',
-            'You now have lifetime access to all features on this device.\n\nWould you like to create an account to sync your purchase across devices?',
-            [
-              {
-                text: 'Not Now',
-                style: 'cancel',
-                onPress: onPurchaseComplete,
-              },
-              {
-                text: 'Create Account',
-                onPress: () => {
-                  router.push('/(auth)/sign-up');
-                },
-              },
-            ]
-          );
-        } else {
-          // Already authenticated - just show success
-          Alert.alert(
-            'Purchase Successful!',
-            'You now have lifetime access to all features.',
-            [
-              {
-                text: 'OK',
-                onPress: onPurchaseComplete,
-              },
-            ]
-          );
-        }
-      } else {
-        Alert.alert(
-          'Purchase Failed',
-          result.error || 'Unable to complete your purchase. Please try again.'
-        );
-      }
-    } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : 'An unexpected error occurred';
-      Alert.alert(
-        'Error',
-        errorMsg + '\n\nPlease try again later.'
-      );
-    } finally {
-      setPurchasing(false);
-    }
-  };
+  // TEMPORARILY REMOVED for v1.1.6 - Lifetime purchase not working in TestFlight
+  // Will be re-enabled in v1.1.7 after Apple approval
+  // const handlePurchase = async () => {
+  //   setPurchasing(true);
+  //   try {
+  //     const result = await purchaseLifetimeAccess();
+  //     if (result.success) {
+  //       if (isGuest || !user) {
+  //         Alert.alert(
+  //           'Purchase Successful!',
+  //           'You now have lifetime access to all features on this device.\n\nWould you like to create an account to sync your purchase across devices?',
+  //           [
+  //             { text: 'Not Now', style: 'cancel', onPress: onPurchaseComplete },
+  //             { text: 'Create Account', onPress: () => { router.push('/(auth)/sign-up'); } },
+  //           ]
+  //         );
+  //       } else {
+  //         Alert.alert('Purchase Successful!', 'You now have lifetime access to all features.', [{ text: 'OK', onPress: onPurchaseComplete }]);
+  //       }
+  //     } else {
+  //       Alert.alert('Purchase Failed', result.error || 'Unable to complete your purchase. Please try again.');
+  //     }
+  //   } catch (error) {
+  //     const errorMsg = error instanceof Error ? error.message : 'An unexpected error occurred';
+  //     Alert.alert('Error', errorMsg + '\n\nPlease try again later.');
+  //   } finally {
+  //     setPurchasing(false);
+  //   }
+  // };
 
   const handleRestore = async () => {
     // Check if user is guest or not authenticated before restoring
@@ -490,103 +464,8 @@ export const SubscriptionScreen: React.FC<SubscriptionScreenProps> = ({
                 </View>
               </LinearGradient>
 
-              {/* Subscription Tiers - Lifetime (Best Value) */}
-              <LinearGradient
-                colors={[colors.accent.green + '15', colors.accent.blue + '15']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={styles.pricingCardGradient}
-              >
-                <View style={[styles.pricingCard, { backgroundColor: colors.card }]}>
-                  <View style={styles.pricingHeader}>
-                    <View style={styles.badgeContainer}>
-                      <View style={[styles.bestValueBadge, { backgroundColor: colors.accent.green + '30' }]}>
-                        <Text style={[styles.badgeText, { color: colors.accent.green }]}>Best Value</Text>
-                      </View>
-                    </View>
-                    <Text style={[styles.pricingTitle, { color: colors.text }]}>Lifetime</Text>
-                    <View style={styles.priceBadge}>
-                      <Text style={[styles.priceAmount, { color: colors.primary }]}>$49.99</Text>
-                      <Text style={[styles.priceLabel, { color: colors.textSecondary }]}>one-time</Text>
-                    </View>
-                  </View>
-
-                  <View style={[styles.divider, { backgroundColor: colors.border }]} />
-
-                  <View style={styles.featuresList}>
-                    <View style={styles.featureRow}>
-                      <Ionicons
-                        name="checkmark-circle"
-                        size={isTablet ? 24 : 20}
-                        color={colors.accent.green}
-                      />
-                      <Text style={[styles.featureText, { color: colors.text }]}>
-                        All Premium features
-                      </Text>
-                    </View>
-                    <View style={styles.featureRow}>
-                      <Ionicons
-                        name="checkmark-circle"
-                        size={isTablet ? 24 : 20}
-                        color={colors.accent.green}
-                      />
-                      <Text style={[styles.featureText, { color: colors.text }]}>
-                        Lifetime updates
-                      </Text>
-                    </View>
-                    <View style={styles.featureRow}>
-                      <Ionicons
-                        name="checkmark-circle"
-                        size={isTablet ? 24 : 20}
-                        color={colors.accent.green}
-                      />
-                      <Text style={[styles.featureText, { color: colors.text }]}>
-                        Priority support
-                      </Text>
-                    </View>
-                    <View style={styles.featureRow}>
-                      <Ionicons
-                        name="checkmark-circle"
-                        size={isTablet ? 24 : 20}
-                        color={colors.accent.green}
-                      />
-                      <Text style={[styles.featureText, { color: colors.text }]}>
-                        Exclusive content
-                      </Text>
-                    </View>
-                    <View style={styles.featureRow}>
-                      <Ionicons
-                        name="checkmark-circle"
-                        size={isTablet ? 24 : 20}
-                        color={colors.accent.green}
-                      />
-                      <Text style={[styles.featureText, { color: colors.text }]}>
-                        Never expires
-                      </Text>
-                    </View>
-                    <View style={styles.featureRow}>
-                      <Ionicons
-                        name="checkmark-circle"
-                        size={isTablet ? 24 : 20}
-                        color={colors.accent.green}
-                      />
-                      <Text style={[styles.featureText, { color: colors.text }]}>
-                        One-time payment
-                      </Text>
-                    </View>
-                  </View>
-
-                  <Button
-                    title="Get Lifetime Access"
-                    variant="accent"
-                    size="lg"
-                    fullWidth
-                    onPress={handlePurchase}
-                    loading={purchasing}
-                    style={styles.purchaseButton}
-                  />
-                </View>
-              </LinearGradient>
+              {/* LIFETIME TIER TEMPORARILY REMOVED FOR v1.1.6 */}
+              {/* Will be re-enabled in v1.1.7 after Apple approval */}
 
               {/* Trial Section */}
               {!isActive && !hasExpired && (
