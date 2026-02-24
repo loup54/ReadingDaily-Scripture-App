@@ -1,26 +1,33 @@
 # Future Work Queue
-**Last Updated:** February 20, 2026
-**Current Version:** 1.1.6 (Build 117) - Submitted to Apple Review
-**Status:** ⏳ Waiting for Apple approval, planning v1.1.7
+**Last Updated:** February 25, 2026
+**Current Version:** 1.1.7 (Build 118) - IN DEVELOPMENT
+**Status:** 🎉 v1.1.6 APPROVED - Re-enabling lifetime purchase in v1.1.7
 
 ---
 
 ## Current Status
 
-### Version 1.1.6 (Build 117)
-- **Status:** 🚀 SUBMITTED TO APPLE REVIEW (February 20, 2026)
-- **Expected Approval:** February 21-23, 2026 (1-3 days)
+### Version 1.1.7 (Build 118) - IN PROGRESS
+- **Status:** 🔧 CODE CHANGES COMPLETE (February 25, 2026)
+- **Changes:** Re-enabled lifetime purchase ($49.99)
+- **Next:** Build, test in TestFlight, submit to Apple
+- **Expected Submission:** February 25-26, 2026
+- **Expected Approval:** February 27-March 1, 2026 (1-3 days after submission)
+
+### Version 1.1.6 (Build 117) - LIVE ✅
+- **Status:** ✅ APPROVED and LIVE on App Store (February 24, 2026)
+- **App Store URL:** https://apps.apple.com/app/readingdaily-scripture/id6753561999
 - **Features:** Monthly/yearly subscriptions, 7-day trial, TTS pronunciation
-- **Deferred:** Lifetime purchase, Send a Gift, Redeem Gift Code
+- **Deferred to v1.1.7:** Lifetime purchase (NOW BEING ADDED)
 
 ---
 
 ## Version 1.1.7 - High Priority (After v1.1.6 Approval)
 
-### 1. Re-enable Lifetime Purchase ⭐ CRITICAL
+### 1. Re-enable Lifetime Purchase ⭐ IN PROGRESS
 **Priority:** P0 - First task after approval
 **Effort:** 1-2 hours
-**Status:** Code ready, just needs uncommenting
+**Status:** ✅ CODE CHANGES COMPLETE (Feb 25, 2026)
 
 **Files to Modify:**
 - `src/screens/subscription/SubscriptionScreen.tsx`

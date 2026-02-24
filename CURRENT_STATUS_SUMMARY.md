@@ -1,18 +1,25 @@
 # ReadingDaily Scripture App - Current Status Summary
-**Date:** February 20, 2026
-**Version:** 1.1.6 (Build 117)
-**Status:** 🚀 SUBMITTED TO APPLE REVIEW
+**Date:** February 25, 2026
+**Version:** 1.1.7 (Build 118) - IN PROGRESS
+**Status:** 🎉 v1.1.6 APPROVED - Building v1.1.7
 
 ---
 
 ## 📍 Where We Are Now
 
-### Build 117 - Awaiting Apple Approval
-- **Submitted:** February 20, 2026 at 8:27 PM
-- **Expected Decision:** February 21-23, 2026 (1-3 days)
+### Build 118 - v1.1.7 In Development
+- **Phase:** Code changes complete, ready to build
+- **Changes:** Re-enabled lifetime purchase ($49.99)
+- **Next Steps:** Build, test in TestFlight, submit to Apple
 - **App Store Connect:** https://appstoreconnect.apple.com/apps/6753561999
 
-### What's Working in Build 117 ✅
+### Build 117 - v1.1.6 APPROVED ✅
+- **Submitted:** February 20, 2026 at 8:27 PM
+- **Approved:** February 24, 2026 at 10:53 PM AEST
+- **Status:** LIVE on App Store
+- **App Store URL:** https://apps.apple.com/app/readingdaily-scripture/id6753561999
+
+### What's Live in v1.1.6 (App Store) ✅
 1. **Monthly Subscription** - $2.99/month (fully functional)
 2. **Yearly Subscription** - $19.99/year (fully functional)
 3. **7-Day Free Trial** - Trial system operational
@@ -20,10 +27,15 @@
 5. **Restore Purchases** - Purchase restoration functional
 6. **Clean UI** - No broken features visible to users
 
-### What's Temporarily Removed ⏸️
-1. **Lifetime Purchase** ($49.99) - Removed due to TestFlight sandbox limitations
-2. **Send a Gift** - Removed due to Firebase auth token issues
-3. **Redeem Gift Code** - Removed (dependent on Send a Gift)
+### What's Being Added in v1.1.7 (Build 118) 🔧
+1. **Lifetime Purchase** ($49.99) - RE-ENABLED (code changes complete)
+   - Product approved in App Store Connect
+   - Should work in TestFlight after v1.1.6 approval
+   - Offers one-time payment alternative to subscriptions
+
+### What's Still Deferred ⏸️
+1. **Send a Gift** - Deferred to v1.1.8 (Firebase auth token issues)
+2. **Redeem Gift Code** - Deferred to v1.1.8 (dependent on Send a Gift)
 
 ---
 

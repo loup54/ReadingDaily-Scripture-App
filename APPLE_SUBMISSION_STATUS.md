@@ -1,21 +1,51 @@
 # Apple App Store Submission Status Report
-**Version:** 1.1.6 (Build 117)
-**Last Updated:** February 20, 2026
-**Status:** 🚀 SUBMITTED TO APPLE REVIEW
+**Version:** 1.1.7 (Build 118) - IN PROGRESS
+**Last Updated:** February 25, 2026
+**Status:** 🎉 v1.1.6 APPROVED - Building v1.1.7
 
 ---
 
 ## Current Status
 
-### Build 117 - In Apple Review
-- **Submission Date:** February 20, 2026
-- **Version:** 1.1.6
-- **Build Number:** 117
-- **Status:** ✅ Submitted to Apple App Store Review
-- **Expected Review Time:** 1-3 days
+### Build 118 - v1.1.7 In Development
+- **Current Phase:** Code changes complete, ready for build
+- **Version:** 1.1.7
+- **Build Number:** 118
+- **Status:** 🔧 Re-enabling lifetime purchase
+- **Changes:** Lifetime purchase ($49.99) re-enabled
 - **App Store Connect:** https://appstoreconnect.apple.com/apps/6753561999
 
-### What Was Submitted
+### Build 117 - v1.1.6 APPROVED ✅
+- **Submission Date:** February 20, 2026
+- **Approval Date:** February 24, 2026
+- **Version:** 1.1.6
+- **Build Number:** 117
+- **Status:** ✅ APPROVED and LIVE on App Store
+- **App Store URL:** https://apps.apple.com/app/readingdaily-scripture/id6753561999
+- **Review Time:** 4 days
+
+## Version 1.1.7 Status - IN PROGRESS
+
+### What's Being Added in v1.1.7
+✅ **Re-enabling Lifetime Purchase:**
+- Product: com.readingdaily.lifetime.access.v2
+- Price: $49.99 one-time payment
+- Type: Non-Consumable
+- Status: Approved in App Store Connect
+- Code: Re-enabled in SubscriptionScreen.tsx
+- Expected: Will work in TestFlight after v1.1.6 approval
+
+### v1.1.7 Timeline
+- **Feb 25, 2026:** Code changes complete ✅
+- **Next:** Build 118 and test in TestFlight
+- **Then:** Submit to Apple Review
+- **Expected Approval:** 1-3 days after submission
+
+---
+
+## Version 1.1.6 - LIVE ON APP STORE ✅
+
+### What Was Submitted (Build 117)
 ✅ **Working Features:**
 - Monthly subscription ($2.99/month) - fully functional
 - Yearly subscription ($19.99/year) - fully functional
@@ -24,10 +54,10 @@
 - Restore purchases functionality
 - Clean UI with no broken features
 
-❌ **Features Temporarily Removed:**
-- Lifetime purchase ($49.99 one-time) - removed for this version
-- Send a Gift feature - removed for this version
-- Redeem Gift Code feature - removed for this version
+❌ **Features Temporarily Removed in v1.1.6:**
+- Lifetime purchase ($49.99 one-time) - RE-ENABLING IN v1.1.7
+- Send a Gift feature - deferred to v1.1.8
+- Redeem Gift Code feature - deferred to v1.1.8
 
 ---
 
