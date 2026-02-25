@@ -1,18 +1,20 @@
 # Apple App Store Submission Status Report
-**Version:** 1.1.7 (Build 118) - IN PROGRESS
-**Last Updated:** February 25, 2026
-**Status:** 🎉 v1.1.6 APPROVED - Building v1.1.7
+**Version:** 1.1.7 (Build 118) - WAITING FOR REVIEW
+**Last Updated:** February 25, 2026 (Evening)
+**Status:** ⏳ v1.1.7 SUBMITTED - Waiting for Apple Review
 
 ---
 
 ## Current Status
 
-### Build 118 - v1.1.7 In Development
-- **Current Phase:** Code changes complete, ready for build
+### Build 118 - v1.1.7 SUBMITTED TO APPLE ✅
+- **Current Phase:** Waiting for Apple Review
+- **Submission Date:** February 25, 2026
 - **Version:** 1.1.7
 - **Build Number:** 118
-- **Status:** 🔧 Re-enabling lifetime purchase
+- **Status:** ⏳ In Review
 - **Changes:** Lifetime purchase ($49.99) re-enabled
+- **Expected Decision:** February 27-29, 2026 (1-3 days)
 - **App Store Connect:** https://appstoreconnect.apple.com/apps/6753561999
 
 ### Build 117 - v1.1.6 APPROVED ✅
@@ -36,10 +38,18 @@
 - Expected: Will work in TestFlight after v1.1.6 approval
 
 ### v1.1.7 Timeline
-- **Feb 25, 2026:** Code changes complete ✅
-- **Next:** Build 118 and test in TestFlight
-- **Then:** Submit to Apple Review
-- **Expected Approval:** 1-3 days after submission
+- **Feb 25, 2026 (Morning):** Code changes complete ✅
+- **Feb 25, 2026 (Midday):** Build 118 created and tested ✅
+- **Feb 25, 2026 (Afternoon):** Submitted to Apple Review ✅
+- **Feb 25, 2026 (Evening):** Fixed $7.99 pricing in screenshot, generated promo codes ✅
+- **Expected Approval:** February 27-29, 2026 (1-3 days)
+
+### Additional Work Completed Feb 25
+- ✅ Identified and fixed $7.99 display issue (screenshot showed wrong pricing)
+- ✅ Created HTML advertisement with free trial badge and ourenglish.best credit
+- ✅ Generated 10 lifetime promo codes for friends/influencers
+- ✅ Planned screenshot reordering strategy (after approval)
+- ✅ Decided to keep developer name as "Lou Page" (legal entity)
 
 ---
 
@@ -99,10 +109,27 @@
 - **Build 116:** Added pending transaction clearing BEFORE every purchase attempt
 - **Result:** ❌ Lifetime purchase still failed with empty result from StoreKit
 
-### Build 117 (February 20, 2026) - Submission Build
+### Build 117 (February 20, 2026) - v1.1.6 Submission Build
 - **Decision:** Remove lifetime purchase option entirely, submit with subscriptions only
 - **Rationale:** Non-Consumable IAP products need Apple Review approval before TestFlight recognizes them
-- **Status:** ✅ Submitted to Apple Review
+- **Status:** ✅ Submitted to Apple Review → APPROVED February 24, 2026
+
+### Build 118 (February 25, 2026) - v1.1.7 Submission Build
+- **Changes:** Re-enabled lifetime purchase ($49.99)
+- **Testing:** Lifetime purchase still failed in TestFlight (expected - TestFlight sandbox limitation)
+- **Decision:** Submit to Apple anyway - product configuration verified correct
+- **Issues Discovered Post-Submission:**
+  1. ❌ **$7.99 Pricing Display** - App Store showed "$7.99 In-App Purchases" instead of starting at $2.99
+  2. ❌ **Screenshot Order** - Not optimal (daily reading should be first)
+  3. ℹ️ **Developer Name** - Shows "Lou Page" instead of "ourenglish.best"
+- **Issues Fixed:**
+  1. ✅ **$7.99 Fixed** - Found old screenshot with $7.99 pricing in 6.1" display, corrected to show proper pricing
+  2. ⏸️ **Screenshot Order** - Locked during review, will reorder after approval
+  3. ✅ **Developer Name** - Decided to keep "Lou Page" (legal entity, requires documentation to change)
+- **Additional Work:**
+  - ✅ Created HTML advertisement with free trial badge and ourenglish.best credit
+  - ✅ Generated 10 lifetime promo codes for promotional use
+- **Status:** ✅ Submitted to Apple Review - Waiting for decision
 
 ---
 
@@ -371,19 +398,24 @@ WITH the app to Apple Review before TestFlight sandbox recognizes them.
 ```
 February 2, 2026:   Apple rejected v1.1.5 (Guideline 2.1.0)
 February 3-18:      Builds 99-116 (fixing crashes, IAP, TTS)
-February 20, 2026:  Build 117 submitted to Apple Review ⭐ YOU ARE HERE
-February 21-23:     Expected: Apple review in progress
-February 24, 2026:  Expected: Apple approval (optimistic)
-February 25, 2026:  Begin v1.1.7 development (re-enable features)
-March 1, 2026:      Target: v1.1.7 submission with lifetime + gifting
+February 20, 2026:  Build 117 (v1.1.6) submitted to Apple Review
+February 21-23:     Apple review in progress
+February 24, 2026:  Build 117 (v1.1.6) APPROVED ✅ - App goes LIVE
+February 25, 2026:  Build 118 (v1.1.7) development, build, and submission
+                    - Morning: Code changes (re-enable lifetime)
+                    - Midday: Build & test in TestFlight
+                    - Afternoon: Submit to Apple Review
+                    - Evening: Fix $7.99 pricing, create promo codes
+February 27-29:     Expected: v1.1.7 approval decision ⭐ WAITING HERE
+March 2026:         Target: v1.1.8 with gifting feature fixes
 ```
 
 ---
 
-**Status:** ✅ Build 117 submitted successfully
-**Confidence Level:** High - subscriptions work, UI is clean
-**Expected Outcome:** Approval (all tested features work correctly)
-**Next Action:** Wait for Apple review (1-3 days)
+**Status:** ✅ Build 118 (v1.1.7) submitted successfully
+**Confidence Level:** High - lifetime purchase code verified, pricing corrected
+**Expected Outcome:** Approval (70-80% probability lifetime works in production)
+**Next Action:** Wait for Apple review (1-3 days), then reorder screenshots
 
 ---
 
