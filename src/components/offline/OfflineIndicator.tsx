@@ -27,7 +27,10 @@ export const OfflineIndicator: React.FC<OfflineIndicatorProps> = ({
   const [networkState, setNetworkState] = useState<NetworkState>(
     NetworkStatusService.getCurrentState()
   );
-  const [isVisible, setIsVisible] = useState(!networkState.isConnected);
+  // Only show offline indicator when we're CONFIRMED offline, not when status is 'unknown'
+  const [isVisible, setIsVisible] = useState(
+    networkState.status === 'offline'
+  );
   const slideAnim = React.useRef(new Animated.Value(isVisible ? 0 : -100)).current;
 
   useEffect(() => {
@@ -37,12 +40,13 @@ export const OfflineIndicator: React.FC<OfflineIndicatorProps> = ({
     const unsubscribe = NetworkStatusService.onNetworkChange((state) => {
       console.log('[OfflineIndicator] Network state changed:', state);
       setNetworkState(state);
-      setIsVisible(!state.isConnected);
+      // Only show when CONFIRMED offline, not 'unknown'
+      setIsVisible(state.status === 'offline');
 
       // Animate in/out
       if (animated) {
         Animated.timing(slideAnim, {
-          toValue: state.isConnected ? -100 : 0,
+          toValue: state.status === 'offline' ? 0 : -100,
           duration: 300,
           useNativeDriver: true,
         }).start();
@@ -56,21 +60,21 @@ export const OfflineIndicator: React.FC<OfflineIndicatorProps> = ({
   }, [animated, slideAnim]);
 
   const getStatusIcon = () => {
-    if (networkState.isConnected) {
-      return 'wifi';
+    if (networkState.status === 'offline') {
+      return 'alert-circle-outline';
     }
-    return 'alert-circle-outline';
+    return 'wifi';
   };
 
   const getStatusColor = () => {
-    if (networkState.isConnected) {
-      return Colors.success;
+    if (networkState.status === 'offline') {
+      return Colors.error;
     }
-    return Colors.error;
+    return Colors.success;
   };
 
   const getStatusText = () => {
-    if (!networkState.isConnected) {
+    if (networkState.status === 'offline') {
       return 'Offline - Limited functionality';
     }
     if (networkState.type === 'wifi') {

@@ -17,7 +17,7 @@
     },
     "ios": {
       "bundleIdentifier": "com.readingdaily.scripture",
-      "buildNumber": "118",
+      "buildNumber": "119",
       "splash": {
         "image": "./assets/splash.png",
         "resizeMode": "contain",
@@ -40,7 +40,7 @@
         "backgroundColor": "#7C3AED"
       },
       "package": "com.readingdaily.scripture",
-      "versionCode": 2,
+      "versionCode": 3,
       "compileSdkVersion": 35,
       "targetSdkVersion": 35,
       "minSdkVersion": 24,
