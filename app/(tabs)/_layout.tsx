@@ -7,17 +7,28 @@
  */
 
 import React, { useEffect } from 'react';
+import { Platform } from 'react-native';
 import { Tabs, useSegments } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Colors } from '@constants';
 
 export default function TabsLayout() {
   const segments = useSegments();
+  const insets = useSafeAreaInsets();
 
   useEffect(() => {
     console.log('[TAB_NAVIGATION] Current segments:', segments);
     console.log('[TAB_NAVIGATION] Active route:', segments[segments.length - 1]);
   }, [segments]);
+
+  // Android needs extra bottom padding for gesture navigation
+  const bottomPadding = Platform.OS === 'android'
+    ? Math.max(insets.bottom, 8)
+    : 8;
+  const tabBarHeight = Platform.OS === 'android'
+    ? 65 + Math.max(insets.bottom - 8, 0)
+    : 65;
 
   return (
     <Tabs
@@ -29,9 +40,9 @@ export default function TabsLayout() {
           backgroundColor: Colors.background.card,
           borderTopWidth: 1,
           borderTopColor: Colors.ui.border,
-          paddingBottom: 8,
+          paddingBottom: bottomPadding,
           paddingTop: 8,
-          height: 65,
+          height: tabBarHeight,
         },
         tabBarLabelStyle: {
           fontSize: 12,
