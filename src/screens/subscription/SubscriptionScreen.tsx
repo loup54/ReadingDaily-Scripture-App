@@ -181,18 +181,17 @@ export const SubscriptionScreen: React.FC<SubscriptionScreenProps> = ({
             ]
           );
         } else {
-          // Already authenticated - just show success
           Alert.alert(
             'Subscription Activated!',
             'You now have access to all features.',
-            [
-              {
-                text: 'OK',
-                onPress: onPurchaseComplete,
-              },
-            ]
+            [{ text: 'OK', onPress: onPurchaseComplete }]
           );
         }
+      } else {
+        Alert.alert(
+          'Purchase Failed',
+          'Unable to complete your subscription. Please check your payment method and try again.\n\nIf this problem persists, the product may not be available in your region.'
+        );
       }
     } catch (error) {
       Alert.alert('Error', 'An unexpected error occurred. Please try again later.');
@@ -231,18 +230,17 @@ export const SubscriptionScreen: React.FC<SubscriptionScreenProps> = ({
             ]
           );
         } else {
-          // Already authenticated - just show success
           Alert.alert(
             'Subscription Activated!',
             'You now have access to all features.',
-            [
-              {
-                text: 'OK',
-                onPress: onPurchaseComplete,
-              },
-            ]
+            [{ text: 'OK', onPress: onPurchaseComplete }]
           );
         }
+      } else {
+        Alert.alert(
+          'Purchase Failed',
+          'Unable to complete your subscription. Please check your payment method and try again.\n\nIf this problem persists, the product may not be available in your region.'
+        );
       }
     } catch (error) {
       Alert.alert('Error', 'An unexpected error occurred. Please try again later.');

@@ -185,6 +185,10 @@ export class GooglePlayIAPService implements IPaymentService {
         errorMessage = 'You already own this item. Try restoring purchases.';
       } else if (error.code === 'E_ITEM_UNAVAILABLE') {
         errorMessage = 'This item is currently unavailable.';
+      } else if (error.code) {
+        errorMessage = `Purchase failed (${error.code})`;
+      } else if (error.message) {
+        errorMessage = `Purchase failed: ${error.message}`;
       }
 
       return {
