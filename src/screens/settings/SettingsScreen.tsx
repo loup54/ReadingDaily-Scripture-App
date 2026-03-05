@@ -28,6 +28,7 @@ import { useTheme } from '@/hooks/useTheme';
 import { useOfflineStore } from '@/stores/useOfflineStore';
 import { TranslationService } from '@/services/translation/TranslationService';
 import { CacheService } from '@services/cache';
+import Constants from 'expo-constants';
 import { StorageCleanupService } from '@/services/offline/StorageCleanupService';
 import { OfflineSettingsSection } from '@/components/offline/OfflineSettingsSection';
 import {
@@ -1637,7 +1638,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
 
           {/* App Version & Footer */}
           <View style={styles.versionContainer}>
-            <Text style={styles.versionText}>Version {settings.version}</Text>
+            <Text style={styles.versionText}>Version {Constants.expoConfig?.version ?? settings.version}</Text>
             <Text style={styles.footerText}>Catholic ESL Learning</Text>
             <Text style={styles.footerText}>
               developed by www.ourengltd.best

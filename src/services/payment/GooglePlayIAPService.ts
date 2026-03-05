@@ -21,12 +21,17 @@ import * as Crypto from 'expo-crypto';
 import { getFunctions, httpsCallable } from 'firebase/functions';
 import { app } from '@/config/firebase';
 
-const PRODUCT_IDS = ['com.readingdaily.lifetime.access']; // Your Google Play product ID
+const ONE_TIME_PRODUCT_IDS = ['com.readingdaily.lifetime.access.v2'];
+const SUBSCRIPTION_IDS = [
+  'com.readingdaily.basic.monthly.v2',
+  'com.readingdaily.basic.yearly.v2',
+];
 
 export class GooglePlayIAPService implements IPaymentService {
   readonly provider: PaymentProvider = 'google';
 
   private products: PaymentProduct[] = [];
+  private subscriptionOfferTokens: Map<string, string> = new Map();
   private purchaseUpdateSubscription: any = null;
   private purchaseErrorSubscription: any = null;
   private functions = getFunctions(app);
@@ -119,10 +124,23 @@ export class GooglePlayIAPService implements IPaymentService {
     console.log('[GooglePlayIAPService] Processing purchase:', productId);
 
     try {
-      // Request purchase
-      const purchase = await RNIap.requestPurchase({
-        sku: productId,
-      });
+      let purchase: any;
+
+      if (SUBSCRIPTION_IDS.includes(productId)) {
+        // Subscriptions require requestSubscription with offer token on Android
+        const offerToken = this.subscriptionOfferTokens.get(productId);
+        console.log('[GooglePlayIAPService] Requesting subscription, offerToken:', offerToken ? 'found' : 'missing');
+
+        purchase = await RNIap.requestSubscription({
+          sku: productId,
+          ...(offerToken && {
+            subscriptionOffers: [{ sku: productId, offerToken }],
+          }),
+        });
+      } else {
+        // One-time purchases use requestPurchase
+        purchase = await RNIap.requestPurchase({ sku: productId });
+      }
 
       console.log('[GooglePlayIAPService] Purchase response:', purchase);
 
@@ -135,13 +153,14 @@ export class GooglePlayIAPService implements IPaymentService {
         };
       }
 
-      // Extract transaction details
-      const transactionId = purchase.transactionId || 'unknown';
-      const receipt = purchase.transactionReceipt || '';
+      // Extract transaction details (handle array response from subscriptions)
+      const purchaseItem = Array.isArray(purchase) ? purchase[0] : purchase;
+      const transactionId = purchaseItem?.transactionId || 'unknown';
+      const receipt = purchaseItem?.transactionReceipt || '';
 
       // Acknowledge purchase
-      if (purchase.purchaseToken) {
-        await RNIap.acknowledgePurchaseAndroid(purchase.purchaseToken);
+      if (purchaseItem?.purchaseToken) {
+        await RNIap.acknowledgePurchaseAndroid(purchaseItem.purchaseToken);
       }
 
       console.log('[GooglePlayIAPService] Purchase successful:', transactionId);
@@ -288,10 +307,10 @@ export class GooglePlayIAPService implements IPaymentService {
    */
   private async loadProducts(): Promise<void> {
     try {
-      console.log('[GooglePlayIAPService] Loading products:', PRODUCT_IDS);
-
-      const products = await RNIap.getProducts({ skus: PRODUCT_IDS });
-      console.log('[GooglePlayIAPService] Products loaded:', products.length);
+      // Load one-time products
+      console.log('[GooglePlayIAPService] Loading one-time products:', ONE_TIME_PRODUCT_IDS);
+      const products = await RNIap.getProducts({ skus: ONE_TIME_PRODUCT_IDS });
+      console.log('[GooglePlayIAPService] One-time products loaded:', products.length);
 
       this.products = products.map((product) => ({
         id: product.productId,
@@ -301,20 +320,62 @@ export class GooglePlayIAPService implements IPaymentService {
         currency: product.currency,
         type: 'one_time' as const,
       }));
+
+      // Load subscriptions and capture offer tokens
+      console.log('[GooglePlayIAPService] Loading subscriptions:', SUBSCRIPTION_IDS);
+      const subscriptions = await RNIap.getSubscriptions({ skus: SUBSCRIPTION_IDS });
+      console.log('[GooglePlayIAPService] Subscriptions loaded:', subscriptions.length);
+
+      subscriptions.forEach((sub: any) => {
+        // Extract offer token from first available offer
+        const offerToken = sub.subscriptionOfferDetails?.[0]?.offerToken;
+        if (offerToken) {
+          this.subscriptionOfferTokens.set(sub.productId, offerToken);
+          console.log('[GooglePlayIAPService] Offer token captured for:', sub.productId);
+        }
+
+        const price = sub.subscriptionOfferDetails?.[0]?.pricingPhases?.pricingPhaseList?.[0]?.priceAmountMicros;
+        const priceValue = price ? parseInt(price) / 1_000_000 : 0;
+
+        this.products.push({
+          id: sub.productId,
+          name: sub.name || sub.title,
+          description: sub.description,
+          price: priceValue,
+          currency: sub.subscriptionOfferDetails?.[0]?.pricingPhases?.pricingPhaseList?.[0]?.priceCurrencyCode || 'USD',
+          type: 'subscription' as const,
+        });
+      });
     } catch (error) {
       console.error('[GooglePlayIAPService] Failed to load products:', error);
 
-      // Fallback to hardcoded product (for development)
+      // Fallback to hardcoded products (for development)
       if (__DEV__) {
-        console.warn('[GooglePlayIAPService] Using fallback product');
+        console.warn('[GooglePlayIAPService] Using fallback products');
         this.products = [
           {
-            id: 'com.readingdaily.lifetime.access',
+            id: 'com.readingdaily.lifetime.access.v2',
             name: 'Lifetime Access',
             description: 'Unlock all features forever',
-            price: 4.99,
+            price: 49.99,
             currency: 'USD',
             type: 'one_time',
+          },
+          {
+            id: 'com.readingdaily.basic.monthly.v2',
+            name: 'Basic Monthly',
+            description: 'Monthly subscription',
+            price: 2.99,
+            currency: 'USD',
+            type: 'subscription',
+          },
+          {
+            id: 'com.readingdaily.basic.yearly.v2',
+            name: 'Basic Yearly',
+            description: 'Yearly subscription',
+            price: 19.99,
+            currency: 'USD',
+            type: 'subscription',
           },
         ];
       }
