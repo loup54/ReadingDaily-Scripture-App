@@ -55,7 +55,7 @@ export class GooglePlayIAPService implements IPaymentService {
           const token = purchase.purchaseToken;
           if (token) {
             try {
-              await RNIap.acknowledgePurchaseAndroid({ token });
+              await RNIap.acknowledgePurchaseAndroid(token);
               console.log('[GooglePlayIAPService] Purchase acknowledged');
             } catch (error) {
               console.error('[GooglePlayIAPService] Failed to acknowledge purchase:', error);
@@ -127,13 +127,21 @@ export class GooglePlayIAPService implements IPaymentService {
         const offerToken = this.subscriptionOfferTokens.get(productId);
         console.log('[GooglePlayIAPService] Requesting subscription, offerToken:', offerToken ? 'found' : 'missing');
 
+        // offerToken is REQUIRED for Google Play Billing 5+ subscriptions
+        if (!offerToken) {
+          return {
+            success: false,
+            provider: this.provider,
+            error: 'Subscription details not loaded. Please close the app fully and try again.',
+            timestamp: Date.now(),
+          };
+        }
+
         purchase = await RNIap.requestPurchase({
           request: {
             google: {
               skus: [productId],
-              ...(offerToken && {
-                subscriptionOffers: [{ sku: productId, offerToken }],
-              }),
+              subscriptionOffers: [{ sku: productId, offerToken }],
             },
           },
           type: 'subs',
@@ -168,7 +176,7 @@ export class GooglePlayIAPService implements IPaymentService {
 
       // Acknowledge purchase
       if (purchaseItem?.purchaseToken) {
-        await RNIap.acknowledgePurchaseAndroid({ token: purchaseItem.purchaseToken });
+        await RNIap.acknowledgePurchaseAndroid(purchaseItem.purchaseToken);
       }
 
       console.log('[GooglePlayIAPService] Purchase successful:', transactionId);
@@ -183,23 +191,30 @@ export class GooglePlayIAPService implements IPaymentService {
     } catch (error: any) {
       console.error('[GooglePlayIAPService] Purchase failed:', error);
 
-      // Handle specific error codes (react-native-iap may use code string or responseCode number)
+      // Handle specific error codes
+      // react-native-iap v14 uses kebab-case codes (e.g. 'user-cancelled')
+      // older versions used E_ prefix (e.g. 'E_USER_CANCELLED')
       let errorMessage = 'Purchase failed';
-      if (error.code === 'E_USER_CANCELLED' || error.responseCode === 1) {
+      const code = error.code ?? '';
+      if (code === 'user-cancelled' || code === 'E_USER_CANCELLED' || error.responseCode === 1) {
         errorMessage = 'Purchase cancelled by user';
-      } else if (error.code === 'E_NETWORK_ERROR' || error.responseCode === 2) {
+      } else if (code === 'network-error' || code === 'E_NETWORK_ERROR' || error.responseCode === 2) {
         errorMessage = 'Network error. Please check your connection.';
-      } else if (error.code === 'E_ALREADY_OWNED' || error.responseCode === 7) {
+      } else if (code === 'already-owned' || code === 'E_ALREADY_OWNED' || error.responseCode === 7) {
         errorMessage = 'You already own this item. Try restoring purchases.';
-      } else if (error.code === 'E_ITEM_UNAVAILABLE' || error.responseCode === 4) {
+      } else if (code === 'item-unavailable' || code === 'E_ITEM_UNAVAILABLE' || error.responseCode === 4) {
         errorMessage = 'This item is currently unavailable in the store.';
-      } else if (error.code === 'E_BILLING_RESPONSE_JSON_PARSE_ERROR' || error.responseCode === 3) {
+      } else if (code === 'billing-unavailable' || code === 'E_BILLING_RESPONSE_JSON_PARSE_ERROR' || error.responseCode === 3) {
         errorMessage = 'Billing service unavailable. Please try again.';
+      } else if (code === 'unknown' || code === 'E_UNKNOWN') {
+        // Generic Google Play error - may be a product/account configuration issue
+        const debug = error.debugMessage || error.message || '';
+        errorMessage = `Purchase failed. Check that you are signed into Google Play with a valid account.${debug ? ' (' + debug + ')' : ''}`;
       } else if (error.responseCode !== undefined && error.responseCode !== null) {
         const debug = error.debugMessage ? `: ${error.debugMessage}` : '';
         errorMessage = `Purchase failed (code ${error.responseCode}${debug})`;
-      } else if (error.code) {
-        errorMessage = `Purchase failed (${error.code})`;
+      } else if (code) {
+        errorMessage = `Purchase failed (${code})`;
       } else if (error.message) {
         errorMessage = `Purchase failed: ${error.message}`;
       } else {
