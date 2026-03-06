@@ -52,7 +52,7 @@ interface TrialStoreState extends TrialState {
   restorePurchase: () => Promise<boolean>;
 
   // Subscription actions (NEW - Phase 1)
-  upgradeToBasic: (subscriptionId: string) => Promise<boolean>;
+  upgradeToBasic: (subscriptionId: string) => Promise<{ success: boolean; error?: string }>;
   cancelSubscription: () => Promise<boolean>;
   getSubscriptionFeatures: () => SubscriptionFeatures;
   isDailyLimitReached: () => boolean;
@@ -321,7 +321,7 @@ export const useTrialStore = create<TrialStoreState>()(
       },
 
       // Upgrade to Basic subscription (NEW - Phase 1)
-      upgradeToBasic: async (subscriptionId: string): Promise<boolean> => {
+      upgradeToBasic: async (subscriptionId: string): Promise<{ success: boolean; error?: string }> => {
         try {
           const state = get();
 
@@ -366,7 +366,7 @@ export const useTrialStore = create<TrialStoreState>()(
               trialUsed: true,
             });
 
-            return true;
+            return { success: true };
           } else {
             console.error('❌ Subscription upgrade failed:', result.error);
 
@@ -378,11 +378,12 @@ export const useTrialStore = create<TrialStoreState>()(
               retryable: true,
             });
 
-            return false;
+            return { success: false, error: result.error };
           }
         } catch (error) {
+          const errorMsg = error instanceof Error ? error.message : 'Subscription upgrade failed';
           console.error('Subscription upgrade exception:', error);
-          return false;
+          return { success: false, error: errorMsg };
         }
       },
 

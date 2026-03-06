@@ -158,9 +158,9 @@ export const SubscriptionScreen: React.FC<SubscriptionScreenProps> = ({
     try {
       // Purchase Monthly subscription (com.readingdaily.basic.monthly.v2)
       const { upgradeToBasic } = useTrialStore.getState();
-      const success = await upgradeToBasic('com.readingdaily.basic.monthly.v2');
+      const result = await upgradeToBasic('com.readingdaily.basic.monthly.v2');
 
-      if (success) {
+      if (result.success) {
         // Purchase successful - offer optional sign-in for device sync
         if (isGuest || !user) {
           Alert.alert(
@@ -190,7 +190,7 @@ export const SubscriptionScreen: React.FC<SubscriptionScreenProps> = ({
       } else {
         Alert.alert(
           'Purchase Failed',
-          'Unable to complete your subscription. Please check your payment method and try again.\n\nIf this problem persists, the product may not be available in your region.'
+          result.error || 'Unable to complete your subscription. Please try again.'
         );
       }
     } catch (error) {
@@ -207,9 +207,9 @@ export const SubscriptionScreen: React.FC<SubscriptionScreenProps> = ({
     try {
       // Purchase Yearly subscription (com.readingdaily.basic.yearly.v2)
       const { upgradeToBasic } = useTrialStore.getState();
-      const success = await upgradeToBasic('com.readingdaily.basic.yearly.v2');
+      const result = await upgradeToBasic('com.readingdaily.basic.yearly.v2');
 
-      if (success) {
+      if (result.success) {
         // Purchase successful - offer optional sign-in for device sync
         if (isGuest || !user) {
           Alert.alert(
@@ -239,7 +239,7 @@ export const SubscriptionScreen: React.FC<SubscriptionScreenProps> = ({
       } else {
         Alert.alert(
           'Purchase Failed',
-          'Unable to complete your subscription. Please check your payment method and try again.\n\nIf this problem persists, the product may not be available in your region.'
+          result.error || 'Unable to complete your subscription. Please try again.'
         );
       }
     } catch (error) {

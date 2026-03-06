@@ -175,20 +175,31 @@ export class GooglePlayIAPService implements IPaymentService {
     } catch (error: any) {
       console.error('[GooglePlayIAPService] Purchase failed:', error);
 
-      // Handle specific error codes
+      // Handle specific error codes (react-native-iap may use code string or responseCode number)
       let errorMessage = 'Purchase failed';
-      if (error.code === 'E_USER_CANCELLED') {
+      if (error.code === 'E_USER_CANCELLED' || error.responseCode === 1) {
         errorMessage = 'Purchase cancelled by user';
-      } else if (error.code === 'E_NETWORK_ERROR') {
+      } else if (error.code === 'E_NETWORK_ERROR' || error.responseCode === 2) {
         errorMessage = 'Network error. Please check your connection.';
-      } else if (error.code === 'E_ALREADY_OWNED') {
+      } else if (error.code === 'E_ALREADY_OWNED' || error.responseCode === 7) {
         errorMessage = 'You already own this item. Try restoring purchases.';
-      } else if (error.code === 'E_ITEM_UNAVAILABLE') {
-        errorMessage = 'This item is currently unavailable.';
+      } else if (error.code === 'E_ITEM_UNAVAILABLE' || error.responseCode === 4) {
+        errorMessage = 'This item is currently unavailable in the store.';
+      } else if (error.code === 'E_BILLING_RESPONSE_JSON_PARSE_ERROR' || error.responseCode === 3) {
+        errorMessage = 'Billing service unavailable. Please try again.';
+      } else if (error.responseCode !== undefined && error.responseCode !== null) {
+        const debug = error.debugMessage ? `: ${error.debugMessage}` : '';
+        errorMessage = `Purchase failed (code ${error.responseCode}${debug})`;
       } else if (error.code) {
         errorMessage = `Purchase failed (${error.code})`;
       } else if (error.message) {
         errorMessage = `Purchase failed: ${error.message}`;
+      } else {
+        try {
+          errorMessage = `Purchase failed: ${JSON.stringify(error)}`;
+        } catch {
+          errorMessage = 'Purchase failed (unknown error)';
+        }
       }
 
       return {
