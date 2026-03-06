@@ -50,17 +50,13 @@ export class GooglePlayIAPService implements IPaymentService {
 
       // Set up purchase update listener
       this.purchaseUpdateSubscription = RNIap.purchaseUpdatedListener(
-        async (purchase: RNIap.Purchase) => {
+        async (purchase: any) => {
           console.log('[GooglePlayIAPService] Purchase updated:', purchase.transactionId);
-
-          const receipt = purchase.transactionReceipt;
-          if (receipt) {
+          const token = purchase.purchaseToken;
+          if (token) {
             try {
-              // Acknowledge the purchase (required for Google Play)
-              if (Platform.OS === 'android') {
-                await RNIap.acknowledgePurchaseAndroid(purchase.purchaseToken!);
-                console.log('[GooglePlayIAPService] Purchase acknowledged');
-              }
+              await RNIap.acknowledgePurchaseAndroid({ token });
+              console.log('[GooglePlayIAPService] Purchase acknowledged');
             } catch (error) {
               console.error('[GooglePlayIAPService] Failed to acknowledge purchase:', error);
             }
@@ -127,19 +123,31 @@ export class GooglePlayIAPService implements IPaymentService {
       let purchase: any;
 
       if (SUBSCRIPTION_IDS.includes(productId)) {
-        // Subscriptions require requestSubscription with offer token on Android
+        // Subscriptions use requestPurchase with type:'subs' in react-native-iap v14
         const offerToken = this.subscriptionOfferTokens.get(productId);
         console.log('[GooglePlayIAPService] Requesting subscription, offerToken:', offerToken ? 'found' : 'missing');
 
-        purchase = await RNIap.requestSubscription({
-          sku: productId,
-          ...(offerToken && {
-            subscriptionOffers: [{ sku: productId, offerToken }],
-          }),
+        purchase = await RNIap.requestPurchase({
+          request: {
+            google: {
+              skus: [productId],
+              ...(offerToken && {
+                subscriptionOffers: [{ sku: productId, offerToken }],
+              }),
+            },
+          },
+          type: 'subs',
         });
       } else {
-        // One-time purchases use requestPurchase
-        purchase = await RNIap.requestPurchase({ sku: productId });
+        // One-time purchases use requestPurchase with type:'in-app'
+        purchase = await RNIap.requestPurchase({
+          request: {
+            google: {
+              skus: [productId],
+            },
+          },
+          type: 'in-app',
+        });
       }
 
       console.log('[GooglePlayIAPService] Purchase response:', purchase);
@@ -160,7 +168,7 @@ export class GooglePlayIAPService implements IPaymentService {
 
       // Acknowledge purchase
       if (purchaseItem?.purchaseToken) {
-        await RNIap.acknowledgePurchaseAndroid(purchaseItem.purchaseToken);
+        await RNIap.acknowledgePurchaseAndroid({ token: purchaseItem.purchaseToken });
       }
 
       console.log('[GooglePlayIAPService] Purchase successful:', transactionId);
@@ -322,42 +330,58 @@ export class GooglePlayIAPService implements IPaymentService {
    */
   private async loadProducts(): Promise<void> {
     try {
-      // Load one-time products
+      // Load one-time products (react-native-iap v14 uses fetchProducts)
       console.log('[GooglePlayIAPService] Loading one-time products:', ONE_TIME_PRODUCT_IDS);
-      const products = await RNIap.getProducts({ skus: ONE_TIME_PRODUCT_IDS });
+      const products = await RNIap.fetchProducts({ skus: ONE_TIME_PRODUCT_IDS, type: 'in-app' });
       console.log('[GooglePlayIAPService] One-time products loaded:', products.length);
 
-      this.products = products.map((product) => ({
-        id: product.productId,
-        name: product.title,
-        description: product.description,
-        price: parseFloat(product.price),
-        currency: product.currency,
+      this.products = products.map((product: any) => ({
+        id: product.id,
+        name: product.displayName || product.nameAndroid || product.id,
+        description: product.description || '',
+        price: product.price ?? 0,
+        currency: product.currency || 'USD',
         type: 'one_time' as const,
       }));
 
       // Load subscriptions and capture offer tokens
       console.log('[GooglePlayIAPService] Loading subscriptions:', SUBSCRIPTION_IDS);
-      const subscriptions = await RNIap.getSubscriptions({ skus: SUBSCRIPTION_IDS });
+      const subscriptions = await RNIap.fetchProducts({ skus: SUBSCRIPTION_IDS, type: 'subs' });
       console.log('[GooglePlayIAPService] Subscriptions loaded:', subscriptions.length);
 
       subscriptions.forEach((sub: any) => {
-        // Extract offer token from first available offer
-        const offerToken = sub.subscriptionOfferDetails?.[0]?.offerToken;
+        // v14: offerToken is in subscriptionOffers[0].offerTokenAndroid
+        // or fallback to subscriptionOfferDetailsAndroid[0].offerToken
+        const offerToken =
+          sub.subscriptionOffers?.[0]?.offerTokenAndroid ||
+          sub.subscriptionOfferDetailsAndroid?.[0]?.offerToken;
+
         if (offerToken) {
-          this.subscriptionOfferTokens.set(sub.productId, offerToken);
-          console.log('[GooglePlayIAPService] Offer token captured for:', sub.productId);
+          this.subscriptionOfferTokens.set(sub.id, offerToken);
+          console.log('[GooglePlayIAPService] Offer token captured for:', sub.id);
+        } else {
+          console.warn('[GooglePlayIAPService] No offer token found for:', sub.id);
         }
 
-        const price = sub.subscriptionOfferDetails?.[0]?.pricingPhases?.pricingPhaseList?.[0]?.priceAmountMicros;
-        const priceValue = price ? parseInt(price) / 1_000_000 : 0;
+        // v14: price is in subscriptionOffers[0].price (number)
+        // or fallback to pricingPhases
+        const priceValue =
+          sub.subscriptionOffers?.[0]?.price ??
+          (sub.subscriptionOfferDetailsAndroid?.[0]?.pricingPhases?.pricingPhaseList?.[0]?.priceAmountMicros
+            ? parseInt(sub.subscriptionOfferDetailsAndroid[0].pricingPhases.pricingPhaseList[0].priceAmountMicros) / 1_000_000
+            : 0);
+
+        const currency =
+          sub.subscriptionOffers?.[0]?.currency ||
+          sub.subscriptionOfferDetailsAndroid?.[0]?.pricingPhases?.pricingPhaseList?.[0]?.priceCurrencyCode ||
+          'USD';
 
         this.products.push({
-          id: sub.productId,
-          name: sub.name || sub.title,
-          description: sub.description,
+          id: sub.id,
+          name: sub.displayName || sub.nameAndroid || sub.id,
+          description: sub.description || '',
           price: priceValue,
-          currency: sub.subscriptionOfferDetails?.[0]?.pricingPhases?.pricingPhaseList?.[0]?.priceCurrencyCode || 'USD',
+          currency,
           type: 'subscription' as const,
         });
       });
