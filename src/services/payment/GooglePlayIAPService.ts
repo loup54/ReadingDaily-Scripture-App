@@ -49,18 +49,10 @@ export class GooglePlayIAPService implements IPaymentService {
       console.log('[GooglePlayIAPService] Connection initialized');
 
       // Set up purchase update listener
+      // NOTE: Do NOT call acknowledgePurchaseAndroid here — purchase() method handles it
       this.purchaseUpdateSubscription = RNIap.purchaseUpdatedListener(
-        async (purchase: any) => {
-          console.log('[GooglePlayIAPService] Purchase updated:', purchase.transactionId);
-          const token = purchase.purchaseToken;
-          if (token) {
-            try {
-              await RNIap.acknowledgePurchaseAndroid(token);
-              console.log('[GooglePlayIAPService] Purchase acknowledged');
-            } catch (error) {
-              console.error('[GooglePlayIAPService] Failed to acknowledge purchase:', error);
-            }
-          }
+        (purchase: any) => {
+          console.log('[GooglePlayIAPService] Purchase updated (listener):', purchase.transactionId);
         }
       );
 

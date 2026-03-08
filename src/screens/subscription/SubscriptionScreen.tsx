@@ -359,7 +359,7 @@ export const SubscriptionScreen: React.FC<SubscriptionScreenProps> = ({
             <>
               {/* Subscription Tiers - Basic */}
               <LinearGradient
-                colors={[colors.primary + '10', colors.secondary + '10']}
+                colors={['rgba(123,95,232,0.06)', 'rgba(91,111,232,0.06)']}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
                 style={styles.pricingCardGradient}
@@ -422,7 +422,7 @@ export const SubscriptionScreen: React.FC<SubscriptionScreenProps> = ({
 
               {/* Subscription Tiers - Premium (Popular) */}
               <LinearGradient
-                colors={[colors.primary + '15', colors.secondary + '15']}
+                colors={['rgba(123,95,232,0.08)', 'rgba(91,111,232,0.08)']}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
                 style={styles.pricingCardGradient}
@@ -490,7 +490,7 @@ export const SubscriptionScreen: React.FC<SubscriptionScreenProps> = ({
 
               {/* Subscription Tiers - Lifetime (Best Value) */}
               <LinearGradient
-                colors={[colors.accent.green + '15', colors.accent.blue + '15']}
+                colors={['rgba(76,175,80,0.08)', 'rgba(91,111,232,0.08)']}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
                 style={styles.pricingCardGradient}
@@ -638,9 +638,11 @@ export const SubscriptionScreen: React.FC<SubscriptionScreenProps> = ({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#7C3AED',
   },
   gradient: {
     flex: 1,
+    backgroundColor: '#7B5FE8',
   },
   header: {
     flexDirection: 'row',
