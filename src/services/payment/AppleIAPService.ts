@@ -56,20 +56,12 @@ export class AppleIAPService implements IPaymentService {
       console.log('[AppleIAPService] Connection initialized');
 
       // Set up purchase update listener
+      // NOTE: Do NOT call finishTransaction here — the purchase() method handles it.
+      // Finishing here races with requestPurchase() resolving, causing it to return []
+      // which the purchase() method interprets as failure even though Apple charged the user.
       this.purchaseUpdateSubscription = RNIap.purchaseUpdatedListener(
         async (purchase: RNIap.Purchase) => {
-          console.log('[AppleIAPService] Purchase updated:', purchase.id);
-
-          const receipt = purchase.purchaseToken;
-          if (receipt) {
-            // Finish the transaction
-            if (Platform.OS === 'ios') {
-              await RNIap.finishTransaction({
-                purchase,
-                isConsumable: false, // Lifetime access is non-consumable
-              });
-            }
-          }
+          console.log('[AppleIAPService] Purchase updated (listener):', purchase.id);
         }
       );
 
@@ -172,31 +164,47 @@ export class AppleIAPService implements IPaymentService {
         console.log('[AppleIAPService] Products loaded:', this.products.length);
       }
 
-      // CRITICAL FIX: Clear any pending transactions BEFORE attempting new purchase
-      // If there's a pending unfinished transaction, StoreKit returns [] and blocks new purchases
+      // Check for pending transactions before attempting new purchase
       console.log('[AppleIAPService] Checking for pending transactions before purchase...');
       try {
         const availablePurchases = await RNIap.getAvailablePurchases();
         if (availablePurchases.length > 0) {
-          console.log('[AppleIAPService] Found', availablePurchases.length, 'pending transaction(s), clearing them now...');
+          console.log('[AppleIAPService] Found', availablePurchases.length, 'pending transaction(s)');
+
+          // If Apple already processed this product (e.g. from a previous attempt), use it directly
+          const existingPurchase = availablePurchases.find((p) => p.productId === productId);
+          if (existingPurchase) {
+            console.log('[AppleIAPService] ✅ Found existing pending transaction for', productId, '— using it directly');
+            try {
+              await RNIap.finishTransaction({ purchase: existingPurchase, isConsumable: false });
+            } catch (finishError) {
+              console.error('[AppleIAPService] Failed to finish existing transaction:', finishError);
+            }
+            return {
+              success: true,
+              provider: this.provider,
+              transactionId: existingPurchase.id || 'unknown',
+              subscriptionId: existingPurchase.productId,
+              receipt: existingPurchase.purchaseToken || '',
+              timestamp: Date.now(),
+            };
+          }
+
+          // Finish any other stale transactions (different products)
           for (const purchase of availablePurchases) {
             try {
-              await RNIap.finishTransaction({
-                purchase,
-                isConsumable: false,
-              });
-              console.log('[AppleIAPService] ✅ Cleared pending transaction:', purchase.id);
+              await RNIap.finishTransaction({ purchase, isConsumable: false });
+              console.log('[AppleIAPService] Cleared stale transaction:', purchase.id);
             } catch (finishError) {
-              console.error('[AppleIAPService] ⚠️ Failed to clear transaction:', purchase.id, finishError);
+              console.error('[AppleIAPService] Failed to clear stale transaction:', purchase.id, finishError);
             }
           }
-          console.log('[AppleIAPService] ✅ All pending transactions cleared');
         } else {
           console.log('[AppleIAPService] ✅ No pending transactions found');
         }
       } catch (error) {
         console.error('[AppleIAPService] ⚠️ Error checking pending transactions:', error);
-        // Continue with purchase attempt even if clearing fails
+        // Continue with purchase attempt even if check fails
       }
 
       // Get product to determine if it's a subscription
@@ -246,6 +254,15 @@ export class AppleIAPService implements IPaymentService {
         const transactionId = purchase.id || 'unknown';
         const receipt = purchase.purchaseToken || '';
         const subscriptionId = purchase.productId || productId;
+
+        // Finish the transaction — required when andDangerouslyFinishTransactionAutomatically: false
+        try {
+          await RNIap.finishTransaction({ purchase, isConsumable: false });
+          console.log('[AppleIAPService] Subscription transaction finished:', transactionId);
+        } catch (finishError) {
+          console.error('[AppleIAPService] Failed to finish subscription transaction:', finishError);
+          // Continue — purchase was successful even if finish fails
+        }
 
         console.log('[AppleIAPService] Subscription purchase successful:', transactionId);
 
@@ -300,6 +317,15 @@ export class AppleIAPService implements IPaymentService {
       // Extract transaction details
       const transactionId = purchase.id || 'unknown';
       const receipt = purchase.purchaseToken || '';
+
+      // Finish the transaction — required when andDangerouslyFinishTransactionAutomatically: false
+      try {
+        await RNIap.finishTransaction({ purchase, isConsumable: false });
+        console.log('[AppleIAPService] Transaction finished:', transactionId);
+      } catch (finishError) {
+        console.error('[AppleIAPService] Failed to finish transaction:', finishError);
+        // Continue — purchase was successful even if finish fails
+      }
 
       console.log('[AppleIAPService] Purchase successful:', transactionId);
 
