@@ -74,7 +74,7 @@ export const ScriptureText: React.FC<ScriptureTextProps> = ({ reading }) => {
     const words = text.split(/(\s+)/);
 
     return (
-      <Text style={[styles.content, { color: colors.text.primary }]}>
+      <Text style={[styles.content, { color: colors.text.primary }]} allowFontScaling={false}>
         {words.map((word, index) => {
           // Skip whitespace
           if (word.trim().length === 0) {
@@ -126,7 +126,10 @@ export const ScriptureText: React.FC<ScriptureTextProps> = ({ reading }) => {
         {/* English Reading Section */}
         <View style={styles.readingSection}>
           <View style={styles.textContentWrapper}>
-            {renderTappableText(reading.content)}
+            {translationEnabled
+              ? renderTappableText(reading.content)
+              : <Text style={[styles.content, { color: colors.text.primary }]} allowFontScaling={false}>{reading.content}</Text>
+            }
           </View>
         </View>
 
@@ -280,10 +283,8 @@ const styles = StyleSheet.create({
   readingSection: {
     marginBottom: 0,
     marginTop: 0,
-    flex: 1,
   },
   textContentWrapper: {
-    flex: 1,
     justifyContent: 'flex-start',
     marginTop: Spacing.xs,
     paddingBottom: Spacing.xs,

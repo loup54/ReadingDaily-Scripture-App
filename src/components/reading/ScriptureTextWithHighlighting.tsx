@@ -84,7 +84,7 @@ export const ScriptureTextWithHighlighting: React.FC<ScriptureTextWithHighlighti
     // Fallback: render plain tappable text (same as ScriptureText)
     const words = reading.content.split(/(\s+)/);
     return (
-      <Text style={[styles.content, { color: colors.text.primary }]}>
+      <Text style={[styles.content, { color: colors.text.primary }]} allowFontScaling={false}>
         {words.map((word, index) => {
           // Skip whitespace
           if (word.trim().length === 0) {
