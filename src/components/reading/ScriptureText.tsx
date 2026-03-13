@@ -24,6 +24,9 @@ export const ScriptureText: React.FC<ScriptureTextProps> = ({ reading }) => {
   const [translationLoading, setTranslationLoading] = useState(false);
   const [translationError, setTranslationError] = useState<string | null>(null);
   const [canScrollDown, setCanScrollDown] = useState(false);
+  const [containerHeight, setContainerHeight] = useState(0);
+  const [headerHeight, setHeaderHeight] = useState(0);
+  const [actionsHeight, setActionsHeight] = useState(0);
 
   // Load translation settings on mount
   useEffect(() => {
@@ -94,9 +97,12 @@ export const ScriptureText: React.FC<ScriptureTextProps> = ({ reading }) => {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background.card }]}>
+    <View
+      style={[styles.container, { backgroundColor: colors.background.card }]}
+      onLayout={(e) => setContainerHeight(e.nativeEvent.layout.height)}
+    >
       {/* Header with Title */}
-      <View style={styles.header}>
+      <View style={styles.header} onLayout={(e) => setHeaderHeight(e.nativeEvent.layout.height)}>
         <View style={styles.titleRow}>
           <View style={styles.titleContent}>
             <Text style={[styles.title, { color: colors.text.primary }]}>{reading.title}</Text>
@@ -115,7 +121,13 @@ export const ScriptureText: React.FC<ScriptureTextProps> = ({ reading }) => {
 
       {/* Combined Scripture + Translation Scrollable View */}
       <ScrollView
-        style={[styles.scrollView, { backgroundColor: colors.background.card }]}
+        style={[
+          styles.scrollView,
+          { backgroundColor: colors.background.card },
+          containerHeight > 0 && headerHeight > 0 && actionsHeight > 0
+            ? { height: containerHeight - headerHeight - actionsHeight }
+            : {},
+        ]}
         contentContainerStyle={styles.scrollViewContent}
         showsVerticalScrollIndicator={true}
         onScroll={handleScroll}
@@ -187,6 +199,7 @@ export const ScriptureText: React.FC<ScriptureTextProps> = ({ reading }) => {
       {/* Practice Pronunciation Button */}
       <TouchableOpacity
         style={[styles.actionButton, { backgroundColor: colors.accent.orange }]}
+        onLayout={(e) => setActionsHeight(e.nativeEvent.layout.height)}
         onPress={() => setShowPronunciationPractice(true)}
         activeOpacity={0.8}
       >

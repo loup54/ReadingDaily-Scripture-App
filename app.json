@@ -3,7 +3,7 @@
     "name": "ReadingDaily Scripture App",
     "slug": "readingdaily-scripture-app",
     "scheme": "readingdaily",
-    "version": "1.1.21",
+    "version": "1.1.22",
     "icon": "./assets/icon.png",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
@@ -17,7 +17,7 @@
     },
     "ios": {
       "bundleIdentifier": "com.readingdaily.scripture",
-      "buildNumber": "133",
+      "buildNumber": "134",
       "splash": {
         "image": "./assets/splash.png",
         "resizeMode": "contain",
@@ -40,7 +40,7 @@
         "backgroundColor": "#7C3AED"
       },
       "package": "com.readingdaily.scripture",
-      "versionCode": 15,
+      "versionCode": 16,
       "compileSdkVersion": 35,
       "targetSdkVersion": 35,
       "minSdkVersion": 24,
