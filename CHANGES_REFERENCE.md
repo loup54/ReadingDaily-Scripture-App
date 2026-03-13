@@ -1,160 +1,149 @@
-# Quick Reference: All Changes Made
+# Changes Reference — ReadingDaily Scripture App
 
-## Files Modified
-
-### 1. package.json
-**Location:** `/package.json` (line 5)
-**Change:** Fixed Expo Router entry point
-```json
-- "main": "node_modules/expo/AppEntry.js",
-+ "main": "expo-router/entry",
-```
-
-### 2. .env
-**Location:** `/.env`
-**Changes:** Updated two expired API keys
-
-**Line 5 - Firebase API Key:**
-```
-EXPO_PUBLIC_FIREBASE_API_KEY=AIzaSyBMtHfivpU9uSv9EZXihT0w184X3h2UfY8
-```
-
-**Line 17 - Google Cloud API Key:**
-```
-EXPO_PUBLIC_GOOGLE_CLOUD_API_KEY=AIzaSyB09cXBISxuSDcVmSGNv58NMQg2bjHSYtQ
-```
-
-### 3. src/components/offline/OfflineIndicator.tsx
-**Location:** `/src/components/offline/OfflineIndicator.tsx` (line 62)
-**Change:** Fixed invalid icon name
-```typescript
-- return 'wifi-off';
-+ return 'alert-circle-outline';
-```
-
-### 4. app/index.tsx
-**Location:** `/app/index.tsx` (lines 12, 52-59)
-**Change:** Added authInitialized flag check
-
-```typescript
-// Line 12 - Added authInitialized to destructure
-- const { user, state, isInitialized: authInitialized } = useAuthStore();
-
-// Lines 52-59 - Check both flags
-- if (!isInitialized) {
-+ if (!isInitialized || !authInitialized) {
-    return <LoadingScreen message="Initializing app..." />;
-  }
-```
-
-### 5. src/services/auth/DevelopmentAuthHelper.ts
-**Location:** `/src/services/auth/DevelopmentAuthHelper.ts` (lines 76-81)
-**Change:** Disabled auto-login for testing
-
-```typescript
-static isDevMode(): boolean {
-  // DISABLED: return __DEV__ === true;
-  return false; // Set to false to disable auto-login for testing login screen
-}
-```
-
-### 6. src/stores/useAuthStore.ts
-**Location:** `/src/stores/useAuthStore.ts` (lines 44-127)
-**Change:** Implemented non-blocking auth initialization
-
-**Key Changes:**
-- Added `resolved` flag to prevent multiple promise resolutions
-- Resolve promise immediately on first Firebase auth state change (line 70-75)
-- Move async operations (token refresh, profile fetch) to background (lines 77-111)
-- Reduced timeout from 10s to 3s (line 52-64)
-- Enhanced logging at each stage
-
-**Before:** Promise waited for all async operations to complete
-**After:** Promise resolves immediately, async operations continue in background
-
-### 7. src/services/translation/TranslationService.ts
-**Location:** `/src/services/translation/TranslationService.ts` (lines 199-217, 445-459)
-**Change:** Added API key validation and debugging
-
-```typescript
-// In callTranslateAPI() method (lines 199-217):
-if (!this.apiKey || this.apiKey.trim().length === 0) {
-  console.error('[TranslationService] API key is missing or empty');
-  throw new Error('Translation API key not configured');
-}
-console.log('[TranslationService] API key present:', this.apiKey.substring(0, 10) + '...');
-
-// In getTranslationService() function (lines 445-459):
-console.log('[TranslationService] Initializing service with API key:', apiKey ? apiKey.substring(0, 10) + '...' : 'MISSING');
-if (!apiKey || apiKey.trim().length === 0) {
-  console.error('[TranslationService] ❌ Google Cloud API key not configured');
-  throw new Error('Google Cloud API key not configured');
-}
-console.log('[TranslationService] ✅ Creating new instance with valid API key');
-```
-
-### 8. src/screens/practice/PronunciationPracticeScreen.tsx
-**Location:** `/src/screens/practice/PronunciationPracticeScreen.tsx` (line 54)
-**Change:** Added missing state variable
-
-```typescript
-+ const [showPermissionModal, setShowPermissionModal] = useState(false);
-```
-
-## External Configuration Changes
-
-### Google Cloud Console
-- Created new API key with restrictions
-- Enabled APIs: Cloud Text-to-Speech, Cloud Translation, Cloud Speech-to-Text
-- Set API restrictions (NOT application restrictions for REST-based APIs)
-- Removed iOS application restrictions (these don't work with REST API)
-
-### Firebase Console
-- Created new Firebase API key with proper permissions
-
-## Compilation Status
-
-✓ TypeScript compilation successful
-✓ Bundler compiles without errors
-✓ No console errors related to these changes
-✓ All imports and dependencies resolved
-
-## Testing Checklist
-
-- [ ] Load app on iOS device/simulator
-- [ ] Verify login screen appears (not auto-login bypassed)
-- [ ] Test manual login with valid credentials
-- [ ] Test Daily Readings play button (TTS)
-- [ ] Test word translation functionality
-- [ ] Test pronunciation recording feature
-- [ ] Verify all 7 screens render without errors
-
-## Archive File
-
-**Location:** `/Users/louispage/ReadingDaily-Scripture-App/ReadingDaily-Scripture-App-FINAL.tar.gz`
-**Size:** 39M
-**Contents:** Full project source excluding node_modules, dist, build, .expo
-
-## Key Technical Details
-
-### Non-Blocking Auth Initialization Pattern
-The most critical fix involved separating initialization completion from async operations. Instead of waiting for:
-1. Firebase response → get user profile → get token → resolve
-
-Now it:
-1. Firebase response → resolve → (async: get token, profile in background)
-
-This prevents timeout and race conditions while maintaining data integrity.
-
-### API Key Management
-- Google Cloud API key needs API-level restrictions for REST endpoints
-- iOS app restrictions are for native SDK only, not REST calls
-- Firebase API key is separate from Google Cloud key
-
-### Icon Library
-- Expo uses ionicons library
-- 'wifi-off' doesn't exist, replaced with 'alert-circle-outline'
+**Last Updated:** March 7, 2026
+**Purpose:** Quick lookup of what changed, when, and why.
 
 ---
 
-**All changes verified and working as of: November 25, 2025**
+## v1.1.14 (iOS only — code ready, not yet built)
+
+### `src/services/payment/AppleIAPService.ts`
+**What:** Removed `finishTransaction()` call from `purchaseUpdatedListener`
+**Why:** Race condition — listener was finishing transactions before `requestPurchase()`
+promise resolved, causing `requestPurchase()` to return `[]` (empty array),
+which the purchase flow treated as failure → "purchase failed" shown to user
+**Lines:** 59-68
+**Impact:** iOS monthly/yearly subscription purchases now succeed
+
+---
+
+## v1.1.13 (iOS Build 125, Android versionCode 9 — in review March 7, 2026)
+
+### `src/services/payment/GooglePlayIAPService.ts`
+**What:** Full rewrite for react-native-iap v14.7.6 (Nitro Modules)
+**Why:** react-native-iap upgraded from v12 to v14 — entire API changed
+**Key changes:**
+- `getProducts()` → `fetchProducts({ skus, type: 'in-app' })`
+- `getSubscriptions()` → `fetchProducts({ skus, type: 'subs' })`
+- `requestSubscription({ sku })` → `requestPurchase({ request: { google: { skus, subscriptionOffers } }, type: 'subs' })`
+- `acknowledgePurchaseAndroid({ token })` → `acknowledgePurchaseAndroid(token)` (string)
+- Error codes: `'E_USER_CANCELLED'` → `'user-cancelled'` (kebab-case)
+- Added offer token guard (required for Google Play Billing 5+)
+- Offer token path: `sub.subscriptionOffers?.[0]?.offerTokenAndroid`
+
+### `src/stores/useTrialStore.ts`
+**What:** `upgradeToBasic()` now returns `{ success: boolean; error?: string }`
+**Why:** Was returning boolean — UI couldn't display actual error message
+**Lines:** 324-388
+
+### `src/screens/subscription/SubscriptionScreen.tsx`
+**What:** Shows actual error message from `upgradeToBasic` result
+**Why:** Previously showed generic "Purchase failed" regardless of actual error
+
+### `app.json`
+**What:** version "1.1.13", buildNumber "125", versionCode 9
+**Why:** New release
+
+---
+
+## v1.1.8 (iOS Build 120, Android versionCode 4 — LIVE)
+
+### `src/components/offline/OfflineIndicator.tsx`
+**What:** Changed `!isConnected` → `status === 'offline'`
+**Why:** `NetworkStatusService` initializes with `isConnected: false, status: 'unknown'`
+so `!isConnected` was always true on startup, showing false offline banner
+**Line:** 62
+
+### `app/(tabs)/_layout.tsx`
+**What:** Added `useSafeAreaInsets()` for Android bottom navigation
+**Why:** Android navigation icons were invisible (tab bar too short, icons hidden)
+**Pattern:**
+```typescript
+const insets = useSafeAreaInsets();
+paddingBottom = Platform.OS === 'android' ? Math.max(insets.bottom, 8) : 8
+height = Platform.OS === 'android' ? 65 + Math.max(insets.bottom - 8, 0) : 65
+```
+
+---
+
+## v1.1.x Subscription System (Nov 2025 - Jan 2026)
+
+### `src/services/payment/AppleIAPService.ts` (initial build)
+- StoreKit integration via react-native-iap
+- Products: monthly.v2, yearly.v2, lifetime.access.v2
+- 7-day trial support, receipt validation via Firebase Cloud Function
+
+### `src/services/payment/GooglePlayIAPService.ts` (initial build)
+- Google Play Billing integration
+- Same product IDs as iOS (.v2 suffix)
+
+### `src/stores/useTrialStore.ts` (initial build)
+- Zustand persist store (AsyncStorage)
+- Trial state, purchase state, subscription state
+- Device fingerprinting for abuse prevention
+
+### `src/screens/subscription/SubscriptionScreen.tsx`
+- Subscription paywall UI
+- Shows pricing, trial info, purchase buttons
+
+---
+
+## Dark Mode & UI Fixes (Nov 28, 2025)
+
+### `src/screens/progress/ProgressDashboard.tsx`
+- `colors.background.main` → `colors.background.primary`
+- `colors.primary.main` → `colors.primary.blue`
+- Fixed: stat numbers unreadable in dark mode
+
+### `src/components/progress/ReadingCalendar.tsx`
+- All stat text colors updated to theme colors
+- Fixed: calendar dates invisible in dark mode
+
+### `src/screens/NotificationCenterScreen.tsx`
+- Complete redesign with theme colors
+- Type-based color coding (blue/green/purple by notification type)
+
+### `src/screens/subscription/SendGiftScreen.tsx`
+- Complete redesign: gradient header, step indicator, colored tier cards
+- Fixed 5 color property mismatches
+
+### `src/services/practice/SentenceExtractionService.ts`
+- `MIN_WORDS`: 15 → 5
+- `MAX_WORDS`: 50 → 100
+- Fixed: Gospel (6-13 words) and Psalm (1-8 words) sentences were all filtered out
+
+### Multiple screens — Trial duration text
+- All "10-minute trial" text changed to "7 days" / "7-day free trial"
+- Files: SubscriptionScreen, SettingsScreen, AuthNavigator, TrialExpiredModal, SubscriptionSettingsSection
+
+---
+
+## Initial API & Auth Fixes (Nov 25, 2025)
+
+### `package.json`
+- `"main": "node_modules/expo/AppEntry.js"` → `"main": "expo-router/entry"`
+
+### `src/stores/useAuthStore.ts`
+- Non-blocking auth initialization
+- Resolves promise immediately on first Firebase auth state change
+- Token refresh and profile fetch moved to background
+
+### `src/components/offline/OfflineIndicator.tsx`
+- Icon: `'wifi-off'` → `'alert-circle-outline'` (ionicons library)
+
+### `.env`
+- Updated expired Firebase API key
+- Updated expired Google Cloud API key
+
+---
+
+## Product IDs Reference
+
+| Product | ID | Price |
+|---------|-----|-------|
+| Monthly subscription | `com.readingdaily.basic.monthly.v2` | $2.99/month |
+| Yearly subscription | `com.readingdaily.basic.yearly.v2` | $19.99/year |
+| Lifetime access | `com.readingdaily.lifetime.access.v2` | $49.99 one-time |
+
+Note: `.v2` suffix because original products (without `.v2`) were deleted/recreated
+in both App Store Connect and Google Play Console in January 2026.

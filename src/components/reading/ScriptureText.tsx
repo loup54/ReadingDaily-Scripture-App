@@ -115,21 +115,17 @@ export const ScriptureText: React.FC<ScriptureTextProps> = ({ reading }) => {
 
       {/* Combined Scripture + Translation Scrollable View */}
       <ScrollView
-        style={styles.scrollView}
+        style={[styles.scrollView, { backgroundColor: colors.background.card }]}
         contentContainerStyle={styles.scrollViewContent}
         showsVerticalScrollIndicator={true}
         onScroll={handleScroll}
         scrollEventThrottle={16}
       >
         {/* English Reading Section */}
-        <View style={styles.readingSection}>
-          <View style={styles.textContentWrapper}>
-            {translationEnabled
-              ? renderTappableText(reading.content)
-              : <Text style={[styles.content, { color: colors.text.primary }]} allowFontScaling={false}>{reading.content}</Text>
-            }
-          </View>
-        </View>
+        {translationEnabled
+          ? renderTappableText(reading.content)
+          : <Text style={[styles.content, { color: colors.text.primary }]} allowFontScaling={false}>{reading.content}</Text>
+        }
 
         {/* Translation Section - Only show if translation enabled */}
         {translationEnabled && (
@@ -275,8 +271,6 @@ const styles = StyleSheet.create({
   scrollViewContent: {
     paddingHorizontal: Spacing.lg,
     paddingVertical: Spacing.xs,
-    flexGrow: 1,
-    flexDirection: 'column',
   },
   readingSection: {
     marginBottom: 0,

@@ -1,315 +1,128 @@
-# Phase 8 Deployment Checklist
-**Last Updated:** November 28, 2025
-**Status:** ✅ READY FOR DEPLOYMENT
+# Deployment Checklist
+**Last Updated:** March 7, 2026
+**Current Release:** v1.1.13 (in review)
+**Next Release:** v1.1.14 (iOS only, ready to build)
 
 ---
 
-## Pre-Deployment Verification
+## v1.1.13 Release Status
 
-### Code Quality
-- [x] All TypeScript files compile without errors
-- [x] No hardcoded colors in refactored sections
-- [x] All theme colors properly namespaced
-- [x] Type safety verified across codebase
-- [x] Code follows React Native best practices
+### Code
+- [x] GooglePlayIAPService.ts — react-native-iap v14 API rewrite
+- [x] useTrialStore.ts — upgradeToBasic returns { success, error }
+- [x] SubscriptionScreen.tsx — shows actual error message
+- [x] app.json — version 1.1.13, buildNumber 125, versionCode 9
+- [x] git committed
 
-### Dark Mode Support
-- [x] Progress Dashboard fully readable
-- [x] Notification Center properly themed
-- [x] Send Gift Screen fully styled
-- [x] All stat numbers visible
-- [x] Text contrast meets WCAG AA standards
-- [x] Calendar dates readable
-- [x] All buttons properly visible
+### Builds
+- [x] Android AAB built via EAS (versionCode 9)
+- [x] iOS IPA built via EAS (buildNumber 125)
+- [x] Android uploaded to Play Console → Internal Testing → Production
+- [x] iOS uploaded via Transporter → App Store Connect v1.1.13 entry
 
-### Functional Testing
-- [x] Arrow navigation works (all 4 reading types)
-- [x] Translation label shows dynamic language names
-- [x] Trial duration correctly displays 7 days
-- [x] Notification icons appear correctly
-- [x] Gift sending flow complete
-- [x] Subscription screens functional
-
-### Documentation
-- [x] ARCHIVE_MANIFEST.md created and updated
-- [x] SESSION_COMPLETION_SUMMARY.md completed
-- [x] All phase documentation archived
-- [x] Legal documents finalized
-- [x] API documentation complete
-- [x] User guides prepared
-
-### Git & Version Control
-- [x] All changes committed
-- [x] Commit messages comprehensive
-- [x] Branch history clean
-- [x] No uncommitted changes
-- [x] Ready for merge to main
+### Submissions
+- [x] Android submitted for Google Play review
+- [x] iOS submitted for Apple review
+- [ ] Android approved and live
+- [ ] iOS approved and live
 
 ---
 
-## Files Ready for Deployment
+## v1.1.14 Release Checklist (iOS only)
 
-### Core Services (Updated)
-- `src/services/practice/SentenceExtractionService.ts` - Word limits fixed
-- `src/services/legal/*` - All legal services implemented (7 files)
+### Pre-Build
+- [x] Code fix applied: AppleIAPService.ts listener race condition
+- [ ] Bump app.json: version → 1.1.14, buildNumber → 126
+- [ ] (Android versionCode → 10 if doing Android build too)
+- [ ] git commit
 
-### Screens (Updated)
-- `src/screens/progress/ProgressDashboard.tsx` - Dark mode fixed
-- `src/screens/NotificationCenterScreen.tsx` - Theme colors added
-- `src/screens/subscription/SendGiftScreen.tsx` - Complete redesign
-- `src/screens/subscription/SubscriptionScreen.tsx` - Trial text fixed
-- `src/screens/settings/SettingsScreen.tsx` - Trial text fixed
-- `src/screens/legal/*` - 3 new legal screens
+### Build
+- [ ] `eas build --platform ios --profile production --non-interactive`
+- [ ] Confirm build success and download IPA
 
-### Components (Updated)
-- `src/components/progress/ReadingCalendar.tsx` - Colors fixed
-- `src/components/subscription/SubscriptionSettingsSection.tsx` - Trial text fixed
-- `src/components/trial/TrialExpiredModal.tsx` - Trial text fixed
-- `src/components/reading/ScriptureText.tsx` - Dynamic translation label
-- `src/components/legal/*` - 3 new legal components
+### Submit
+- [ ] Upload IPA via Transporter
+- [ ] Go to App Store Connect → create NEW version entry for 1.1.14
+- [ ] Add buildNumber 126 to the 1.1.14 version entry
+- [ ] Fill App Review Information (no new permissions needed)
+- [ ] Submit for review
 
-### Navigation & Auth (Updated)
-- `src/navigation/AuthNavigator.tsx` - Trial text fixed
-- `app/(tabs)/practice.tsx` - Text color fixed
-- `app/(tabs)/settings.tsx` - Updated
-- `app/(tabs)/_layout.tsx` - Navigation updated
-- `app/(auth)/sign-in.tsx` - Updated
-- `app/(auth)/sign-up.tsx` - Updated
+### Testing (TestFlight before submit)
+- [ ] Install from TestFlight
+- [ ] Test monthly subscription purchase → should succeed
+- [ ] Test yearly subscription purchase → should succeed
+- [ ] Test lifetime purchase → may fail in TestFlight sandbox (EXPECTED, don't block)
+- [ ] Test Restore Purchases
+- [ ] Confirm no "purchase failed" after payment sheet completes
 
 ---
 
-## Environment Variables
+## Post v1.1.14 Launch
 
-### Required for Deployment
-```
-EXPO_PUBLIC_FIREBASE_API_KEY=<your-key>
-EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN=<your-domain>
-EXPO_PUBLIC_FIREBASE_PROJECT_ID=<your-project-id>
-EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET=<your-bucket>
-EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=<your-sender-id>
-EXPO_PUBLIC_FIREBASE_APP_ID=<your-app-id>
-```
+### Email Campaign
+- [ ] Confirm v1.1.14 is live on App Store
+- [ ] Confirm Android subscriptions working (check ~March 8)
+- [ ] Send Batch 01 to yourself as test
+- [ ] Check test email on phone + desktop
+- [ ] Send all 11 batches to 329 contacts (15-min waits between batches)
+- [ ] Monitor ourenglish2019@gmail.com for responses
+- [ ] Track downloads in App Store Connect & Play Console
 
-### Verified
-- [x] All environment variables documented
-- [x] No secrets hardcoded
-- [x] Firebase configuration templates ready
-- [x] Cloud function configuration documented
+### Android Subscription Check (~March 8)
+- [ ] Test Android monthly subscription
+- [ ] Test Android yearly subscription
+- [ ] If still failing: diagnose further (propagation delay should have resolved)
 
 ---
 
-## Database & Backend
+## Environment Variables (EAS Production)
 
-### Firestore Collections
-- [x] Users collection (auth + profile)
-- [x] Trial subscriptions collection
-- [x] Readings collection (daily scripture)
-- [x] Bookmarks collection
-- [x] Gift codes collection
-- [x] Compliance records collection
+All configured in EAS dashboard for `loup1954/readingdaily-scripture-app`:
 
-### Cloud Functions
-- [x] sendGift function implemented
-- [x] redeemGift function implemented
-- [x] recordCompliance function implemented
-- [x] backupUserData function implemented
-- [x] All functions tested locally
+- EXPO_PUBLIC_FIREBASE_* (API key, project ID, auth domain, etc.)
+- EXPO_PUBLIC_AZURE_SPEECH_KEY + REGION
+- EXPO_PUBLIC_GOOGLE_CLOUD_API_KEY
+- EXPO_PUBLIC_AZURE_SPEECH_REGION=australiaeast
+- EXPO_PUBLIC_TRIAL_DURATION_MINUTES (7 days = 10080)
+- EXPO_PUBLIC_LIFETIME_PRICE=49.99
+- EXPO_PUBLIC_APPLE_IAP_PRODUCT_ID
+- EXPO_PUBLIC_GOOGLE_PLAY_PRODUCT_ID
+- EXPO_PUBLIC_MOCK_PAYMENTS=false (production)
+- EXPO_PUBLIC_SKIP_TRIAL=false (production)
 
 ---
 
-## TestFlight Build Preparation
+## Rollback Reference
 
-### Build Configuration
-- [x] Bundle identifier correct
-- [x] App name verified
-- [x] Version number set
-- [x] Build number incremented
-- [x] Icons and splash screens configured
-- [x] App Store Connect ready
-
-### Testing Accounts
-- [x] Test user created
-- [x] Test subscription created
-- [x] Test payment method set up
-- [x] Gift code test flow verified
+| Version | iOS Build | Android versionCode | Status | Notes |
+|---------|-----------|-------------------|--------|-------|
+| 1.1.8 | 120 | 4 | LIVE (current) | Last stable live version |
+| 1.1.13 | 125 | 9 | In review | Subscription error display |
+| 1.1.14 | 126 | 10 | Pending build | iOS subscription fix |
 
 ---
 
-## Deployment Steps
+## Quick Commands
 
-### Step 1: Final Review
-- [ ] Review all changes in ARCHIVE_MANIFEST.md
-- [ ] Review SESSION_COMPLETION_SUMMARY.md
-- [ ] Confirm all tests passing
-- [ ] Verify git commits clean
-
-### Step 2: Build for TestFlight
 ```bash
-# Build the app
-eas build --platform ios
+# Build iOS
+eas build --platform ios --profile production --non-interactive
 
-# Check for errors
-# Verify build size and time
+# Build Android
+eas build --platform android --profile production --non-interactive
+
+# Build both
+eas build --platform all --profile production --non-interactive
+
+# Check build status
+eas build:list
 ```
 
-### Step 3: TestFlight Beta Testing
-- [ ] Deploy to TestFlight internal testing
-- [ ] Test on multiple iOS devices
-- [ ] Verify dark mode on different devices
-- [ ] Test subscription flow
-- [ ] Test gift sending
-- [ ] Verify legal document flow
-
-### Step 4: Collect Feedback
-- [ ] Monitor TestFlight crash reports
-- [ ] Check performance metrics
-- [ ] Review user feedback
-- [ ] Note any issues for hotfix
-
-### Step 5: Staging Deployment
-- [ ] Set up staging Firebase project
-- [ ] Deploy to staging environment
-- [ ] Verify all features in staging
-- [ ] Load test if needed
-
-### Step 6: Production Deployment
-- [ ] Final approval from stakeholders
-- [ ] Production Firebase configuration ready
-- [ ] Monitoring and alerting configured
-- [ ] Deploy to production
-- [ ] Monitor error rates and performance
-
-### Step 7: Post-Launch
-- [ ] Monitor app store reviews
-- [ ] Track crash reports
-- [ ] Monitor usage analytics
-- [ ] Prepare hotfix if needed
-- [ ] Document learnings
-
 ---
 
-## Rollback Plan
-
-### If Critical Issues Found
-1. Immediately take app offline if security issue
-2. Prepare hotfix or revert commit
-3. Test hotfix on staging
-4. Deploy hotfix to production
-5. Document issue and resolution
-
-### Previous Build (Fallback)
-- Commit: `058b637` (Last stable version)
-- Features: All working
-- Known Issues: Dark mode incomplete (will be fixed)
-
----
-
-## Monitoring & Alerts
-
-### Post-Deployment Monitoring
-- [x] Error rate tracking configured
-- [x] Performance monitoring ready
-- [x] Crash report service ready
-- [x] User analytics tracking ready
-
-### Alert Thresholds
-- [ ] Crash rate > 0.1% → Alert
-- [ ] Error rate > 1% → Alert
-- [ ] API latency > 1s → Alert
-- [ ] Authentication failures > 5% → Alert
-
----
-
-## Launch Communication
-
-### Internal Team
-- [ ] All developers briefed on changes
-- [ ] Support team prepared with FAQ
-- [ ] Marketing team ready with announcement
-- [ ] Management notified
-
-### External Users
-- [ ] Release notes prepared
-- [ ] Feature highlights documented
-- [ ] Support email ready: ourenglish2019@gmail.com
-- [ ] FAQ updated with new features
-
----
-
-## Success Criteria
-
-### Deployment Success
-- ✅ App builds without errors
-- ✅ All screens render properly
-- ✅ Dark mode fully functional
-- ✅ No regression bugs
-- ✅ Performance acceptable (<500ms loads)
-- ✅ Crash rate < 0.1%
-
-### Business Metrics
-- [ ] User registration working
-- [ ] Trial activation working
-- [ ] Gift purchase working
-- [ ] Legal document acceptance tracking
-- [ ] Subscription analytics tracking
-
----
-
-## Sign-Off
-
-### Development Team
-- [x] Code review complete
-- [x] Testing verified
-- [x] Documentation accurate
-- [x] Ready for deployment
-
-### Quality Assurance
-- [ ] Beta testing passed
-- [ ] Performance testing passed
-- [ ] Security review passed
-- [ ] Accessibility review passed
-
-### Product Management
-- [ ] Feature requirements met
-- [ ] User experience verified
-- [ ] Business logic correct
-- [ ] Ready for launch
-
----
-
-## Additional Resources
-
-### Documentation Files
-- `ARCHIVE_MANIFEST.md` - Complete change manifest
-- `SESSION_COMPLETION_SUMMARY.md` - Detailed session summary
-- `PHASE_8_DEPLOYMENT_MIGRATION_PLAN.md` - Full deployment guide
-- `PHASE_8_QUICK_START.md` - Quick reference
-- `FIREBASE_DEPLOYMENT_GUIDE.md` - Firebase setup guide
-- `E2E_TEST_SCENARIOS.md` - Test scenarios
-
-### Support Resources
-- `LEGAL_DOCUMENTS_IMPLEMENTATION.md` - Legal doc guide
-- `API_DOCUMENTATION.md` - API reference
-- `DEVELOPER_GUIDE.md` - Dev setup guide
-- `USER_GUIDES.md` - User documentation
-
----
-
-## Final Verification
-
-**Current Status:** ✅ READY FOR PHASE 8 DEPLOYMENT
-
-**Last Commit:** `2ca03c8`
-**All changes:** Documented and archived
-**Tests:** Passing
-**Documentation:** Complete
-**Code Quality:** Production-ready
-
----
-
-**Prepared by:** Claude Code
-**Date:** November 28, 2025
-**Version:** 1.0
-**Status:** FINAL
-
-🚀 **Ready to launch!**
+## Store Links
+- App Store Connect: https://appstoreconnect.apple.com
+- Google Play Console: https://play.google.com/console
+- EAS Dashboard: https://expo.dev/accounts/loup1954/projects/readingdaily-scripture-app
+- iOS App Store: https://apps.apple.com/app/readingdaily-scripture/id6753561999
+- Google Play: https://play.google.com/store/apps/details?id=com.readingdaily.scripture

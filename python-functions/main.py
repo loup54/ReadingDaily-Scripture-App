@@ -12,9 +12,7 @@ import json
 import os
 import pytz
 
-# Google Play Billing imports
-from google.oauth2 import service_account
-from googleapiclient.discovery import build
+# Google Play Billing imports (lazy - loaded inside function to avoid slow startup)
 
 # Import scraper modules
 from scrapers.usccb_scraper import USCCBScraper
@@ -218,6 +216,8 @@ def cleanup_old_readings(cutoff_date):
 
 @https_fn.on_request()
 def validate_google_receipt(req: https_fn.Request) -> https_fn.Response:
+    from google.oauth2 import service_account
+    from googleapiclient.discovery import build
     """
     Validate Google Play purchase receipt
 

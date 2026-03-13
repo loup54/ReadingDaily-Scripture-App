@@ -1,562 +1,122 @@
 # Future Work Queue
-**Last Updated:** February 25, 2026 (Evening)
-**Current Version:** 1.1.7 (Build 118) - WAITING FOR REVIEW
-**Status:** ⏳ v1.1.7 SUBMITTED - Waiting for Apple Review
+**Last Updated:** March 10, 2026
+**Current Version:** iOS 1.1.16 (Build 128) | Android 1.1.15 (versionCode 10)
+**Status:** ✅ Both platforms LIVE — monitoring week of Mar 10-17 before next release
 
 ---
 
-## Current Status
+## CURRENT PRIORITIES
 
-### Version 1.1.7 (Build 118) - SUBMITTED ✅
-- **Status:** ⏳ WAITING FOR APPLE REVIEW (February 25, 2026)
-- **Submitted:** February 25, 2026 (Afternoon)
-- **Changes:** Re-enabled lifetime purchase ($49.99)
-- **Additional Work:** Fixed $7.99 pricing, created promo codes, advertisement
-- **Expected Approval:** February 27-29, 2026 (1-3 days)
+### P0 — Email Campaign (Do Now)
+**Status:** Ready to send
+- 329 contacts in 11 Gmail BCC batches
+- Templates: English + Vietnamese (separate files)
+- Flyers: English + Vietnamese A5 (print to PDF, attach)
+- Instructions: `Email/Gmail-Batch-Sending-Instructions.md`
 
-### Version 1.1.6 (Build 117) - LIVE ✅
-- **Status:** ✅ APPROVED and LIVE on App Store (February 24, 2026)
-- **App Store URL:** https://apps.apple.com/app/readingdaily-scripture/id6753561999
-- **Features:** Monthly/yearly subscriptions, 7-day trial, TTS pronunciation
-- **Deferred to v1.1.7:** Lifetime purchase (NOW BEING ADDED)
-
----
-
-## Version 1.1.7 - High Priority (After v1.1.6 Approval)
-
-### 1. Re-enable Lifetime Purchase ✅ COMPLETED & SUBMITTED
-**Priority:** P0 - First task after approval
-**Effort:** 1-2 hours
-**Status:** ✅ COMPLETED & SUBMITTED (Feb 25, 2026)
-
-**Files Modified:**
-- ✅ `src/screens/subscription/SubscriptionScreen.tsx` - Uncommented handlePurchase() and lifetime UI
-- ✅ `app.json` - Updated to version 1.1.7, build 118
-
-**Testing Completed:**
-- ✅ Build 118 created successfully
-- ✅ Tested in TestFlight (failed as expected - sandbox limitation)
-- ✅ Submitted to Apple Review
-
-**Additional Issues Discovered & Fixed:**
-- ✅ Fixed $7.99 pricing display (corrected screenshot)
-- ✅ Created HTML advertisement with free trial and ourenglish.best branding
-- ✅ Generated 10 lifetime promo codes for promotional use
-- ⏸️ Screenshot reordering deferred (locked during review)
-
-**Current Status:** Waiting for Apple approval (Feb 27-29, 2026)
+### P0 — Monitor Both Platforms (Week of Mar 10-17)
+- Watch for crash reports in App Store Connect / Play Console
+- Confirm subscriptions working in production (both platforms now live with fixes)
+- Check ourenglish2019@gmail.com for user questions
+- App download price now FREE — monitor for any store propagation issues
+- Android scroll fix pending release — bundle with other fixes before next build
 
 ---
 
-### New Tasks Added (Feb 25, 2026)
+## P1 — Fix Send a Gift Feature
 
-#### 1A. Reorder Screenshots (Post-Approval) ⭐ NEW
-**Priority:** P1 - After v1.1.7 approval
-**Effort:** 15 minutes
-**Status:** Waiting for approval
+**Problem:** Firebase Cloud Function auth token becomes invalid after app reinstall.
+Users see "Please sign in again" even when logged in.
 
-**Issue:** Screenshot order not optimal - daily reading screen should be first
+**Options:**
+- **A) Client-side token refresh** (recommended) — refresh on app start before Cloud Function calls
+  - Files: `src/config/firebase.ts`, `src/stores/useAuthStore.ts`
+- **B) Server-side** — update Cloud Function to handle token refresh
+  - Files: `functions/src/gifting/sendGift.ts`
+- **C) Firestore rules** — eliminate Cloud Function dependency entirely
 
-**Action After Approval:**
-1. App Store Connect → v1.1.7 → Previews and Screenshots
-2. Drag screenshots to reorder:
-   - Scripture reading screen FIRST
-   - Calendar/daily view SECOND
-   - Others as needed
-3. Click Save (updates immediately, no new submission)
-
-**Current Status:** Locked during review, will unlock after approval
-
-#### 1B. Promotional Materials ✅ COMPLETED
-**Priority:** P1 - Marketing support
-**Effort:** 1 hour
-**Status:** ✅ COMPLETED (Feb 25, 2026)
-
-**Completed Items:**
-- ✅ HTML advertisement created (`/Users/loumimihome/Desktop/ReadingDaily-App-Advertisement.html`)
-- ✅ Prominent "7-Day FREE Trial" badge added
-- ✅ Developer credit "ourenglish.best" included
-- ✅ Mobile-optimized design
-- ✅ Direct App Store link included
-
-#### 1C. Promo Code System ✅ COMPLETED
-**Priority:** P1 - Enable friend/influencer access
-**Effort:** 30 minutes
-**Status:** ✅ COMPLETED (Feb 25, 2026)
-
-**Completed Items:**
-- ✅ Generated 10 lifetime promo codes in App Store Connect
-- ✅ Codes ready to share with friends/influencers
-- ✅ Documentation created for code redemption process
-- **Remaining:** 90 codes available this quarter
+**Re-enable after fix:**
+- `src/screens/subscription/SubscriptionScreen.tsx` — Send a Gift + Redeem buttons
 
 ---
 
-### 2. Fix Send a Gift Feature ⭐ HIGH PRIORITY
-**Priority:** P1 - Second task after lifetime is working
-**Effort:** 4-8 hours (debugging + testing)
-**Status:** Requires Firebase auth token fix
-
-**Problem:** Firebase Cloud Function auth token becomes invalid after app reinstall, causing "Please sign in again" errors even for logged-in users.
-
-**Options to Investigate:**
-**A) Client-Side Token Refresh (Recommended)**
-- Implement token refresh on app start
-- Check token validity before Cloud Function calls
-- Automatically re-authenticate if token expired
-- **Files:** `src/config/firebase.ts`, `src/stores/useAuthStore.ts`
-
-**B) Server-Side Token Validation Update**
-- Update Cloud Function to accept longer-lived tokens
-- Implement custom token generation with longer expiry
-- **Files:** `functions/src/gifting/sendGift.ts`
-
-**C) Alternative Auth Approach**
-- Use Firestore security rules instead of Cloud Functions
-- Store gift codes in Firestore with uid-based access control
-- Eliminate need for Cloud Function auth entirely
-- **Files:** New Firestore schema, remove Cloud Function dependency
-
-**Testing Required:**
-- ✅ Verify gift sending works after app reinstall
-- ✅ Verify logged-in users can send gifts without re-auth
-- ✅ Verify guest users see "Account Required" message
-- ✅ Verify gift codes are generated and stored correctly
-
-**Files to Re-enable:**
-- `src/screens/subscription/SubscriptionScreen.tsx` - Re-enable buttons
-- `src/screens/subscription/SendGiftScreen.tsx` - May need auth fixes
+## P2 — Re-enable Redeem Gift Code
+Dependent on Send a Gift (P1) being fixed and tested.
 
 ---
 
-### 3. Re-enable Redeem Gift Code ⭐ MEDIUM PRIORITY
-**Priority:** P2 - After Send a Gift is fixed
-**Effort:** 1 hour (just re-enable button)
-**Status:** Dependent on Send a Gift working
+## P3 — UX Improvements
 
-**Files to Modify:**
-- `src/screens/subscription/SubscriptionScreen.tsx`
-  - Re-enable "Redeem a Gift Code" button
-  - Verify navigation to redeem screen works
-
-**Testing Required:**
-- ✅ Verify button appears for all users
-- ✅ Verify navigation to redeem screen
-- ✅ Verify gift code validation works
-- ✅ Verify successful redemption flow
-
----
-
-### 4. Improve IAP Error Messages
-**Priority:** P2 - UX improvement
-**Effort:** 2-3 hours
-**Status:** Enhancement
-
-**Current Issue:** Generic error messages like "Purchase Failed" don't help users understand what went wrong.
-
-**Improvements Needed:**
-- Map StoreKit error codes to user-friendly messages
-- Provide actionable next steps (e.g., "Check your payment method in Settings")
-- Distinguish between user cancellation vs. actual errors
-- Add retry buttons for transient errors
-
-**Files to Modify:**
-- `src/services/payment/AppleIAPService.ts` - Error mapping
-- `src/screens/subscription/SubscriptionScreen.tsx` - Error display
-
-**Example Error Messages:**
-```
-E_USER_CANCELLED → "Purchase cancelled"
-E_NETWORK_ERROR → "Network error. Check your connection and try again."
-E_ALREADY_OWNED → "You already own this product. Tap 'Restore Purchases' to activate it."
-E_ITEM_UNAVAILABLE → "This product is currently unavailable. Try again later."
-```
-
----
-
-## Version 1.1.8+ - Medium Priority
-
-### 5. Add Purchase Confirmation Screen
-**Priority:** P3 - UX enhancement
-**Effort:** 4-6 hours
-**Status:** Planning
-
-**Description:** After successful purchase, show a dedicated confirmation screen with:
-- Success animation (checkmark, confetti)
-- Clear summary of what was purchased
-- Benefits reminder
-- Call-to-action to start using features
-
-**Benefits:**
-- Better user experience
-- Reduces support questions "Did my purchase work?"
-- Opportunity to guide users to key features
-
-**Files to Create:**
-- `src/screens/subscription/PurchaseConfirmationScreen.tsx`
+### Purchase Confirmation Screen
+After successful purchase: success animation, summary of what was purchased, CTA.
+- Create: `src/screens/subscription/PurchaseConfirmationScreen.tsx`
 - Update navigation in `SubscriptionScreen.tsx`
 
----
+### Improved IAP Error Messages
+Map error codes to user-friendly, actionable messages.
+- `'user-cancelled'` → "Purchase cancelled"
+- `'unknown'` → "Something went wrong. Check your payment method and try again."
+- `'already-owned'` → "You already own this. Tap Restore Purchases to activate."
+- `'item-unavailable'` → "This product is unavailable right now. Try again later."
+- Files: `AppleIAPService.ts`, `GooglePlayIAPService.ts`, `SubscriptionScreen.tsx`
 
-### 6. Implement Receipt Validation
-**Priority:** P3 - Security improvement
-**Effort:** 8-12 hours
-**Status:** Planning
-
-**Description:** Server-side receipt validation to prevent IAP fraud.
-
-**Implementation:**
-- Send purchase receipt to Firebase Cloud Function
-- Validate with Apple's App Store API
-- Store validated purchase in Firestore
-- Sync validated purchases across devices
-
-**Benefits:**
-- Prevents IAP piracy/fraud
-- Enables cross-device purchase sync
-- Better analytics on actual revenue
-- Required for business tier
-
-**Files to Create:**
-- `functions/src/iap/validateReceipt.ts`
-- Update `AppleIAPService.ts` to call validation
+### Subscription Management Deep Link
+Add "Manage Subscription" button in Settings → deep links to iOS Settings / Play Store.
 
 ---
 
-### 7. Add Family Sharing Support
-**Priority:** P4 - Feature request
-**Effort:** 6-10 hours
-**Status:** Planning
+## P3 — Technical Debt
 
-**Description:** Allow users to share IAP purchases with family members via Apple Family Sharing.
+### TD-1: Remove auth.currentUser checks
+Replace all `auth.currentUser` with Zustand `useAuthStore()` for consistent reactivity.
+Search: `grep -r "auth.currentUser" src/`
 
-**Implementation:**
-- Enable Family Sharing in App Store Connect
-- Update IAP service to handle shared purchases
-- Test with multiple Apple IDs in family group
+### TD-2: Consolidate IAP Error Handling
+Create `src/utils/iap/displayIAPError.ts` — single shared error display utility.
+Currently duplicated across screens.
 
-**Files to Modify:**
-- `src/services/payment/AppleIAPService.ts`
-- App Store Connect settings
-
----
-
-## Version 1.2+ - Low Priority
-
-### 8. Add Subscription Management
-**Priority:** P5 - Convenience feature
-**Effort:** 4-6 hours
-**Status:** Planning
-
-**Description:** In-app subscription management (cancel, change tier, etc.)
-
-**Current:** Users must go to iOS Settings → Apple ID → Subscriptions
-**Proposed:** Deep link to subscription management from app settings
-
-**Implementation:**
-- Add "Manage Subscription" button in Settings
-- Deep link to App Store subscription management
-- Display current subscription status
+### TD-3: Server-side Receipt Validation
+Firebase Cloud Function → validate with Apple/Google API → store in Firestore.
+Prevents IAP fraud; enables cross-device sync.
+- Create: `functions/src/iap/validateReceipt.ts`
 
 ---
 
-### 9. Implement Promo Codes
-**Priority:** P5 - Marketing feature
-**Effort:** 2-4 hours
-**Status:** Planning
+## P4 — Growth Features
 
-**Description:** Support Apple promotional codes for free trials or discounts.
+### App Store Rating Prompts
+Trigger `StoreReview.requestReview()` after milestone events (e.g., 7-day streak, first completed reading).
 
-**Implementation:**
-- Create promo codes in App Store Connect
-- Add "Redeem Code" button in app
-- Test redemption flow
+### Mailchimp Integration
+Consider for future email campaigns — open rate tracking, automated follow-ups.
 
----
-
-### 10. Add Gift Card Support
-**Priority:** P6 - Alternative payment
-**Effort:** 10-15 hours
-**Status:** Planning
-
-**Description:** Allow users to purchase with Apple Gift Cards.
-
-**Note:** This is automatically supported by StoreKit. Just needs testing and documentation.
+### Additional Language UI
+App UI currently English-only. Vietnamese UI would serve primary user base better.
 
 ---
 
-### 11. Subscription Analytics Dashboard
-**Priority:** P6 - Business intelligence
-**Effort:** 15-20 hours
-**Status:** Planning
+## P5 — Future / Backlog
 
-**Description:** Admin dashboard showing:
-- Subscription conversion rates
-- Monthly Recurring Revenue (MRR)
-- Churn rate
-- Popular tiers
-- Trial conversion rates
-
-**Files to Create:**
-- `src/screens/admin/SubscriptionAnalyticsScreen.tsx`
-- Firebase Analytics custom events
-- Firestore aggregation queries
+- Family Sharing support (Apple)
+- Subscription analytics dashboard (Firebase Analytics + Firestore aggregation)
+- Automated IAP unit tests (mock StoreKit)
+- Gift Card support (StoreKit handles automatically — just needs testing)
 
 ---
 
-## Technical Debt Queue
+## COMPLETED (Reference)
 
-### TD-1: Update react-native-iap to Latest
-**Priority:** P3
-**Current Version:** 14.7.6
-**Latest Version:** Check npm for latest
-**Effort:** 2-4 hours (testing)
-**Status:** Monitor for breaking changes
-
-**Action:**
-1. Check changelog for v15+ releases
-2. Test in development build
-3. Update if no breaking changes
-4. Verify all IAP flows work
-
----
-
-### TD-2: Remove Firebase auth.currentUser Checks
-**Priority:** P4
-**Effort:** 2-3 hours
-**Status:** Code cleanup
-
-**Problem:** Mixing Firebase `auth.currentUser` with Zustand `user` causes reactivity issues.
-
-**Solution:** Use Zustand consistently everywhere:
-```typescript
-// Bad
-if (auth.currentUser) { ... }
-
-// Good
-const { user, isGuest } = useAuthStore();
-if (user && !isGuest) { ... }
-```
-
-**Files to Search:**
-- Grep for `auth.currentUser` usage
-- Replace with Zustand store access
-- Test auth-dependent features
-
----
-
-### TD-3: Consolidate IAP Error Handling
-**Priority:** P4
-**Effort:** 3-4 hours
-**Status:** DRY refactoring
-
-**Problem:** Error display logic duplicated across screens.
-
-**Solution:** Create centralized error handler:
-```typescript
-// src/utils/iap/displayIAPError.ts
-export function displayIAPError(error: IAPError) {
-  const userMessage = mapErrorToMessage(error);
-  Alert.alert('Purchase Error', userMessage, [
-    { text: 'OK' },
-    { text: 'Try Again', onPress: () => retry() }
-  ]);
-}
-```
-
----
-
-### TD-4: Add Automated IAP Testing
-**Priority:** P5
-**Effort:** 8-12 hours
-**Status:** Testing improvement
-
-**Problem:** IAP flows can only be tested manually in TestFlight.
-
-**Solution:** Mock StoreKit for unit tests:
-- Create mock RNIap implementation
-- Test purchase flows with mocked responses
-- Test error handling paths
-- Test edge cases (network errors, cancellation, etc.)
-
-**Files to Create:**
-- `src/services/payment/__mocks__/react-native-iap.ts`
-- `src/services/payment/__tests__/AppleIAPService.test.ts`
-
----
-
-## Visual Hierarchy Enhancements (Phase 9+)
-
-### Deferred from Previous Sessions
-
-**Documents Filed:**
-- ✅ `VISUAL_HIERARCHY_ENHANCEMENT_PLAN.md` - Strategic overview
-- ✅ `DETAILED_IMPLEMENTATION_PHASES_8A_TO_9.3.md` - Week-by-week roadmap
-
-**Status:** 📋 FILED FOR POST-LAUNCH
-**Timeline:** Review 4-6 weeks after v1.1.6 launch
-**Scope:** 3 phases, 9 components, 6 major improvements
-
-**When to Review:**
-- After v1.1.6 is stable in production
-- After v1.1.7 lifetime + gifting are working
-- After collecting user feedback data
-- After establishing baseline metrics
-
-**Key Phases:**
-- **Phase 8A:** Monitoring & data collection (4 weeks)
-- **Phase 8B:** Brand kit & component specs (3 weeks)
-- **Phase 9.1-9.3:** Incremental UI/UX improvements (7 weeks)
-
----
-
-## Metrics to Track (Starting v1.1.6)
-
-### IAP Metrics
-- **Subscription Conversion Rate:** % of users who subscribe
-- **Trial Start Rate:** % of users starting 7-day trial
-- **Trial Conversion Rate:** % of trials converting to paid
-- **Monthly vs Yearly:** Purchase preference split
-- **Restore Usage:** % of users using restore purchases
-- **Average Revenue Per User (ARPU)**
-- **Monthly Recurring Revenue (MRR)**
-
-### After v1.1.7 Launch
-- **Lifetime vs Subscription:** Purchase preference
-- **Lifetime Revenue:** Total from one-time purchases
-- **Gifting Adoption:** % of users sending gifts
-- **Gifting Success Rate:** % of gifts redeemed
-- **Gift Redemption Time:** Avg time from send to redeem
-
-### App Health Metrics
-- **Crash Rate:** Target < 0.1%
-- **Daily Active Users (DAU)**
-- **Monthly Active Users (MAU)**
-- **Session Duration**
-- **Feature Usage:** Which features are most used
-
----
-
-## Priority Matrix
-
-```
-P0 (Critical - Do Immediately After Approval):
-├── Re-enable Lifetime Purchase (v1.1.7)
-
-P1 (High - Next Sprint):
-├── Fix Send a Gift Feature (v1.1.7)
-
-P2 (Medium - Next 2-4 Weeks):
-├── Re-enable Redeem Gift Code (v1.1.7)
-├── Improve IAP Error Messages (v1.1.8)
-
-P3 (Medium - Next 1-2 Months):
-├── Add Purchase Confirmation Screen (v1.1.8)
-├── Implement Receipt Validation (v1.1.8)
-├── TD-1: Update react-native-iap
-├── TD-2: Remove auth.currentUser checks
-
-P4 (Low - Next 2-3 Months):
-├── Add Family Sharing Support (v1.2)
-├── TD-3: Consolidate IAP error handling
-
-P5 (Low - Future):
-├── Add Subscription Management (v1.2)
-├── Implement Promo Codes (v1.2)
-├── TD-4: Add automated IAP testing
-
-P6 (Very Low - Backlog):
-├── Add Gift Card Support (v1.2+)
-├── Subscription Analytics Dashboard (v1.2+)
-```
-
----
-
-## Estimated Timeline
-
-```
-Week 1 (Feb 20-27):
-├── ✅ Feb 20: v1.1.6 submitted to Apple
-├── ✅ Feb 24: v1.1.6 APPROVED and LIVE
-├── ✅ Feb 25: v1.1.7 developed, built, and submitted
-├── ✅ Feb 25: Fixed $7.99 pricing, created promo codes
-├── ⏳ Feb 27-29: Waiting for v1.1.7 approval
-
-Week 2-3 (Feb 28 - Mar 13):
-├── 🔧 Fix Send a Gift auth issues
-├── ✅ Re-enable gift redemption
-├── 🧪 Test gifting flows
-├── 🚀 Submit v1.1.8 to Apple
-
-Week 4-5 (Mar 14-27):
-├── 📊 Collect metrics from v1.1.6/7/8
-├── 💬 Gather user feedback
-├── 🎨 Improve error messages
-├── ✨ Add confirmation screen
-
-Month 2+ (April onwards):
-├── 🔐 Receipt validation
-├── 👨‍👩‍👧‍👦 Family sharing
-├── 📈 Analytics dashboard
-├── 🧹 Technical debt cleanup
-```
-
----
-
-## How to Use This Document
-
-### When v1.1.6 Gets Approved:
-1. ✅ Celebrate! 🎉
-2. ✅ Immediately start work on "Re-enable Lifetime Purchase"
-3. ✅ Test lifetime purchase in TestFlight (should work now)
-4. ✅ Submit v1.1.7 within 24-48 hours
-
-### When v1.1.7 is Live:
-1. ✅ Begin "Fix Send a Gift Feature" investigation
-2. ✅ Choose auth fix approach (A, B, or C)
-3. ✅ Implement and test thoroughly
-4. ✅ Submit v1.1.8 when ready
-
-### When Planning Sprints:
-1. ✅ Refer to Priority Matrix
-2. ✅ Pick P0/P1 items first
-3. ✅ Balance features vs. technical debt
-4. ✅ Consider user feedback when prioritizing
-
-### When Reviewing Metrics:
-1. ✅ Check "Metrics to Track" section
-2. ✅ Compare against baseline
-3. ✅ Adjust priorities based on data
-4. ✅ Use insights to guide v1.2+ features
-
----
-
-## Quick Links
-
-### Current Work
-- **Status:** [APPLE_SUBMISSION_STATUS.md](./APPLE_SUBMISSION_STATUS.md)
-- **Build History:** Git log Feb 2-20, 2026
-- **App Store Connect:** https://appstoreconnect.apple.com/apps/6753561999
-
-### Future Planning
-- **Visual Enhancements:** [VISUAL_HIERARCHY_ENHANCEMENT_PLAN.md](./VISUAL_HIERARCHY_ENHANCEMENT_PLAN.md)
-- **Phase 9 Roadmap:** [DETAILED_IMPLEMENTATION_PHASES_8A_TO_9.3.md](./DETAILED_IMPLEMENTATION_PHASES_8A_TO_9.3.md)
-
-### Reference Docs
-- **Project Roadmap:** [PROJECT_ROADMAP_STATUS.md](./PROJECT_ROADMAP_STATUS.md)
-- **Deployment:** [PHASE_8_DEPLOYMENT_MIGRATION_PLAN.md](./PHASE_8_DEPLOYMENT_MIGRATION_PLAN.md)
-
----
-
-## Document Status
-
-**Created:** February 20, 2026
-**Last Updated:** February 20, 2026
-**Next Review:** After v1.1.6 Apple approval
-**Owner:** Development Team
-**Status:** ✅ Active - Reference for all future work
-
----
-
-*This document is the single source of truth for future development work.*
-*Update after each version release and sprint planning session.*
+| Item | Version | Date |
+|------|---------|------|
+| False offline banner fix | v1.1.8 | Mar 5 |
+| Android bottom nav fix | v1.1.8 | Mar 5 |
+| Android IAP full rewrite (rn-iap v14) | v1.1.13 | Mar 7 |
+| iOS listener race condition fix | v1.1.14 | Mar 7 |
+| Android LinearGradient black screen fix | v1.1.15 | Mar 8 |
+| iOS getAvailablePurchases discard fix | v1.1.16 | Mar 8 |
+| Email campaign templates (EN + VI) | — | Mar 9 |
+| A5 flyers (EN + VI) | — | Mar 9 |
+| Vietnam Zalo/Facebook outreach kit | — | Mar 9 |
+| Philippines Messenger outreach kit | — | Mar 9 |
+| App Store download price fixed (Free) | — | Mar 10 |
+| Android A21s scroll fix (ScriptureText flex:1) | pending build | Mar 10 |

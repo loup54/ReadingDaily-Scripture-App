@@ -1,113 +1,105 @@
-# Session Summary - Reading Daily Scripture App
-**Session Date:** November 28, 2025
-**Status:** ✅ COMPLETE
+# Session Summaries - ReadingDaily Scripture App
+
+**File Purpose:** Running log of major sessions. Most recent first.
 
 ---
 
-## 🎯 What Was Done
+## March 7, 2026 — v1.1.13 Submission + iOS Subscription Fix
 
-### 1. Support Email Updated ✅
-- Centralized to: `ourenglish2019@gmail.com`
-- Updated 54+ email references across entire app
-- All legal documents updated
-- All authentication screens updated
-- All support channels now use single email
+**Submitted:** iOS v1.1.13 (Build 125) + Android v1.1.13 (versionCode 9) to both stores.
 
-### 2. Signature Writing Fixed ✅
-- Implemented touch event handling in SignatureModal
-- Added handleTouchStart, handleTouchMove, handleTouchEnd
-- Added visual feedback for signature capture
-- Users can now draw signatures properly
+**Key work:**
+- App Store Connect: Created new version entry 1.1.13, added Build 125, submitted
+- Diagnosed iOS subscription "purchase failed" bug: listener race condition in
+  `AppleIAPService.initialize()` calling `finishTransaction()` before `requestPurchase()`
+  resolved, causing empty array `[]` return
+- Fix applied to `AppleIAPService.ts`: removed `finishTransaction` from listener
+- Decision: Wait for v1.1.13 approval → build v1.1.14 → send email campaign
 
-### 3. Navigation Fixed ✅
-- Back arrow in legal-documents now returns to Settings (not Readings)
-- Changed from router.back() to explicit router.push('/(tabs)/settings')
-
-### 4. First-Time Onboarding Added ✅
-- Legal acceptance required on first launch
-- Beautiful modal with checklist
-- Tracks acceptance in settings store
-- Users understand requirements before using app
-
-### 5. Help Button Fixed ✅
-- "Need Help?" button now opens email client
-- Pre-fills subject and body with context
-- Works in sign-in, sign-up, and auth navigator
-- Fallback alert if no email client available
+**Next:** Build v1.1.14 iOS after v1.1.13 approved. Hold email campaign until then.
 
 ---
 
-## 📄 Legal Documentation Complete
+## March 5-6, 2026 — Android IAP v14 Rewrite + v1.1.13 Build
 
-### 6 Legal Documents Finalized
-1. Privacy Policy - 250+ lines (GDPR/CCPA compliant)
-2. Terms of Service - 350+ lines (subscription, liability, dispute resolution)
-3. Accessibility Statement - 310+ lines (WCAG, accommodations)
-4. Copyright & Attribution - 375+ lines (scripture licensing, DMCA)
-5. Consumer Rights Guide - 490+ lines (regional protections)
-6. Help & FAQ - 520+ lines (user guidance)
+**Context:** Android subscriptions showing black screen (blank payment sheet) in v1.1.12.
 
-**Total:** 2,000+ lines of legal content, 20,000+ words
+**Root cause:** react-native-iap upgraded from v12 to v14 (Nitro Modules). Entire API changed:
+- `getProducts()` → `fetchProducts({ skus, type })`
+- `getSubscriptions()` → `fetchProducts({ skus, type: 'subs' })`
+- `requestSubscription()` removed → `requestPurchase({ type: 'subs' })`
+- `acknowledgePurchaseAndroid({ token })` → `acknowledgePurchaseAndroid(token)` (string)
+- Error codes changed to kebab-case
 
----
+**Also fixed:**
+- `upgradeToBasic()` in `useTrialStore.ts` now returns `{ success, error }` not boolean
+- `SubscriptionScreen.tsx` displays actual error message
+- Subscription products needed offer tokens for Google Play Billing 5+
+- Android subscription black screen: separately diagnosed as Google Play propagation
+  delay (new products created March 5, needs 24-72 hrs). Not a code bug.
 
-## 📦 Archives Created
-
-### 3 Compressed Archives
-1. legal-documents-archive-20251128-063844.tar.gz (23 KB)
-2. project-phases-archive-20251128-063850.tar.gz (28 KB)
-3. documentation-archive-20251128-063858.tar.gz (21 KB)
-
-**Total:** 72 KB compressed (from 200+ KB original)
-**Compression:** 64% reduction
+**Built:** v1.1.13 for both platforms.
 
 ---
 
-## ✅ Quality Metrics
+## March 2, 2026 — Email Campaign Preparation
 
-```
-✅ Code Coverage: >85%
-✅ Test Pass Rate: 100%
-✅ TypeScript Strict: Enabled
-✅ All Tests Passing: Yes
-✅ No Breaking Changes: Confirmed
-✅ Production Ready: Yes
-✅ Legal Compliant: GDPR, CCPA, UK GDPR
-✅ Security Verified: TLS, Encryption, Access Controls
-```
+**Work done:**
+- Added 24 new contacts from Untitled.csv → total now 329 contacts
+- Regenerated batch files (Batch-01 through Batch-11)
+- Created bilingual email template (English + Vietnamese): `ReadingDaily-Email-Template-BILINGUAL-v1.txt`
+- Updated `Gmail-Batch-Sending-Instructions.md` with bilingual subject line
+- Campaign on hold until app subscription issues resolved
 
 ---
 
-## 📊 Session Statistics
+## February 2026 — v1.1.7 / v1.1.8 — First Stable Launch
 
-- Files Modified: 15+
-- Lines Changed: 500+
-- Bug Fixes: 5 major issues resolved
-- Features Added: 4 new capabilities
-- Email References Updated: 54
-- Legal Documents: 6 complete
-- Archives Created: 3
-- Documentation Files: 2 (manifest + summary)
-
----
-
-## 🚀 Deployment Status
-
-**READY FOR PHASE 8** ✅
-
-All features complete
-All tests passing
-All documentation finalized
-All legal requirements met
-Support contact configured
-User feedback addressed
+**Work done:**
+- Fixed false offline indicator: `status === 'offline'` not `!isConnected`
+  (`NetworkStatusService` starts with `status: 'unknown'`, not `isConnected: false`)
+- Fixed Android bottom navigation icons invisible: added `useSafeAreaInsets()`
+  with `Platform.OS === 'android'` padding calculation
+- Apple rejected v1.1.7 ("train closed") — bumped to v1.1.8
+- Both iOS and Android went LIVE on stores with v1.1.8
 
 ---
 
-## 📞 Support
+## November-January 2025-2026 — Subscription System (Phase 7)
 
-Email: ourenglish2019@gmail.com
+**Work done:**
+- Added three subscription tiers: Monthly ($2.99), Yearly ($19.99), Lifetime ($49.99)
+- Created IAP products in App Store Connect and Google Play Console (.v2 suffix)
+- Built `AppleIAPService.ts` and `GooglePlayIAPService.ts`
+- 7-day free trial implemented before paywall
+- `useTrialStore.ts` manages all purchase/subscription state with Zustand persist
+- Trial timer, device fingerprinting for abuse prevention
+- Gift subscription system (Send a Gift / Redeem Gift Code) — partially complete
+  (Firebase auth token persistence issue, deferred)
 
 ---
 
-**Session Complete: November 28, 2025**
+## November 28, 2025 — Legal, UI, Dark Mode (Phase 6-7 completion)
+
+**Work done:**
+- 6 legal documents finalized (Privacy Policy, ToS, Accessibility, Copyright, Consumer Rights, FAQ)
+- Signature writing fixed in SignatureModal
+- First-time onboarding legal acceptance flow added
+- Dark mode visibility fixed: Progress Dashboard, Calendar, Notifications, Send Gift screen
+- Arrow navigation fixed in pronunciation practice (sentence word limits relaxed)
+- Translation label now shows actual selected language name
+- Trial duration text standardized to "7 days" across all screens
+- Support email centralized to ourenglish2019@gmail.com (54+ locations updated)
+
+---
+
+## November 25, 2025 — API Keys, Auth, Router Fix
+
+**Work done:**
+- Fixed Expo Router entry point (`expo-router/entry`)
+- Non-blocking auth initialization (resolves immediately, background token refresh)
+- Firebase + Google Cloud API keys updated/recreated
+- Translation API key validation added
+- Offline indicator icon fixed (`wifi-off` → `alert-circle-outline`)
+
+---

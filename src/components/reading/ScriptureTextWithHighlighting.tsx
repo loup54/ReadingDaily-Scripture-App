@@ -86,11 +86,9 @@ export const ScriptureTextWithHighlighting: React.FC<ScriptureTextWithHighlighti
     return (
       <Text style={[styles.content, { color: colors.text.primary }]} allowFontScaling={false}>
         {words.map((word, index) => {
-          // Skip whitespace
           if (word.trim().length === 0) {
             return <Text key={index}>{word}</Text>;
           }
-
           return (
             <Text
               key={index}
@@ -126,7 +124,7 @@ export const ScriptureTextWithHighlighting: React.FC<ScriptureTextWithHighlighti
       </View>
 
       {/* Scripture Content - With/Without Highlighting */}
-      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+      <ScrollView style={[styles.scrollView, { backgroundColor: colors.background.card }]} showsVerticalScrollIndicator={false}>
         {renderContent()}
       </ScrollView>
 

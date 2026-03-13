@@ -1,390 +1,151 @@
-# Reading Daily Scripture App - Legal System Project Roadmap
+# ReadingDaily Scripture App - Project Roadmap & Status
 
-**Overall Status:** 7/8 Phases Complete (87.5%)
-**Last Updated:** January 2024
-
----
-
-## Phase Completion Overview
-
-### Phase 1: Document Management ✅ COMPLETE
-- Legal document storage and retrieval
-- Document versioning system
-- Multi-document support
-- **Status:** Production Ready
-- **Timeline:** Completed
-
-### Phase 2: Digital Signatures ✅ COMPLETE
-- Sketch signature capture
-- Typed signature option
-- Signature verification
-- Expiration tracking (1 year)
-- **Status:** Production Ready
-- **Timeline:** Completed
-
-### Phase 3: Document Versioning ✅ COMPLETE
-- Version history tracking
-- Acceptance recording
-- Signature linking
-- Platform/app version tracking
-- **Status:** Production Ready
-- **Timeline:** Completed
-
-### Phase 4A: Legal Document Viewer UI ✅ COMPLETE
-- Document display component
-- Search functionality
-- Section expansion/collapse
-- Share button
-- **Status:** Production Ready
-- **Timeline:** Completed
-
-### Phase 4B: Document Signing UI ✅ COMPLETE
-- Signature modal
-- Sketch canvas
-- Typed name input
-- Acceptance flow
-- **Status:** Production Ready
-- **Timeline:** Completed
-
-### Phase 5: Backup & Export ✅ COMPLETE
-- Local backup creation
-- Password protection
-- Cloud backup sync
-- Auto-backup scheduling
-- Restore functionality
-- **Status:** Production Ready
-- **Timeline:** Completed
-
-### Phase 6: Compliance & Analytics ✅ COMPLETE
-- Document view tracking
-- Signature analytics
-- Compliance reporting
-- Audit trail logging
-- Report exports (JSON, CSV, PDF)
-- Jurisdictional compliance
-- **Status:** Production Ready
-- **Timeline:** Completed
-
-### Phase 7: Testing & Documentation ✅ COMPLETE
-- Unit tests (500+ test cases)
-- Integration tests (100+ workflows)
-- E2E test specifications
-- Component tests (155+ tests)
-- API documentation (3,000+ lines)
-- User guides (3,500+ lines)
-- Developer guide (2,500+ lines)
-- **Status:** Production Ready
-- **Code Coverage:** >85%
-- **Timeline:** Completed
-- **Deliverables:** 15,000+ lines of tests & documentation
-
-### Phase 8: Deployment & Migration 🚀 IN PLANNING
-- CI/CD pipeline setup
-- Firebase production configuration
-- Staging environment testing
-- QA verification
-- Production deployment
-- Monitoring setup
-- **Status:** Plan Complete, Ready to Start
-- **Timeline:** 10-14 days
-- **Deliverables:** Deployment scripts, runbooks, monitoring
+**Last Updated:** March 9, 2026
+**Current App Version:** iOS 1.1.16 (Build 128) | Android 1.1.15 (versionCode 10)
+**Status:** ✅ Both platforms LIVE | 📧 Email campaign ready to send
 
 ---
 
-## Completion Statistics
+## WHERE WE'VE BEEN
 
-| Metric | Value |
-|--------|-------|
-| **Total Phases** | 8 |
-| **Completed** | 7 |
-| **In Planning** | 1 |
-| **Completion %** | 87.5% |
-| **Lines of Code** | 20,000+ |
-| **Lines of Documentation** | 15,000+ |
-| **Test Cases** | 500+ |
-| **Code Coverage** | >85% |
+### Early Development (2024 - Early 2025)
+- Built core app: daily scripture readings, audio TTS, word translation
+- Pronunciation assessment via Azure Speech Services
+- Firebase backend (Firestore, Auth, Cloud Functions)
+- Legal documents, compliance, digital signatures (Phases 1-7)
+- Dark mode, UI polish, notification centre
+- Gift subscription system (Send a Gift / Redeem Gift Code — deferred)
 
----
+### First Store Submissions (Late 2025)
+- iOS App Store submitted and approved
+- Android Google Play submitted and approved
+- Both platforms launched with v1.0.x
 
-## Deliverable Summary
+### Subscription System Added (Jan–Feb 2026)
+- Added subscription tiers (Monthly $2.99, Yearly $19.99, Lifetime $49.99)
+- IAP products created in App Store Connect and Google Play Console
+- `.v2` suffix used after recreating products due to configuration issues
+- Implemented `AppleIAPService.ts` and `GooglePlayIAPService.ts`
+- 7-day free trial before paywall
 
-### Services Implemented (7 total)
-1. ✅ DocumentAnalyticsService - View tracking and metrics
-2. ✅ ComplianceReportService - Compliance reporting and exports
-3. ✅ DocumentSigningService - Digital signature management
-4. ✅ DocumentVersioningService - Version and acceptance tracking
-5. ✅ BackupService - Local backup management
-6. ✅ CloudBackupService - Cloud backup sync
-7. ✅ BackupScheduleService - Automatic backup scheduling
+### v1.1.x Bug Fix Series (Feb–Mar 2026)
 
-### UI Components Implemented
-1. ✅ LegalDocumentViewer - Document viewing with search
-2. ✅ SignatureModal - Signature capture (sketch & typed)
-3. ✅ ComplianceAnalyticsScreen - Compliance dashboard
-4. ✅ BackupExportScreen - Backup management
-5. ✅ SettingsScreen - Legal features navigation
+#### v1.1.8 — Both platforms LIVE March 5, 2026
+- Fixed false offline indicator (`status === 'offline'` not `!isConnected`)
+- Fixed Android bottom navigation hidden on gesture navigation devices
 
-### Documentation Completed
-1. ✅ API Documentation (3,000+ lines)
-2. ✅ User Guides (3,500+ lines)
-3. ✅ Developer Guide (2,500+ lines)
-4. ✅ E2E Test Specifications (400+ lines)
-5. ✅ Phase Completion Reports
-6. ✅ Deployment Plan (Phase 8)
+#### v1.1.9 through v1.1.12 — Internal builds
+- Upgraded react-native-iap to v14.7.6 (Nitro Modules — completely different API)
+- Iterative IAP fixes; not all shipped to stores
 
-### Test Coverage
-1. ✅ Unit Tests - 315+ test cases
-2. ✅ Integration Tests - 100+ workflows
-3. ✅ Component Tests - 155+ test cases
-4. ✅ E2E Specifications - 4 complete user journeys
-5. ✅ >85% code coverage (exceeding 80% target)
+#### v1.1.13 — Submitted March 7, 2026 (superseded)
+- Full rewrite of `GooglePlayIAPService.ts` for rn-iap v14
+  - `fetchProducts()` replaces `getProducts()`/`getSubscriptions()`
+  - `requestPurchase()` with `type:'subs'` for subscriptions
+  - `acknowledgePurchaseAndroid(token)` takes string directly
+  - Error codes now kebab-case: `'user-cancelled'`, `'unknown'`, etc.
+- Android lifetime confirmed working; subscriptions had black screen
+  (Google Play propagation delay for new products — resolved ~March 8)
 
----
+#### v1.1.14 — iOS only (superseded)
+- Fixed `purchaseUpdatedListener` race condition in `AppleIAPService.ts`
+- Listener was calling `finishTransaction()` — caused `requestPurchase()` to return `[]`
+- Superseded by v1.1.16 which added a deeper fix
 
-## What's Included
+#### v1.1.15 — Android LIVE March 8, 2026
+- Fixed subscription screen black background on Android
+- Root cause: `colors.primary` is object not string → `"[object Object]10"` invalid color
+- Fixed all 3 pricing card `LinearGradient` components with valid `rgba()` values
+- Added `backgroundColor` fallback to main gradient
 
-### User-Facing Features
-- ✅ Read legal documents with full-text search
-- ✅ Accept documents and provide digital signatures
-- ✅ View compliance status and acceptance timeline
-- ✅ Generate and export compliance reports
-- ✅ Create and restore backups (local and cloud)
-- ✅ Enable automatic monthly backups
-
-### Developer-Facing Features
-- ✅ Comprehensive test suite (500+ tests)
-- ✅ Complete API documentation
-- ✅ Detailed developer guide
-- ✅ Mocking and fixture support
-- ✅ Performance benchmarks
-- ✅ Error handling patterns
-
-### Compliance Features
-- ✅ GDPR compliance (data deletion)
-- ✅ CCPA compliance (privacy)
-- ✅ Jurisdictional compliance tracking (GDPR, CCPA, UK, AU, Canada)
-- ✅ Audit trail logging (immutable)
-- ✅ Signature verification and expiration
-- ✅ Acceptance verification and reporting
+#### v1.1.16 — iOS LIVE March 8, 2026
+- Fixed iOS subscription "purchase failed" after Apple payment sheet completes
+- Root cause: `getAvailablePurchases()` found pending transaction for SAME product
+  → blindly finished/discarded it → `requestPurchase()` returned `[]` → "failed"
+- Fix: check if pending transaction matches product being purchased → use as success
+- Fix: `finishTransaction()` added after every successful purchase
 
 ---
 
-## Key Metrics
+## WHERE WE ARE (March 9, 2026)
 
-### Code Quality
-- **TypeScript Strict Mode:** ✅ Enabled
-- **Test Coverage:** ✅ >85%
-- **Code Duplication:** ✅ <5%
-- **Type Safety:** ✅ 100%
-- **Error Handling:** ✅ Comprehensive
+### App Store Status
+| Platform | Version | Build | Status | Live |
+|----------|---------|-------|--------|------|
+| iOS | 1.1.16 | 128 | ✅ LIVE | March 8, 2026 |
+| Android | 1.1.15 | versionCode 10 | ✅ LIVE | March 8, 2026 |
 
-### Performance
-- **Document Load:** <2 seconds
-- **Report Generation:** <5 seconds
-- **Backup Creation:** <10 seconds
-- **Average Operation:** <500ms
-- **Signature Capture:** <1 second
+### What Works
+- All three purchase types on both platforms ✅
+- 7-day free trial ✅
+- All core features: audio, pronunciation, translation, progress, reminders ✅
+- Settings, dark mode, legal documents ✅
 
-### Reliability
-- **Test Pass Rate:** ✅ 100%
-- **E2E Coverage:** ✅ 4 critical workflows
-- **Integration Tests:** ✅ 100+ scenarios
-- **Error Recovery:** ✅ Implemented
+### Deferred
+- Send a Gift — Firebase auth token persistence issue
+- Redeem Gift Code — dependent on Send a Gift
 
----
-
-## File Structure
-
-```
-ReadingDaily-Scripture-App/
-├── src/
-│   ├── services/legal/
-│   │   ├── DocumentAnalyticsService.ts
-│   │   ├── ComplianceReportService.ts
-│   │   ├── DocumentSigningService.ts
-│   │   ├── DocumentVersioningService.ts
-│   │   ├── BackupService.ts
-│   │   ├── CloudBackupService.ts
-│   │   ├── BackupScheduleService.ts
-│   │   └── __tests__/ (315+ test cases)
-│   ├── components/legal/
-│   │   ├── LegalDocumentViewer.tsx
-│   │   ├── SignatureModal.tsx
-│   │   └── __tests__/ (50+ test cases)
-│   └── screens/legal/
-│       ├── ComplianceAnalyticsScreen.tsx
-│       ├── BackupExportScreen.tsx
-│       └── __tests__/ (105+ test cases)
-├── docs/
-│   ├── API_DOCUMENTATION.md (3,000 lines)
-│   ├── USER_GUIDES.md (3,500 lines)
-│   ├── DEVELOPER_GUIDE.md (2,500 lines)
-│   ├── E2E_TEST_SCENARIOS.md (400 lines)
-│   └── PHASE_7_README.md (500 lines)
-├── PHASE_8_DEPLOYMENT_MIGRATION_PLAN.md (2,000 lines)
-└── [6 phase planning documents]
-```
+### Marketing
+- Email campaign: 329 contacts, bilingual templates (EN + VI), flyers (EN + VI), ready to send
+- Vietnam Zalo/Facebook outreach: templates and contact lists ready
+- Philippines Facebook Messenger outreach: templates and institution list ready
 
 ---
 
-## Ready for Phase 8? ✅
+## WHERE WE'RE GOING
 
-### Prerequisites Completed
-- ✅ All 7 services implemented and tested
-- ✅ All UI components built and tested
-- ✅ >85% code coverage achieved
-- ✅ 500+ test cases passing
-- ✅ Comprehensive documentation complete
-- ✅ No breaking issues in staging
+### Immediate — Email Campaign
+Send to 329 contacts in 11 batches via Gmail BCC.
+See `Email/Gmail-Batch-Sending-Instructions.md`.
 
-### Phase 8 Plan Ready
-- ✅ CI/CD pipeline design complete
-- ✅ Firebase configuration templates ready
-- ✅ Deployment procedures documented
-- ✅ QA testing plan ready
-- ✅ Monitoring setup documented
-- ✅ Runbooks prepared
+### Next Development Priority — Send a Gift (v1.2.x)
+- Firebase auth token persistence issue needs diagnosis
+- Options: client-side token refresh, server-side update, or Firestore security rules approach
+- Redeem Gift Code depends on this
 
----
+### Future Roadmap
 
-## Next Steps
+#### UX Improvements
+- Purchase confirmation screen (success animation after purchase)
+- Improved IAP error messages (map error codes to user-friendly text)
+- Deep link to subscription management from Settings
 
-### Start Phase 8: Deployment & Migration
-1. **Setup CI/CD** - GitHub Actions pipelines (Days 1-5)
-2. **Configure Infrastructure** - Firebase production (Days 3-5)
-3. **Staging Deployment** - Deploy and test (Days 6-10)
-4. **Production Rollout** - Blue-green deployment (Days 11-14)
-5. **Post-Launch** - Monitoring and optimization
+#### Technical
+- Server-side receipt validation (Firebase Cloud Function → Apple/Google APIs)
+- Remove `auth.currentUser` checks — use Zustand consistently
+- Consolidate IAP error handling into shared utility
 
-**Estimated Duration:** 10-14 days
-**Estimated Completion:** Early-Mid February 2024
-
-### Key Milestones
-1. CI/CD pipelines automated
-2. Staging environment validated
-3. Full test suite passing in staging
-4. QA sign-off obtained
-5. Production deployment successful
-6. Monitoring and alerts active
+#### Growth
+- App Store rating prompts
+- Consider Mailchimp for email campaigns (open rate tracking)
+- Additional UI language support
 
 ---
 
-## Project Timeline Summary
+## KEY TECHNICAL NOTES
 
-```
-Phase 1-3: Services        [████████] Complete
-Phase 4A-4B: UI           [████████] Complete
-Phase 5: Backup           [████████] Complete
-Phase 6: Compliance       [████████] Complete
-Phase 7: Testing          [████████] Complete
-Phase 8: Deployment       [██------] In Planning
-Phase 9: Optimization     [--------] Future
-Phase 10: Advanced        [--------] Future
+### react-native-iap v14.7.6 (Nitro Modules)
+- `fetchProducts({ skus, type: 'in-app' | 'subs' })` — not `getProducts()`
+- `requestPurchase({ request: { google/apple: {...} }, type: 'subs'|'in-app' })`
+- `acknowledgePurchaseAndroid(token: string)` — string directly, not `{token}`
+- iOS: `finishTransaction()` in `purchase()` method ONLY — not in listener
+- Error codes: `'user-cancelled'`, `'unknown'`, `'already-owned'`, `'item-unavailable'`
 
-Overall Progress: ██████████████░ 87.5%
-```
+### Offline Detection
+- Always check `status === 'offline'` — NEVER check `!isConnected`
 
----
+### Android Bottom Navigation
+- Always use `useSafeAreaInsets()` — never hardcode heights
 
-## Success Indicators
-
-### ✅ Achieved
-- All planned features implemented
-- Code coverage exceeds target (>85%)
-- All tests passing
-- Documentation complete
-- No critical bugs
-- Performance acceptable
-- Security verified
-- Compliance checked
-
-### 🚀 Ready For
-- Staging deployment
-- QA testing
-- Production launch
-- User feedback collection
-- Performance monitoring
-- Regulatory compliance
+### Version Rules
+- Apple version in review = LOCKED, must increment string
+- Always increment BOTH iOS buildNumber AND Android versionCode
 
 ---
 
-## Resource Summary
-
-### Code Delivered
-- **Services:** 7 (fully tested)
-- **Components:** 5 (fully tested)
-- **Test Files:** 9 (500+ tests)
-- **Documentation:** 5 files (15,000+ lines)
-
-### Quality Metrics
-- **Code Coverage:** 85%+ ✅
-- **Test Pass Rate:** 100% ✅
-- **TypeScript Strict:** Enabled ✅
-- **Performance:** <500ms avg ✅
-- **Security:** Verified ✅
-
-### Team Readiness
-- **Documentation:** Complete ✅
-- **Testing:** Comprehensive ✅
-- **Deployment Plan:** Ready ✅
-- **Monitoring:** Designed ✅
-- **Runbooks:** Prepared ✅
-
----
-
-## Known Issues & Limitations
-
-### Current
-- Detox E2E tests configured for iOS (Android coming)
-- Firebase offline persistence requires additional setup
-- PDF export requires platform-specific implementation
-
-### Planned for Phase 9-10
-- Performance optimization
-- Advanced analytics
-- Multi-language support
-- Biometric signatures
-- Enhanced reporting
-
----
-
-## Contact & Support
-
-### For Phase 8 Questions
-- Deployment: See PHASE_8_DEPLOYMENT_MIGRATION_PLAN.md
-- Technical: See docs/DEVELOPER_GUIDE.md
-- API Reference: See docs/API_DOCUMENTATION.md
-
-### For Production Issues
-- Monitoring: Sentry + Firebase dashboards
-- Runbooks: See operations documentation
-- On-call: Team rotation schedule
-
-### For Compliance
-- Legal: legal@example.com
-- Compliance: See API_DOCUMENTATION.md security section
-- Privacy: See USER_GUIDES.md privacy section
-
----
-
-## Conclusion
-
-**The Reading Daily Scripture App legal system is 87.5% complete.**
-
-- Phases 1-7 successfully delivered 20,000+ lines of production-ready code
-- 500+ test cases ensuring reliability
-- 15,000+ lines of comprehensive documentation
-- >85% code coverage exceeding targets
-- All critical features implemented and tested
-
-**Phase 8 is ready to begin** with detailed deployment and migration plan in place.
-
----
-
-**Status:** Ready for Phase 8 Implementation
-**Confidence Level:** High ✅
-**Target Go-Live:** Mid-February 2024
-
----
-
-*For detailed information, see individual phase documents and PHASE_8_DEPLOYMENT_MIGRATION_PLAN.md*
+## STORE LINKS
+- iOS: https://apps.apple.com/app/readingdaily-scripture/id6753561999
+- Android: https://play.google.com/store/apps/details?id=com.readingdaily.scripture
+- EAS Project: loup1954/readingdaily-scripture-app
+- Firebase Project: readingdaily-scripture-fe502
+- Support: ourenglish2019@gmail.com | ourenglish.best

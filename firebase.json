@@ -18,6 +18,10 @@
         "scrapers",
         "scripts"
       ]
+    },
+    {
+      "source": "python-functions",
+      "codebase": "python-scraper"
     }
   ],
   "firestore": {
