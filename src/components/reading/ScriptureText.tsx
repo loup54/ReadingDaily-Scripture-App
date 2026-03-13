@@ -76,11 +76,9 @@ export const ScriptureText: React.FC<ScriptureTextProps> = ({ reading }) => {
     return (
       <Text style={[styles.content, { color: colors.text.primary }]} allowFontScaling={false}>
         {words.map((word, index) => {
-          // Skip whitespace
           if (word.trim().length === 0) {
             return <Text key={index}>{word}</Text>;
           }
-
           return (
             <Text
               key={index}
