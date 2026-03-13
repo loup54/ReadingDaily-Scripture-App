@@ -7,7 +7,6 @@ import {
   Modal,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { ReadingTabs, ScriptureText, ScriptureTextWithHighlighting, GestureTutorialOverlay } from '../../components/reading';
 import { IconButton, FeatureOverlay } from '../../components/common';
@@ -179,10 +178,7 @@ export const DailyReadingsScreen: React.FC<DailyReadingsScreenProps> = ({
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background.primary }]}>
-      <LinearGradient
-        colors={[colors.primary.blue, colors.primary.blue]}
-        style={styles.gradient}
-      >
+      <View style={[styles.gradient, { backgroundColor: colors.primary.blue }]}>
         {/* Header */}
         <View style={styles.header}>
           <View style={styles.headerTop}>
@@ -269,7 +265,7 @@ export const DailyReadingsScreen: React.FC<DailyReadingsScreenProps> = ({
             onPlaybackComplete={onPlaybackComplete}
           />
         </View>
-      </LinearGradient>
+      </View>
 
       {/* Pronunciation Practice Modal */}
       <Modal
