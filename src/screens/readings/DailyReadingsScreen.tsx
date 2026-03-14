@@ -177,8 +177,7 @@ export const DailyReadingsScreen: React.FC<DailyReadingsScreenProps> = ({
   };
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.background.primary }]}>
-      <View style={[styles.gradient, { backgroundColor: colors.primary.blue }]}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.primary.blue }]}>
         {/* Header */}
         <View style={styles.header}>
           <View style={styles.headerTop}>
@@ -265,7 +264,6 @@ export const DailyReadingsScreen: React.FC<DailyReadingsScreenProps> = ({
             onPlaybackComplete={onPlaybackComplete}
           />
         </View>
-      </View>
 
       {/* Pronunciation Practice Modal */}
       <Modal
@@ -363,8 +361,6 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     backgroundColor: Colors.background.primary,
-    borderTopLeftRadius: BorderRadius.xl,
-    borderTopRightRadius: BorderRadius.xl,
     paddingHorizontal: Spacing.lg,
     paddingTop: Spacing.md,
     paddingBottom: 0,
