@@ -62,8 +62,6 @@ export const DailyReadingsScreen: React.FC<DailyReadingsScreenProps> = ({
   const [showPronunciationModal, setShowPronunciationModal] = useState(false);
   const [showAudioHighlightingTip, setShowAudioHighlightingTip] = useState(false);
   const [showGestureTutorial, setShowGestureTutorial] = useState(false);
-  const [headerH, setHeaderH] = useState(0);
-  const [audioH, setAudioH] = useState(0);
   const { height: windowHeight } = useWindowDimensions();
   const insets = useSafeAreaInsets();
 
@@ -173,24 +171,21 @@ export const DailyReadingsScreen: React.FC<DailyReadingsScreenProps> = ({
 
   const currentReading = getCurrentReading();
 
-  // Explicit content height to fix Samsung Android 11 flex:1 bug
-  const explicitContentHeight = headerH > 0 && audioH > 0
-    ? windowHeight - insets.top - insets.bottom - headerH - audioH
-    : undefined;
-
   // Dynamic styles with theme colors
   const dynamicStyles = {
     content: {
       ...styles.content,
       backgroundColor: colors.background.primary,
-      ...(explicitContentHeight ? { height: explicitContentHeight, flex: 0 } : {}),
+      // minHeight fixes Samsung Android 11 broken flex:1 chain.
+      // Once content View has a defined size, all flex:1 children get correct heights.
+      minHeight: Math.round((windowHeight - insets.top - insets.bottom) * 0.72),
     },
   };
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.primary.blue }]}>
         {/* Header */}
-        <View style={styles.header} onLayout={(e) => setHeaderH(e.nativeEvent.layout.height)}>
+        <View style={styles.header}>
           <View style={styles.headerTop}>
             <TouchableOpacity
               style={styles.calendarButton}
@@ -269,7 +264,7 @@ export const DailyReadingsScreen: React.FC<DailyReadingsScreenProps> = ({
         </View>
 
         {/* Enhanced Audio Player - Fixed at bottom */}
-        <View style={[styles.audioPlayerContainer, { backgroundColor: colors.background.primary }]} onLayout={(e) => setAudioH(e.nativeEvent.layout.height)}>
+        <View style={[styles.audioPlayerContainer, { backgroundColor: colors.background.primary }]}>
           <EnhancedAudioPlayer
             reading={currentReading}
             onPlaybackComplete={onPlaybackComplete}
