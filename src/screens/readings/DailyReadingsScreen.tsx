@@ -5,8 +5,9 @@ import {
   StyleSheet,
   TouchableOpacity,
   Modal,
+  useWindowDimensions,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { ReadingTabs, ScriptureText, ScriptureTextWithHighlighting, GestureTutorialOverlay } from '../../components/reading';
 import { IconButton, FeatureOverlay } from '../../components/common';
@@ -61,6 +62,10 @@ export const DailyReadingsScreen: React.FC<DailyReadingsScreenProps> = ({
   const [showPronunciationModal, setShowPronunciationModal] = useState(false);
   const [showAudioHighlightingTip, setShowAudioHighlightingTip] = useState(false);
   const [showGestureTutorial, setShowGestureTutorial] = useState(false);
+  const [headerH, setHeaderH] = useState(0);
+  const [audioH, setAudioH] = useState(0);
+  const { height: windowHeight } = useWindowDimensions();
+  const insets = useSafeAreaInsets();
 
   // Check if reading is cached offline
   useEffect(() => {
@@ -168,18 +173,24 @@ export const DailyReadingsScreen: React.FC<DailyReadingsScreenProps> = ({
 
   const currentReading = getCurrentReading();
 
+  // Explicit content height to fix Samsung Android 11 flex:1 bug
+  const explicitContentHeight = headerH > 0 && audioH > 0
+    ? windowHeight - insets.top - insets.bottom - headerH - audioH
+    : undefined;
+
   // Dynamic styles with theme colors
   const dynamicStyles = {
     content: {
       ...styles.content,
       backgroundColor: colors.background.primary,
+      ...(explicitContentHeight ? { height: explicitContentHeight, flex: 0 } : {}),
     },
   };
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.primary.blue }]}>
         {/* Header */}
-        <View style={styles.header}>
+        <View style={styles.header} onLayout={(e) => setHeaderH(e.nativeEvent.layout.height)}>
           <View style={styles.headerTop}>
             <TouchableOpacity
               style={styles.calendarButton}
@@ -258,7 +269,7 @@ export const DailyReadingsScreen: React.FC<DailyReadingsScreenProps> = ({
         </View>
 
         {/* Enhanced Audio Player - Fixed at bottom */}
-        <View style={[styles.audioPlayerContainer, { backgroundColor: colors.background.primary }]}>
+        <View style={[styles.audioPlayerContainer, { backgroundColor: colors.background.primary }]} onLayout={(e) => setAudioH(e.nativeEvent.layout.height)}>
           <EnhancedAudioPlayer
             reading={currentReading}
             onPlaybackComplete={onPlaybackComplete}

@@ -116,10 +116,7 @@ export const ScriptureText: React.FC<ScriptureTextProps> = ({ reading }) => {
 
       {/* Combined Scripture + Translation Scrollable View */}
       <ScrollView
-        style={[
-          styles.scrollView,
-          { backgroundColor: colors.background.card, minHeight: Math.round(windowHeight * 0.45) },
-        ]}
+        style={[styles.scrollView, { backgroundColor: colors.background.card }]}
         contentContainerStyle={styles.scrollViewContent}
         showsVerticalScrollIndicator={true}
         onScroll={handleScroll}
