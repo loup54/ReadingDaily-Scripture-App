@@ -1032,16 +1032,16 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
                   />
                   <View style={styles.settingTextContainer}>
                     <View style={styles.labelRow}>
-                      <Text style={dynamicStyles.settingLabel}>Word Highlighting (Preview)</Text>
+                      <Text style={dynamicStyles.settingLabel}>Word Highlighting</Text>
                       <TooltipIcon
-                        title="Word Highlighting (Preview)"
-                        description="Words will highlight in sync as the audio plays. This feature requires timing data that is currently being generated. It may not work for all readings yet."
+                        title="Word Highlighting"
+                        description="Words highlight in sync as the audio plays — like karaoke. Helps you follow along and improves reading comprehension."
                         size={14}
                         color={colors.primary.blue}
                       />
                     </View>
                     <Text style={dynamicStyles.settingValue}>
-                      Experimental: Words light up during playback
+                      Words light up in sync with audio
                     </Text>
                   </View>
                 </View>

@@ -497,27 +497,12 @@ export const useSettingsStore = create<SettingsStoreState>()(
         settingsMode: state.settingsMode,
       }),
 
-      // Migration: Ensure enableAudioHighlighting defaults to false for existing users
-      // This runs when version mismatch is detected (old data without version will be version 0)
       migrate: (persistedState: any, version: number) => {
         console.log('[SettingsStore] Persist middleware migration running, version:', version, 'persistedState exists:', !!persistedState);
 
         if (!persistedState) {
           console.log('[SettingsStore] No persisted state, using defaults');
-          return {
-            settings: {
-              ...DEFAULT_SETTINGS,
-              audio: {
-                ...DEFAULT_SETTINGS.audio,
-                enableAudioHighlighting: false,
-              }
-            }
-          };
-        }
-
-        // Handle old data from version 0 (before versioning was added)
-        if (version === 0) {
-          console.log('[SettingsStore] Migrating from version 0 - ensuring enableAudioHighlighting is false');
+          return { settings: DEFAULT_SETTINGS };
         }
 
         // Ensure settings object exists
@@ -530,34 +515,13 @@ export const useSettingsStore = create<SettingsStoreState>()(
           persistedState.settings.audio = DEFAULT_SETTINGS.audio;
         }
 
-        // Only disable for NEW users (when setting doesn't exist in persisted state)
-        // Respect existing users' choices to preserve their preference
-        if (version === 0 && persistedState.settings.audio && !persistedState.settings.audio.hasOwnProperty('enableAudioHighlighting')) {
-          console.log('[SettingsStore] ✅ New user: setting enableAudioHighlighting to false (default)');
-          persistedState.settings.audio.enableAudioHighlighting = false;
-        } else {
-          console.log('[SettingsStore] Existing user: preserving enableAudioHighlighting setting:', persistedState.settings.audio?.enableAudioHighlighting);
-        }
-
         return persistedState;
       },
 
-      // Post-hydration hook: Ensure enableAudioHighlighting is false even if migration didn't run
       onRehydrateStorage: () => {
         return (state, error) => {
           if (error) {
             console.error('[SettingsStore] Rehydration error:', error);
-            return;
-          }
-
-          // CRITICAL FIX: Ensure enableAudioHighlighting is ALWAYS false
-          // This handles the case where migration didn't run but old value persisted
-          if (state && state.settings && state.settings.audio) {
-            const shouldUpdate = state.settings.audio.enableAudioHighlighting !== false;
-            if (shouldUpdate) {
-              console.log('[SettingsStore] 🔧 Post-hydration fix: Setting enableAudioHighlighting to false');
-              state.settings.audio.enableAudioHighlighting = false;
-            }
           }
         };
       },
@@ -565,44 +529,6 @@ export const useSettingsStore = create<SettingsStoreState>()(
   )
 );
 
-/**
- * Manual migration function to fix highlighting setting on app startup
- * Ensures existing users get the correct default (disabled)
- */
-export async function migrateSettingsIfNeeded() {
-  try {
-    console.log('[SettingsStore] Checking if settings migration is needed...');
-    const store = useSettingsStore.getState();
-
-    // Check if highlighting is enabled (old default)
-    if (store.settings.audio.enableAudioHighlighting === true) {
-      console.log('[SettingsStore] Found enableAudioHighlighting=true, migrating to false');
-
-      // Update in-memory store
-      await store.updateAudioSettings({ enableAudioHighlighting: false });
-
-      // Force persistence by updating the entire settings object
-      await AsyncStorage.setItem('app-settings-storage', JSON.stringify({
-        state: {
-          settings: {
-            ...store.settings,
-            audio: {
-              ...store.settings.audio,
-              enableAudioHighlighting: false,
-            }
-          }
-        },
-        version: 0
-      }));
-
-      console.log('[SettingsStore] ✅ Settings migrated successfully');
-    } else {
-      console.log('[SettingsStore] Settings already correct, no migration needed');
-    }
-  } catch (error) {
-    console.error('[SettingsStore] Migration error:', error);
-  }
-}
 
 /**
  * Hook to get specific setting values
