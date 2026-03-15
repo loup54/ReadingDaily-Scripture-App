@@ -41,9 +41,6 @@
       },
       "package": "com.readingdaily.scripture",
       "versionCode": 22,
-      "compileSdkVersion": 35,
-      "targetSdkVersion": 35,
-      "minSdkVersion": 24,
       "permissions": [
         "android.permission.RECORD_AUDIO"
       ]
@@ -57,6 +54,9 @@
             "flipper": false
           },
           "android": {
+            "compileSdkVersion": 35,
+            "targetSdkVersion": 35,
+            "minSdkVersion": 24,
             "useNextNotificationChannelOnAndroid": true
           }
         }
