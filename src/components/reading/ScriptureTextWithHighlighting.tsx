@@ -124,7 +124,7 @@ export const ScriptureTextWithHighlighting: React.FC<ScriptureTextWithHighlighti
       </View>
 
       {/* Scripture Content - With/Without Highlighting */}
-      <ScrollView style={[styles.scrollView, { backgroundColor: colors.background.card }]} showsVerticalScrollIndicator={false}>
+      <ScrollView style={[styles.scrollView, { backgroundColor: colors.background.card }]} contentContainerStyle={styles.scrollViewContent} showsVerticalScrollIndicator={false}>
         {renderContent()}
       </ScrollView>
 
@@ -200,11 +200,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.background.card,
-    borderRadius: BorderRadius.lg,
-    padding: Spacing.lg,
   },
   header: {
-    marginBottom: Spacing.md,
+    marginBottom: Spacing.xs,
+    paddingHorizontal: Spacing.lg,
+    paddingTop: 0,
   },
   titleRow: {
     flexDirection: 'row',
@@ -239,7 +239,11 @@ const styles = StyleSheet.create({
   },
   scrollView: {
     flex: 1,
-    marginBottom: Spacing.md,
+    marginBottom: 0,
+  },
+  scrollViewContent: {
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.xs,
   },
   content: {
     ...Typography.bodyLarge,
@@ -252,7 +256,9 @@ const styles = StyleSheet.create({
   actionsContainer: {
     flexDirection: 'row',
     gap: Spacing.sm,
-    marginTop: Spacing.md,
+    marginHorizontal: Spacing.lg,
+    marginTop: Spacing.xs,
+    marginBottom: Spacing.xs,
   },
   actionButton: {
     flex: 1,

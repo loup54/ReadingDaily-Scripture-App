@@ -174,8 +174,8 @@ export const DailyReadingsScreen: React.FC<DailyReadingsScreenProps> = ({
   // Explicit height fixes Samsung Android 11 broken flex:1 chain.
   // Using height + flex:0 forces Yoga to use this as the main dimension,
   // so all flex:1 children (scriptureContainer, ScrollView) get correct heights.
-  // 180px accounts for approx header + audio player heights.
-  const contentHeight = Math.max(windowHeight - insets.top - insets.bottom - 180, 300);
+  // 240px accounts for header (~115px) + audio player container (~125px).
+  const contentHeight = Math.max(windowHeight - insets.top - insets.bottom - 240, 300);
 
   // Dynamic styles with theme colors
   const dynamicStyles = {
