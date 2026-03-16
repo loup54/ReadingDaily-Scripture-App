@@ -4,7 +4,7 @@ const path = require('path');
 // Load .env so EXPO_PUBLIC_* vars are in process.env when Metro inlines them.
 // Required for local Xcode archive builds which run in a clean environment
 // without shell env vars. EAS cloud builds inject vars via their own mechanism.
-require('dotenv').config();
+require('dotenv').config({ path: path.resolve(__dirname, '.env') });
 
 const config = getDefaultConfig(__dirname);
 
