@@ -144,9 +144,15 @@ class USCCBScraper:
                         section = h3.find_next('div', class_='content-body')
                         break
                 if not section:
-                    # Sometimes gospel is last section
+                    # Fallback: try the last content-body section, but only if it has
+                    # substantial text (>= 300 chars) — avoids picking up the short
+                    # "Verse Before the Gospel" acclamation as the gospel reading.
                     sections = soup.find_all('div', class_='content-body')
-                    section = sections[-1] if sections else None
+                    for candidate in reversed(sections):
+                        candidate_text = candidate.get_text(separator=' ', strip=True)
+                        if len(candidate_text) >= 300:
+                            section = candidate
+                            break
 
             if not section:
                 return None

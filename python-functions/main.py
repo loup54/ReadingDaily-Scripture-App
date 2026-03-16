@@ -275,11 +275,16 @@ def daily_scrape(event: scheduler_fn.ScheduledEvent) -> None:
             target_date = today + timedelta(days=i)
             date_str = target_date.isoformat()
 
-            # Skip if already stored
+            # Skip if already stored with valid content
             doc_ref = db.collection('readings').document(date_str)
-            if doc_ref.get().exists:
-                skip_count += 1
-                continue
+            existing = doc_ref.get()
+            if existing.exists:
+                # Re-scrape if gospel text is suspiciously short (likely wrong section was stored)
+                gospel_text = existing.to_dict().get('gospel', {}).get('text', '')
+                if len(gospel_text) >= 300:
+                    skip_count += 1
+                    continue
+                logger.warning(f"⚠️ Existing gospel for {date_str} is too short ({len(gospel_text)} chars) — re-scraping")
 
             reading = scrape_reading_for_date(target_date)
             if reading:

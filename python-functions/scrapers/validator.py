@@ -76,10 +76,13 @@ def validate_reading_section(section: Dict, name: str) -> List[str]:
             errors.append(f"{name}: Field '{field}' is empty")
 
     # Validate text length (should have substantial content)
+    # Gospel/First/Second readings are typically 300-2000 chars.
+    # 50 chars is far too low — it allows "Verse Before the Gospel" to pass.
     if 'text' in section:
         text = section['text']
-        if len(text) < 50:
-            errors.append(f"{name}: Text too short ({len(text)} chars)")
+        min_length = 300 if name == 'Gospel' else 150
+        if len(text) < min_length:
+            errors.append(f"{name}: Text too short ({len(text)} chars, minimum {min_length})")
 
     return errors
 
