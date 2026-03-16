@@ -1,9 +1,5 @@
-const { config } = require('dotenv');
-
-// Load .env file explicitly so env vars are embedded at bundle time
-// This ensures EXPO_PUBLIC_* vars work in local Xcode archive builds
-// (EAS cloud builds inject vars via the EAS dashboard instead)
-config();
+const path = require('path');
+require('dotenv').config({ path: path.resolve(__dirname, '.env') });
 
 module.exports = {
   expo: {
@@ -22,7 +18,7 @@ module.exports = {
     },
     ios: {
       bundleIdentifier: "com.readingdaily.scripture",
-      buildNumber: "146",
+      buildNumber: "149",
       splash: {
         image: "./assets/splash.png",
         resizeMode: "contain",
@@ -76,7 +72,18 @@ module.exports = {
     extra: {
       eas: {
         projectId: "0c4f39f5-184d-4af5-8dca-2cc4d52675e6"
-      }
+      },
+      // Keys embedded here for local Xcode builds (EAS builds use dashboard env vars)
+      FIREBASE_API_KEY: process.env.EXPO_PUBLIC_FIREBASE_API_KEY,
+      FIREBASE_AUTH_DOMAIN: process.env.EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN,
+      FIREBASE_PROJECT_ID: process.env.EXPO_PUBLIC_FIREBASE_PROJECT_ID,
+      FIREBASE_STORAGE_BUCKET: process.env.EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET,
+      FIREBASE_MESSAGING_SENDER_ID: process.env.EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+      FIREBASE_APP_ID: process.env.EXPO_PUBLIC_FIREBASE_APP_ID,
+      FIREBASE_MEASUREMENT_ID: process.env.EXPO_PUBLIC_FIREBASE_MEASUREMENT_ID,
+      GOOGLE_CLOUD_API_KEY: process.env.EXPO_PUBLIC_GOOGLE_CLOUD_API_KEY,
+      AZURE_SPEECH_KEY: process.env.EXPO_PUBLIC_AZURE_SPEECH_KEY,
+      AZURE_SPEECH_REGION: process.env.EXPO_PUBLIC_AZURE_SPEECH_REGION,
     }
   }
 };

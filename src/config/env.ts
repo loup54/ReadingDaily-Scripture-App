@@ -8,25 +8,33 @@
  * 4. Throws errors on startup if critical variables are missing
  */
 
+// Extra config embedded via app.config.js (used for local Xcode builds)
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const extra = (() => { try { return require('expo-constants').default?.expoConfig?.extra || {}; } catch { return {}; } })();
+
+// Resolve a key: prefer process.env (EAS builds), fall back to extra (local builds)
+const e = (key: string, fallback = '') =>
+  (process.env[`EXPO_PUBLIC_${key}`] || extra[key] || fallback);
+
 /**
  * Environment variable configuration
  */
 export const ENV = {
   // Firebase Configuration
-  FIREBASE_API_KEY: process.env.EXPO_PUBLIC_FIREBASE_API_KEY || '',
-  FIREBASE_AUTH_DOMAIN: process.env.EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN || '',
-  FIREBASE_PROJECT_ID: process.env.EXPO_PUBLIC_FIREBASE_PROJECT_ID || '',
-  FIREBASE_STORAGE_BUCKET: process.env.EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET || '',
-  FIREBASE_MESSAGING_SENDER_ID: process.env.EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || '',
-  FIREBASE_APP_ID: process.env.EXPO_PUBLIC_FIREBASE_APP_ID || '',
-  FIREBASE_MEASUREMENT_ID: process.env.EXPO_PUBLIC_FIREBASE_MEASUREMENT_ID || '',
+  FIREBASE_API_KEY: e('FIREBASE_API_KEY'),
+  FIREBASE_AUTH_DOMAIN: e('FIREBASE_AUTH_DOMAIN'),
+  FIREBASE_PROJECT_ID: e('FIREBASE_PROJECT_ID'),
+  FIREBASE_STORAGE_BUCKET: e('FIREBASE_STORAGE_BUCKET'),
+  FIREBASE_MESSAGING_SENDER_ID: e('FIREBASE_MESSAGING_SENDER_ID'),
+  FIREBASE_APP_ID: e('FIREBASE_APP_ID'),
+  FIREBASE_MEASUREMENT_ID: e('FIREBASE_MEASUREMENT_ID'),
 
   // Google Cloud API
-  GOOGLE_CLOUD_API_KEY: process.env.EXPO_PUBLIC_GOOGLE_CLOUD_API_KEY || '',
+  GOOGLE_CLOUD_API_KEY: e('GOOGLE_CLOUD_API_KEY'),
 
   // Azure Speech Service
-  AZURE_SPEECH_KEY: process.env.EXPO_PUBLIC_AZURE_SPEECH_KEY || '',
-  AZURE_SPEECH_REGION: process.env.EXPO_PUBLIC_AZURE_SPEECH_REGION || 'eastus',
+  AZURE_SPEECH_KEY: e('AZURE_SPEECH_KEY'),
+  AZURE_SPEECH_REGION: e('AZURE_SPEECH_REGION', 'eastus'),
 
   // App Configuration
   TRIAL_DURATION_MINUTES: parseInt(process.env.EXPO_PUBLIC_TRIAL_DURATION_MINUTES || '10', 10),
