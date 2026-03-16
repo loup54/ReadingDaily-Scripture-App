@@ -3,7 +3,7 @@
     "name": "ReadingDaily Scripture App",
     "slug": "readingdaily-scripture-app",
     "scheme": "readingdaily",
-    "version": "1.1.29",
+    "version": "1.1.30",
     "icon": "./assets/icon.png",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
@@ -17,7 +17,7 @@
     },
     "ios": {
       "bundleIdentifier": "com.readingdaily.scripture",
-      "buildNumber": "141",
+      "buildNumber": "142",
       "splash": {
         "image": "./assets/splash.png",
         "resizeMode": "contain",
