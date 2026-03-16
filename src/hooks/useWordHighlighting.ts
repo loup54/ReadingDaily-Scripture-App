@@ -183,7 +183,7 @@ export function useWordHighlightingState(
 
   useEffect(() => {
     const unsubscribe = audioHighlightingService.onStateChange((newState) => {
-      setState(newState);
+      setTimeout(() => setState(newState), 0);
     });
 
     return () => {

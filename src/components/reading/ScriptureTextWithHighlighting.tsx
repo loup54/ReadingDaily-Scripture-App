@@ -79,12 +79,14 @@ export const ScriptureTextWithHighlighting: React.FC<ScriptureTextWithHighlighti
   const renderContent = () => {
     const isHighlightingActive = highlightingState !== null && currentWordIndex >= 0;
 
-    // Render word-by-word inline with karaoke highlight (no nested ScrollView)
+    // Render word-by-word using View+flexWrap to avoid nested Text+onPress crash
+    // on iOS new architecture (Fabric). Each word is a sibling Text, not a child
+    // of another Text.
     return (
-      <Text style={[styles.content, { color: colors.text.primary }]} allowFontScaling={false}>
+      <View style={styles.wordsContainer}>
         {contentTokens.map((token, tokenIdx) => {
           if (token.trim().length === 0) {
-            return <Text key={tokenIdx}>{token}</Text>;
+            return <Text key={tokenIdx} style={[styles.content, { color: colors.text.primary }]} allowFontScaling={false}>{token}</Text>;
           }
           const wordIdx = wordIndexForToken[tokenIdx];
           const isCurrent = isHighlightingActive && wordIdx === currentWordIndex;
@@ -93,7 +95,9 @@ export const ScriptureTextWithHighlighting: React.FC<ScriptureTextWithHighlighti
               key={tokenIdx}
               onPress={() => handleWordPress(token)}
               style={[
+                styles.content,
                 styles.tappableWord,
+                { color: colors.text.primary },
                 isCurrent && {
                   backgroundColor: colors.primary.blue,
                   color: colors.text.white,
@@ -107,7 +111,7 @@ export const ScriptureTextWithHighlighting: React.FC<ScriptureTextWithHighlighti
             </Text>
           );
         })}
-      </Text>
+      </View>
     );
   };
 
@@ -257,6 +261,11 @@ const styles = StyleSheet.create({
     ...Typography.bodyLarge,
     color: Colors.text.primary,
     lineHeight: 28,
+  },
+  wordsContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'flex-start',
   },
   tappableWord: {
     // No additional styling - words look normal but are tappable
