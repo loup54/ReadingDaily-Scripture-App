@@ -288,15 +288,10 @@ export class AudioHighlightingService {
   private startPositionTracking(): void {
     if (this.updateIntervalId) {
       clearInterval(this.updateIntervalId);
+      this.updateIntervalId = null;
     }
-
-    this.updateIntervalId = setInterval(() => {
-      if (this.currentState.isPlaying && this.timingData) {
-        // In a real implementation, this would be called by the audio player
-        // For now, just emit periodic updates
-        this.emitStateChange();
-      }
-    }, this.config.updateIntervalMs);
+    // Position updates are driven entirely by updateAudioPosition() calls
+    // from the audio player — no polling interval needed.
   }
 
   /**

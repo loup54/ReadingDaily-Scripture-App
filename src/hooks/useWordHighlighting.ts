@@ -93,10 +93,11 @@ export function useWordHighlighting(
 
         if (cancelled) return;
 
-        // Subscribe to state changes
+        // Subscribe to state changes — defer setState to next JS tick to
+        // prevent concurrent state updates crashing iOS new architecture (Fabric)
         const unsubscribe = audioHighlightingService.onStateChange(
           ((newState: HighlightingState) => {
-            setState(newState);
+            setTimeout(() => setState(newState), 0);
           }) as HighlightingStateListener,
         );
 
