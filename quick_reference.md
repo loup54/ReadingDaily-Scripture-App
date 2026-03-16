@@ -251,17 +251,17 @@ console.log(result.scores.prosodyScore);     // 0-100
 ## Environment Setup
 
 ### Required API Keys
-```env
-# Google Cloud (TTS, Translation, Speech-to-Text)
-EXPO_PUBLIC_GOOGLE_CLOUD_API_KEY=AIzaSyB...
+All secrets are stored in **EAS production environment variables** — never in code.
+For local dev, create a `.env` file (gitignored). Ask team lead for values.
 
-# Azure Speech Services (Pronunciation)
+```env
+EXPO_PUBLIC_FIREBASE_API_KEY=...
+EXPO_PUBLIC_FIREBASE_PROJECT_ID=readingdaily-scripture-fe502
+EXPO_PUBLIC_GOOGLE_CLOUD_API_KEY=...
 EXPO_PUBLIC_AZURE_SPEECH_KEY=...
 EXPO_PUBLIC_AZURE_SPEECH_REGION=australiaeast
-
-# Firebase (Readings database)
-EXPO_PUBLIC_FIREBASE_API_KEY=AIzaSy...
-EXPO_PUBLIC_FIREBASE_PROJECT_ID=readingdaily-scripture-fe502
+EXPO_PUBLIC_REVENUE_CAT_KEY=...
+EXPO_PUBLIC_REVENUE_CAT_IOS_KEY=...
 ```
 
 ### Enable Google Cloud APIs

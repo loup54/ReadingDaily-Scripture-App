@@ -8,6 +8,7 @@ import {
   useWindowDimensions,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import { ReadingTabs, ScriptureText, ScriptureTextWithHighlighting, GestureTutorialOverlay } from '../../components/reading';
 import { IconButton, FeatureOverlay } from '../../components/common';
@@ -65,6 +66,7 @@ export const DailyReadingsScreen: React.FC<DailyReadingsScreenProps> = ({
   const [showGestureTutorial, setShowGestureTutorial] = useState(false);
   const { height: windowHeight } = useWindowDimensions();
   const insets = useSafeAreaInsets();
+  const tabBarHeight = useBottomTabBarHeight();
 
   // Check if reading is cached offline
   useEffect(() => {
@@ -177,7 +179,7 @@ export const DailyReadingsScreen: React.FC<DailyReadingsScreenProps> = ({
   // Using height + flex:0 forces Yoga to use this as the main dimension,
   // so all flex:1 children (scriptureContainer, ScrollView) get correct heights.
   // 240px accounts for header (~115px) + audio player container (~125px).
-  const contentHeight = Math.max(windowHeight - insets.top - insets.bottom - 240, 300);
+  const contentHeight = Math.max(windowHeight - insets.top - insets.bottom - tabBarHeight - 240, 300);
 
   // Dynamic styles with theme colors
   const dynamicStyles = {
@@ -271,7 +273,7 @@ export const DailyReadingsScreen: React.FC<DailyReadingsScreenProps> = ({
         </View>
 
         {/* Enhanced Audio Player - Fixed at bottom */}
-        <View style={[styles.audioPlayerContainer, { backgroundColor: colors.background.primary }]}>
+        <View style={[styles.audioPlayerContainer, { backgroundColor: colors.background.primary, paddingBottom: tabBarHeight + Spacing.xs }]}>
           <EnhancedAudioPlayer
             reading={currentReading}
             onPlaybackComplete={onPlaybackComplete}
