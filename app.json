@@ -40,7 +40,7 @@
         "backgroundColor": "#7C3AED"
       },
       "package": "com.readingdaily.scripture",
-      "versionCode": 24,
+      "versionCode": 25,
       "permissions": [
         "android.permission.RECORD_AUDIO"
       ]
