@@ -9,7 +9,7 @@
  * - Audio controls (play, pause, seek)
  */
 
-import React, { useRef, useEffect, useState, useCallback } from 'react';
+import React, { useRef, useEffect, useState, useCallback, useMemo } from 'react';
 import {
   View,
   StyleSheet,
@@ -61,11 +61,17 @@ const ProgressBar: React.FC<{
 }> = ({ currentMs, durationMs, onSeek }) => {
   const isDark = useColorScheme() === 'dark';
   const progress = durationMs > 0 ? currentMs / durationMs : 0;
+  const barWidthRef = useRef<number>(0);
+
+  const handleLayout = (event: any) => {
+    barWidthRef.current = event.nativeEvent.layout.width;
+  };
 
   const handlePress = (event: any) => {
-    const width = event.nativeEvent.locationX;
-    const totalWidth = event.nativeEvent.target.offsetWidth;
-    const position = (width / totalWidth) * durationMs;
+    const touchX = event.nativeEvent.locationX;
+    const totalWidth = barWidthRef.current;
+    if (!totalWidth) return;
+    const position = (touchX / totalWidth) * durationMs;
     onSeek(Math.round(position));
   };
 
@@ -74,6 +80,7 @@ const ProgressBar: React.FC<{
       <TouchableOpacity
         style={styles.progressBar}
         onPress={handlePress}
+        onLayout={handleLayout}
         activeOpacity={0.8}
       >
         <View
@@ -188,6 +195,17 @@ export const HighlightedReadingPlayer: React.FC<HighlightedReadingPlayerProps> =
   const soundRef = useRef<Audio.Sound | null>(null);
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
 
+  // Memoize options so the object reference is stable across renders
+  const highlightingOptions = useMemo(() => ({
+    enabled: wordHighlightingEnabled,
+    config: {
+      highlightColor: Colors.primary.blue,
+      highlightTextColor: Colors.text.white,
+      useFadeOut: true,
+    },
+    onComplete,
+  }), [wordHighlightingEnabled, onComplete]);
+
   // Highlighting (only if enabled)
   const {
     currentWord,
@@ -198,15 +216,7 @@ export const HighlightedReadingPlayer: React.FC<HighlightedReadingPlayerProps> =
     pause,
     resume,
     seek,
-  } = useWordHighlighting(readingId, readingType, {
-    enabled: wordHighlightingEnabled, // Pass enabled state to hook
-    config: {
-      highlightColor: Colors.primary.blue,
-      highlightTextColor: Colors.text.white,
-      useFadeOut: true,
-    },
-    onComplete,
-  });
+  } = useWordHighlighting(readingId, readingType, highlightingOptions);
 
   // Audio position tracking
   const audioPosition = useAudioPosition(
@@ -311,6 +321,7 @@ export const HighlightedReadingPlayer: React.FC<HighlightedReadingPlayerProps> =
           fontSize={18}
           lineHeight={28}
           style={{ flex: 1 }}
+          scrollable={true}
         />
       ) : (
         <HighlightedTextDisplay
@@ -321,6 +332,7 @@ export const HighlightedReadingPlayer: React.FC<HighlightedReadingPlayerProps> =
           fontSize={18}
           lineHeight={28}
           style={{ flex: 1 }}
+          scrollable={true}
         />
       )}
 

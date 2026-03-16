@@ -15,7 +15,6 @@ import { useTheme } from '@/hooks/useTheme';
 import { useTranslationStore } from '@/stores/useTranslationStore';
 import { useWordHighlightingState } from '@/hooks/useWordHighlighting';
 import { WordTranslation, FullTextTranslation } from '@/components/translation';
-import { HighlightedTextDisplay } from '@/components/audio/HighlightedTextDisplay';
 import { PronunciationPractice } from '@/screens/PronunciationPractice';
 
 interface ScriptureTextWithHighlightingProps {
@@ -56,46 +55,55 @@ export const ScriptureTextWithHighlighting: React.FC<ScriptureTextWithHighlighti
   // Get current word index from highlighting state, default to -1 if no state
   const currentWordIndex = highlightingState?.currentWordIndex ?? -1;
 
+  // Split reading content into [word, space, word, space, ...] tokens once
+  // Matches the same non-whitespace split used by the TTS timing generator (main.py)
+  const contentTokens = React.useMemo(
+    () => reading.content.split(/(\s+)/),
+    [reading.content]
+  );
+
+  // Map token index → word index (skip whitespace tokens)
+  const wordIndexForToken = React.useMemo(() => {
+    let wordIdx = 0;
+    return contentTokens.map((token) => {
+      if (token.trim().length === 0) return -1;
+      return wordIdx++;
+    });
+  }, [contentTokens]);
+
   /**
    * Render highlighted text during audio playback
-   * Falls back to plain tappable text if no highlighting data
+   * Renders directly inside the outer ScrollView to avoid nested ScrollView crash on Android.
+   * Falls back to plain tappable text if no highlighting data is active.
    */
   const renderContent = () => {
-    // If highlighting is active (currentWordIndex >= -1 and highlighting state exists)
-    if (highlightingState && currentWordIndex >= 0) {
-      console.log('[ScriptureTextWithHighlighting] Rendering with highlighting, wordIndex:', currentWordIndex);
+    const isHighlightingActive = highlightingState !== null && currentWordIndex >= 0;
 
-      // Use HighlightedTextDisplay component for karaoke-style highlighting
-      return (
-        <HighlightedTextDisplay
-          text={reading.content}
-          words={highlightingState.currentWord ? [highlightingState.currentWord] : []}
-          currentWordIndex={currentWordIndex}
-          onWordPress={(word) => handleWordPress(word.word)}
-          config={{
-            highlightColor: colors.primary.blue,
-            highlightTextColor: colors.text.white,
-            useFadeOut: true,
-          }}
-        />
-      );
-    }
-
-    // Fallback: render plain tappable text (same as ScriptureText)
-    const words = reading.content.split(/(\s+)/);
+    // Render word-by-word inline with karaoke highlight (no nested ScrollView)
     return (
       <Text style={[styles.content, { color: colors.text.primary }]} allowFontScaling={false}>
-        {words.map((word, index) => {
-          if (word.trim().length === 0) {
-            return <Text key={index}>{word}</Text>;
+        {contentTokens.map((token, tokenIdx) => {
+          if (token.trim().length === 0) {
+            return <Text key={tokenIdx}>{token}</Text>;
           }
+          const wordIdx = wordIndexForToken[tokenIdx];
+          const isCurrent = isHighlightingActive && wordIdx === currentWordIndex;
           return (
             <Text
-              key={index}
-              onPress={() => handleWordPress(word)}
-              style={styles.tappableWord}
+              key={tokenIdx}
+              onPress={() => handleWordPress(token)}
+              style={[
+                styles.tappableWord,
+                isCurrent && {
+                  backgroundColor: colors.primary.blue,
+                  color: colors.text.white,
+                  borderRadius: 3,
+                  paddingHorizontal: 2,
+                },
+              ]}
+              allowFontScaling={false}
             >
-              {word}
+              {token}
             </Text>
           );
         })}

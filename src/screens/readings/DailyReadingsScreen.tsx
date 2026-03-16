@@ -29,6 +29,7 @@ import { useTranslationStore } from '@/stores/useTranslationStore';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { ReadingService } from '@/services/readings/ReadingService';
 import { audioPlaybackService } from '@/services/audio';
+import { audioHighlightingService } from '@/services/audio/AudioHighlightingService';
 import { progressService } from '@/services/progress/ProgressService';
 
 interface DailyReadingsScreenProps {
@@ -76,11 +77,12 @@ export const DailyReadingsScreen: React.FC<DailyReadingsScreenProps> = ({
     checkIfCached();
   }, [selectedDate, isOnline]);
 
-  // Stop audio playback when reading tab changes
+  // Stop audio playback and highlighting when reading tab changes
   useEffect(() => {
     const stopAudio = async () => {
       try {
         await audioPlaybackService.pause();
+        audioHighlightingService.stopHighlighting();
       } catch (error) {
         console.log('[DailyReadingsScreen] Audio pause on tab change:', error);
       }

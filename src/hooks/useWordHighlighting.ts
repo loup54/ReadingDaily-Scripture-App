@@ -64,12 +64,12 @@ export function useWordHighlighting(
   const isInitializedRef = useRef(false);
 
   /**
-   * Initialize highlighting service
+   * Initialize highlighting service — re-runs when readingId or readingType changes.
+   * Cleanup runs before each re-run and on unmount, ensuring the old service
+   * is always stopped before a new one starts.
    */
   useEffect(() => {
-    if (isInitializedRef.current) {
-      return;
-    }
+    let cancelled = false;
 
     const initializeHighlighting = async () => {
       try {
@@ -91,6 +91,8 @@ export function useWordHighlighting(
         // Start highlighting
         await audioHighlightingService.startHighlighting(highlightingOptions);
 
+        if (cancelled) return;
+
         // Subscribe to state changes
         const unsubscribe = audioHighlightingService.onStateChange(
           ((newState: HighlightingState) => {
@@ -103,33 +105,27 @@ export function useWordHighlighting(
 
         console.log('[useWordHighlighting] ✅ Initialized');
       } catch (err) {
+        if (cancelled) return;
         const error = err instanceof Error ? err : new Error(String(err));
         setError(error);
         console.error('[useWordHighlighting] Initialization error:', error);
       } finally {
-        setIsLoading(false);
+        if (!cancelled) setIsLoading(false);
       }
     };
 
     initializeHighlighting();
 
     return () => {
-      // Cleanup is in the second effect
-    };
-  }, [readingId, readingType, options]);
-
-  /**
-   * Cleanup effect
-   */
-  useEffect(() => {
-    return () => {
+      cancelled = true;
       if (unsubscribeRef.current) {
         unsubscribeRef.current();
         unsubscribeRef.current = null;
       }
       audioHighlightingService.stopHighlighting();
+      isInitializedRef.current = false;
     };
-  }, []);
+  }, [readingId, readingType]); // eslint-disable-line react-hooks/exhaustive-deps
 
   /**
    * Update audio position (called from audio player)

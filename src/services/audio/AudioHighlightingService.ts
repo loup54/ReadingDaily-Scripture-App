@@ -56,6 +56,10 @@ export class AudioHighlightingService {
   private updateIntervalId: NodeJS.Timeout | null = null;
   private lastEmittedWordIndex: number = -1;
 
+  // Re-entry guard
+  private activeReadingId: string | null = null;
+  private isStarting: boolean = false;
+
   // Data provider
   private dataProvider: IHighlightingProvider = compositeTimingDataProvider;
 
@@ -76,6 +80,20 @@ export class AudioHighlightingService {
    * Loads timing data and initializes highlighting
    */
   async startHighlighting(options: HighlightingOptions): Promise<void> {
+    // Already running for this exact reading — skip
+    if (this.activeReadingId === options.readingId && !this.isStarting) {
+      console.log(`[AudioHighlighting] Already active for ${options.readingId}, skipping re-init`);
+      return;
+    }
+
+    // Concurrent call in progress — stop the previous one first
+    if (this.isStarting) {
+      console.log(`[AudioHighlighting] Concurrent start detected, stopping previous`);
+      this.stopHighlighting();
+    }
+
+    this.isStarting = true;
+
     try {
       console.log(`[AudioHighlighting] Starting: ${options.readingId}/${options.readingType}`);
 
@@ -119,8 +137,14 @@ export class AudioHighlightingService {
       // Start position update loop
       this.startPositionTracking();
 
+      this.activeReadingId = options.readingId;
+      this.isStarting = false;
+
       console.log(`[AudioHighlighting] ✅ Started with ${this.timingData.words.length} words`);
     } catch (error) {
+      this.isStarting = false;
+      this.activeReadingId = null;
+
       // Log as warning if timing data not available (expected); error if unexpected issue
       const errorMsg = error instanceof Error ? error.message : String(error);
       const isTimingDataMissing = errorMsg.includes('No timing data found');
@@ -148,6 +172,8 @@ export class AudioHighlightingService {
       this.updateIntervalId = null;
     }
 
+    this.activeReadingId = null;
+    this.isStarting = false;
     this.currentState.isPlaying = false;
     this.emitStateChange();
   }

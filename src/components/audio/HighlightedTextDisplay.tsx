@@ -39,6 +39,8 @@ interface HighlightedTextDisplayProps {
   textAlign?: 'auto' | 'left' | 'right' | 'center' | 'justify';
   /** Custom style override */
   style?: any;
+  /** Wrap in ScrollView (use only when NOT inside another ScrollView) */
+  scrollable?: boolean;
 }
 
 /**
@@ -112,6 +114,7 @@ export const HighlightedTextDisplay: React.FC<HighlightedTextDisplayProps> = ({
   enableFadeOut = true,
   textAlign = 'left',
   style,
+  scrollable = false,
 }) => {
   const isDark = useColorScheme() === 'dark';
 
@@ -164,70 +167,85 @@ export const HighlightedTextDisplay: React.FC<HighlightedTextDisplayProps> = ({
   const primaryTextColor = isDark ? Colors.text.white : Colors.text.primary;
   const secondaryTextColor = isDark ? Colors.text.secondary : Colors.text.secondary;
 
+  const content = (
+    <View style={[styles.textContainer, { padding: Spacing.lg }]}>
+      <Text
+        style={[
+          styles.text,
+          {
+            fontSize,
+            lineHeight,
+            textAlign,
+            color: primaryTextColor,
+          },
+        ]}
+      >
+        {textSegments.map((segment, idx) => {
+          if (segment.type === 'word' && segment.word) {
+            return (
+              <WordSegment
+                key={`${segment.word.index}-${idx}`}
+                word={segment.word}
+                isCurrentWord={segment.isCurrentWord}
+                isPreviousWord={segment.isPreviousWord}
+                config={config}
+                onPress={() => handleWordPress(segment.word!)}
+                fontSize={fontSize}
+                lineHeight={lineHeight}
+                showBoundary={showBoundaries}
+              />
+            );
+          }
+
+          return (
+            <Text key={`text-${idx}`} style={{ color: primaryTextColor }}>
+              {segment.value}
+            </Text>
+          );
+        })}
+      </Text>
+
+      {/* Debug info */}
+      {showBoundaries && (
+        <View style={[styles.debugInfo, { marginTop: Spacing.lg }]}>
+          <Text style={[styles.debugText, { color: secondaryTextColor }]}>
+            Word {currentWordIndex + 1} of {words.length}
+          </Text>
+          {currentWordIndex >= 0 && words[currentWordIndex] && (
+            <Text style={[styles.debugText, { color: config.highlightColor }]}>
+              Current: {words[currentWordIndex].word}
+            </Text>
+          )}
+        </View>
+      )}
+    </View>
+  );
+
+  if (scrollable) {
+    return (
+      <ScrollView
+        style={[
+          styles.container,
+          { backgroundColor: isDark ? Colors.background.card : Colors.background.card },
+          style,
+        ]}
+        showsVerticalScrollIndicator={true}
+      >
+        {content}
+      </ScrollView>
+    );
+  }
+
   return (
-    <ScrollView
+    <View
       style={[
         styles.container,
-        {
-          backgroundColor: isDark ? Colors.background.card : Colors.background.card,
-        },
+        { backgroundColor: isDark ? Colors.background.card : Colors.background.card },
         style,
       ]}
-      scrollEnabled={true}
-      showsVerticalScrollIndicator={true}
     >
-      <View style={[styles.textContainer, { padding: Spacing.lg }]}>
-        <Text
-          style={[
-            styles.text,
-            {
-              fontSize,
-              lineHeight,
-              textAlign,
-              color: primaryTextColor,
-            },
-          ]}
-        >
-          {textSegments.map((segment, idx) => {
-            if (segment.type === 'word' && segment.word) {
-              return (
-                <WordSegment
-                  key={`${segment.word.index}-${idx}`}
-                  word={segment.word}
-                  isCurrentWord={segment.isCurrentWord}
-                  isPreviousWord={segment.isPreviousWord}
-                  config={config}
-                  onPress={() => handleWordPress(segment.word!)}
-                  fontSize={fontSize}
-                  lineHeight={lineHeight}
-                  showBoundary={showBoundaries}
-                />
-              );
-            }
-
-            return (
-              <Text key={`text-${idx}`} style={{ color: primaryTextColor }}>
-                {segment.value}
-              </Text>
-            );
-          })}
-        </Text>
-
-        {/* Debug info */}
-        {showBoundaries && (
-          <View style={[styles.debugInfo, { marginTop: Spacing.lg }]}>
-            <Text style={[styles.debugText, { color: secondaryTextColor }]}>
-              Word {currentWordIndex + 1} of {words.length}
-            </Text>
-            {currentWordIndex >= 0 && words[currentWordIndex] && (
-              <Text style={[styles.debugText, { color: config.highlightColor }]}>
-                Current: {words[currentWordIndex].word}
-              </Text>
-            )}
-          </View>
-        )}
-      </View>
-    </ScrollView>
+      {content}
+    </View>
   );
 };
 
