@@ -1,0 +1,82 @@
+const { config } = require('dotenv');
+
+// Load .env file explicitly so env vars are embedded at bundle time
+// This ensures EXPO_PUBLIC_* vars work in local Xcode archive builds
+// (EAS cloud builds inject vars via the EAS dashboard instead)
+config();
+
+module.exports = {
+  expo: {
+    name: "ReadingDaily Scripture App",
+    slug: "readingdaily-scripture-app",
+    scheme: "readingdaily",
+    version: "1.1.30",
+    icon: "./assets/icon.png",
+    orientation: "portrait",
+    userInterfaceStyle: "light",
+    assetBundlePatterns: ["**/*"],
+    splash: {
+      image: "./assets/splash.png",
+      resizeMode: "contain",
+      backgroundColor: "#7C3AED"
+    },
+    ios: {
+      bundleIdentifier: "com.readingdaily.scripture",
+      buildNumber: "146",
+      splash: {
+        image: "./assets/splash.png",
+        resizeMode: "contain",
+        backgroundColor: "#7C3AED"
+      },
+      infoPlist: {
+        ITSAppUsesNonExemptEncryption: false,
+        NSMicrophoneUsageDescription: "This app needs access to your microphone to practice pronunciation of sacred scripture.",
+        NSUserNotificationsUsageDescription: "This app needs permission to send you daily reading reminders to help you maintain your spiritual practice."
+      }
+    },
+    android: {
+      adaptiveIcon: {
+        foregroundImage: "./assets/icon.png",
+        backgroundColor: "#7C3AED"
+      },
+      splash: {
+        image: "./assets/splash.png",
+        resizeMode: "contain",
+        backgroundColor: "#7C3AED"
+      },
+      package: "com.readingdaily.scripture",
+      versionCode: 25,
+      permissions: ["android.permission.RECORD_AUDIO"]
+    },
+    plugins: [
+      [
+        "expo-build-properties",
+        {
+          ios: {
+            deploymentTarget: "15.1",
+            flipper: false
+          },
+          android: {
+            compileSdkVersion: 35,
+            targetSdkVersion: 35,
+            minSdkVersion: 24,
+            useNextNotificationChannelOnAndroid: true
+          }
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          icon: "./assets/icon.png",
+          color: "#7C3AED",
+          mode: "production"
+        }
+      ]
+    ],
+    extra: {
+      eas: {
+        projectId: "0c4f39f5-184d-4af5-8dca-2cc4d52675e6"
+      }
+    }
+  }
+};
