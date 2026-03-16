@@ -169,17 +169,7 @@ export const HighlightedTextDisplay: React.FC<HighlightedTextDisplayProps> = ({
 
   const content = (
     <View style={[styles.textContainer, { padding: Spacing.lg }]}>
-      <Text
-        style={[
-          styles.text,
-          {
-            fontSize,
-            lineHeight,
-            textAlign,
-            color: primaryTextColor,
-          },
-        ]}
-      >
+      <View style={[styles.wordsContainer, { justifyContent: textAlign === 'center' ? 'center' : 'flex-start' }]}>
         {textSegments.map((segment, idx) => {
           if (segment.type === 'word' && segment.word) {
             return (
@@ -198,12 +188,12 @@ export const HighlightedTextDisplay: React.FC<HighlightedTextDisplayProps> = ({
           }
 
           return (
-            <Text key={`text-${idx}`} style={{ color: primaryTextColor }}>
+            <Text key={`text-${idx}`} style={{ color: primaryTextColor, fontSize, lineHeight }}>
               {segment.value}
             </Text>
           );
         })}
-      </Text>
+      </View>
 
       {/* Debug info */}
       {showBoundaries && (
@@ -311,6 +301,11 @@ const styles = StyleSheet.create({
   textContainer: {
     paddingVertical: Spacing.lg,
     paddingHorizontal: Spacing.lg,
+  },
+  wordsContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'flex-start',
   },
   text: {
     fontFamily: 'System',
