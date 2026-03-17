@@ -18,7 +18,7 @@ module.exports = {
     },
     ios: {
       bundleIdentifier: "com.readingdaily.scripture",
-      buildNumber: "149",
+      buildNumber: "158",
       splash: {
         image: "./assets/splash.png",
         resizeMode: "contain",
