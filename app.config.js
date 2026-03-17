@@ -26,7 +26,7 @@ module.exports = {
       },
       infoPlist: {
         ITSAppUsesNonExemptEncryption: false,
-        NSMicrophoneUsageDescription: "This app needs access to your microphone to practice pronunciation of sacred scripture.",
+        NSMicrophoneUsageDescription: "This app needs microphone access to practice pronunciation of sacred scripture readings.",
         NSUserNotificationsUsageDescription: "This app needs permission to send you daily reading reminders to help you maintain your spiritual practice."
       }
     },
