@@ -27,6 +27,54 @@ from scrapers.validator import validate_reading, calculate_checksum
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+# Admin secret for protecting admin-only HTTP endpoints
+ADMIN_SECRET = os.environ.get('ADMIN_SECRET', '')
+
+RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000  # 1 hour in milliseconds
+
+
+def verify_admin_token(req: https_fn.Request) -> bool:
+    """Check Authorization: Bearer <token> against ADMIN_SECRET."""
+    if not ADMIN_SECRET:
+        logger.warning('ADMIN_SECRET not configured')
+        return False
+    auth_header = req.headers.get('Authorization', '')
+    if not auth_header.startswith('Bearer '):
+        return False
+    return auth_header[7:] == ADMIN_SECRET
+
+
+def check_rate_limit(key: str, fn_name: str, limit: int) -> bool:
+    """
+    Firestore-backed rate limiter. Returns True if allowed, False if exceeded.
+    Uses a fixed 1-hour window per key+function pair.
+    """
+    db = get_db()
+    doc_ref = db.collection('rateLimits').document(f'{key}_{fn_name}')
+
+    @firestore.transactional
+    def update_in_transaction(transaction):
+        doc = doc_ref.get(transaction=transaction)
+        now_ms = int(datetime.utcnow().timestamp() * 1000)
+
+        if not doc.exists:
+            transaction.set(doc_ref, {'count': 1, 'limit': limit, 'resetAt': now_ms + RATE_LIMIT_WINDOW_MS})
+            return True
+
+        data = doc.to_dict()
+        if now_ms > data.get('resetAt', 0):
+            transaction.set(doc_ref, {'count': 1, 'limit': limit, 'resetAt': now_ms + RATE_LIMIT_WINDOW_MS})
+            return True
+
+        if data.get('count', 0) >= limit:
+            return False
+
+        transaction.update(doc_ref, {'count': data['count'] + 1})
+        return True
+
+    transaction = db.transaction()
+    return update_in_transaction(transaction)
+
 # TTS voice to match the app's default voice (en-US-Wavenet-C = female primary)
 TTS_VOICE_NAME = 'en-US-Wavenet-C'
 TTS_LANGUAGE_CODE = 'en-US'
@@ -282,6 +330,14 @@ def daily_scrape(event: scheduler_fn.ScheduledEvent) -> None:
                 # Re-scrape if gospel text is suspiciously short (likely wrong section was stored)
                 gospel_text = existing.to_dict().get('gospel', {}).get('text', '')
                 if len(gospel_text) >= 300:
+                    # Reading exists — but check if timings are missing and generate if so
+                    timings_ref = db.collection('readings').document(date_str).collection('timings')
+                    existing_timings = timings_ref.limit(1).get()
+                    if not existing_timings:
+                        logger.info(f"📋 Reading exists for {date_str} but timings missing — generating")
+                        result = generate_timings_for_date(date_str, existing.to_dict(), db)
+                        timing_success += result['success']
+                        timing_fail += result['failed']
                     skip_count += 1
                     continue
                 logger.warning(f"⚠️ Existing gospel for {date_str} is too short ({len(gospel_text)} chars) — re-scraping")
@@ -330,6 +386,18 @@ def manual_scrape(req: https_fn.Request) -> https_fn.Response:
     Manual trigger endpoint for scraping specific date
     Usage: POST /manual_scrape with JSON body: {"date": "2025-10-01"}
     """
+    if not verify_admin_token(req):
+        return https_fn.Response(
+            json.dumps({'error': 'Unauthorized'}),
+            status=401,
+            headers={'Content-Type': 'application/json'}
+        )
+    if not check_rate_limit('_global', 'manual_scrape', 10):
+        return https_fn.Response(
+            json.dumps({'error': 'Too many requests. Please try again later.'}),
+            status=429,
+            headers={'Content-Type': 'application/json'}
+        )
     try:
         # Parse request
         data = req.get_json()
@@ -340,8 +408,15 @@ def manual_scrape(req: https_fn.Request) -> https_fn.Response:
                 headers={'Content-Type': 'application/json'}
             )
 
-        # Parse date
+        # Parse and validate date
         date_str = data['date']
+        import re as _re
+        if not _re.fullmatch(r'\d{4}-\d{2}-\d{2}', date_str):
+            return https_fn.Response(
+                json.dumps({'error': 'Invalid date format. Use YYYY-MM-DD'}),
+                status=400,
+                headers={'Content-Type': 'application/json'}
+            )
         target_date = datetime.fromisoformat(date_str).date()
 
         logger.info(f"Manual scrape requested for {date_str}")
@@ -427,6 +502,18 @@ def generate_timings(req: https_fn.Request) -> https_fn.Response:
         "force": false                 # optional - overwrite existing timings
     }
     """
+    if not verify_admin_token(req):
+        return https_fn.Response(
+            json.dumps({'error': 'Unauthorized'}),
+            status=401,
+            headers={'Content-Type': 'application/json'}
+        )
+    if not check_rate_limit('_global', 'generate_timings', 10):
+        return https_fn.Response(
+            json.dumps({'error': 'Too many requests. Please try again later.'}),
+            status=429,
+            headers={'Content-Type': 'application/json'}
+        )
     try:
         data = req.get_json()
         if not data or 'date' not in data:
@@ -437,7 +524,21 @@ def generate_timings(req: https_fn.Request) -> https_fn.Response:
             )
 
         date_str = data['date']
+        import re as _re
+        if not _re.fullmatch(r'\d{4}-\d{2}-\d{2}', date_str):
+            return https_fn.Response(
+                json.dumps({'error': 'Invalid date format. Use YYYY-MM-DD'}),
+                status=400,
+                headers={'Content-Type': 'application/json'}
+            )
         reading_type = data.get('readingType')  # None = generate all
+        valid_reading_types = {'gospel', 'firstReading', 'secondReading', 'psalm'}
+        if reading_type is not None and reading_type not in valid_reading_types:
+            return https_fn.Response(
+                json.dumps({'error': f'Invalid readingType. Must be one of: {", ".join(sorted(valid_reading_types))}'}),
+                status=400,
+                headers={'Content-Type': 'application/json'}
+            )
         force = data.get('force', False)
 
         db = get_db()
@@ -530,8 +631,6 @@ def cleanup_old_readings(cutoff_date):
 
 @https_fn.on_request()
 def validate_google_receipt(req: https_fn.Request) -> https_fn.Response:
-    from google.oauth2 import service_account
-    from googleapiclient.discovery import build
     """
     Validate Google Play purchase receipt
 
@@ -551,6 +650,36 @@ def validate_google_receipt(req: https_fn.Request) -> https_fn.Response:
         "purchaseTime": timestamp
     }
     """
+    from google.oauth2 import service_account
+    from googleapiclient.discovery import build
+    from firebase_admin import auth as firebase_auth
+
+    # Verify Firebase ID token
+    auth_header = req.headers.get('Authorization', '')
+    if not auth_header.startswith('Bearer '):
+        return https_fn.Response(
+            json.dumps({'valid': False, 'error': 'Authentication required'}),
+            status=401,
+            headers={'Content-Type': 'application/json'}
+        )
+    try:
+        id_token = auth_header[7:]
+        decoded_token = firebase_auth.verify_id_token(id_token)
+        caller_uid = decoded_token['uid']
+    except Exception:
+        return https_fn.Response(
+            json.dumps({'valid': False, 'error': 'Invalid or expired token'}),
+            status=401,
+            headers={'Content-Type': 'application/json'}
+        )
+
+    if not check_rate_limit(caller_uid, 'validate_google_receipt', 10):
+        return https_fn.Response(
+            json.dumps({'valid': False, 'error': 'Too many requests. Please try again later.'}),
+            status=429,
+            headers={'Content-Type': 'application/json'}
+        )
+
     try:
         # Parse request
         data = req.get_json()
@@ -559,18 +688,31 @@ def validate_google_receipt(req: https_fn.Request) -> https_fn.Response:
             return https_fn.Response(
                 json.dumps({'valid': False, 'error': 'Missing request body'}),
                 status=400,
-                headers={'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'}
+                headers={'Content-Type': 'application/json'}
             )
 
-        package_name = data.get('packageName', 'com.readingdaily.scripture')
+        package_name = 'com.readingdaily.scripture'
         product_id = data.get('productId')
         purchase_token = data.get('purchaseToken')
 
-        if not product_id or not purchase_token:
+        valid_product_ids = {
+            'com.readingdaily.lifetime.access',
+            'com.readingdaily.basic.monthly',
+            'com.readingdaily.basic.yearly',
+        }
+
+        if not product_id or product_id not in valid_product_ids:
+            return https_fn.Response(
+                json.dumps({'valid': False, 'error': 'Invalid product ID'}),
+                status=400,
+                headers={'Content-Type': 'application/json'}
+            )
+
+        if not purchase_token:
             return https_fn.Response(
                 json.dumps({'valid': False, 'error': 'Missing productId or purchaseToken'}),
                 status=400,
-                headers={'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'}
+                headers={'Content-Type': 'application/json'}
             )
 
         logger.info(f"Validating Google Play receipt for product: {product_id}")
@@ -583,7 +725,7 @@ def validate_google_receipt(req: https_fn.Request) -> https_fn.Response:
             return https_fn.Response(
                 json.dumps({'valid': False, 'error': 'Service account not configured'}),
                 status=500,
-                headers={'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'}
+                headers={'Content-Type': 'application/json'}
             )
 
         # Create credentials
@@ -657,7 +799,7 @@ def validate_google_receipt(req: https_fn.Request) -> https_fn.Response:
         return https_fn.Response(
             json.dumps(response_data),
             status=200,
-            headers={'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'}
+            headers={'Content-Type': 'application/json'}
         )
 
     except Exception as e:
@@ -665,5 +807,5 @@ def validate_google_receipt(req: https_fn.Request) -> https_fn.Response:
         return https_fn.Response(
             json.dumps({'valid': False, 'error': str(e)}),
             status=500,
-            headers={'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'}
+            headers={'Content-Type': 'application/json'}
         )

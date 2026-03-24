@@ -14,6 +14,7 @@ import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
 
 import { SynthesisRequest, BatchProcessingStatus } from './types/highlighting-functions';
+import { checkRateLimitHttp, verifyAdminToken } from './rateLimit';
 
 // Firebase references
 const db = admin.firestore();
@@ -456,8 +457,15 @@ async function sendErrorAlert(message: string, details: any): Promise<void> {
  */
 export const estimateMonthlyCosts = functions.https.onRequest(
   async (req, res) => {
-    res.set('Access-Control-Allow-Origin', '*');
-
+    if (!verifyAdminToken(req.headers.authorization)) {
+      res.status(401).json({ error: 'Unauthorized' });
+      return;
+    }
+    const allowed = await checkRateLimitHttp('_global', 'estimateMonthlyCosts', 10);
+    if (!allowed) {
+      res.status(429).json({ error: 'Too many requests. Please try again later.' });
+      return;
+    }
     try {
       // Get synthesis status records from past 30 days
       const thirtyDaysAgo = new Date();
@@ -524,18 +532,19 @@ export const estimateMonthlyCosts = functions.https.onRequest(
  */
 export const populateHistoricalTimingData = functions.https.onRequest(
   async (req, res) => {
-    // CORS headers
-    res.set('Access-Control-Allow-Origin', '*');
-    res.set('Access-Control-Allow-Methods', 'POST, OPTIONS');
-    res.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-
-    if (req.method === 'OPTIONS') {
-      res.status(204).send('');
+    if (!verifyAdminToken(req.headers.authorization)) {
+      res.status(401).json({ error: 'Unauthorized' });
       return;
     }
 
     if (req.method !== 'POST') {
       res.status(405).json({ error: 'Only POST requests allowed' });
+      return;
+    }
+
+    const allowed = await checkRateLimitHttp('_global', 'populateHistoricalTimingData', 2);
+    if (!allowed) {
+      res.status(429).json({ error: 'Too many requests. Please try again later.' });
       return;
     }
 

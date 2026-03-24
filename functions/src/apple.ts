@@ -9,9 +9,17 @@ import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
 import fetch from 'node-fetch';
 
+import { checkRateLimit } from './rateLimit';
+
 // Apple receipt validation endpoints
 const APPLE_PRODUCTION_URL = 'https://buy.itunes.apple.com/verifyReceipt';
 const APPLE_SANDBOX_URL = 'https://sandbox.itunes.apple.com/verifyReceipt';
+
+const VALID_APPLE_PRODUCT_IDS = new Set([
+  'com.readingdaily.lifetime.access.v2',
+  'com.readingdaily.basic.monthly.v2',
+  'com.readingdaily.basic.yearly.v2',
+]);
 
 interface AppleReceiptResponse {
   status: number;
@@ -31,7 +39,16 @@ export const validateAppleReceipt = functions.https.onCall(async (data, context)
     throw new functions.https.HttpsError('invalid-argument', 'Receipt is required');
   }
 
-  const userId = context.auth?.uid || 'anonymous';
+  if (!productId || !VALID_APPLE_PRODUCT_IDS.has(productId)) {
+    throw new functions.https.HttpsError('invalid-argument', 'Invalid product ID');
+  }
+
+  const userId = context.auth?.uid;
+  if (!userId) {
+    throw new functions.https.HttpsError('unauthenticated', 'Authentication required');
+  }
+
+  await checkRateLimit(userId, 'validateAppleReceipt', 10);
 
   try {
     // Get shared secret from config

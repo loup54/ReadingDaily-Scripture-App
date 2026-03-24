@@ -16,6 +16,7 @@ import * as admin from 'firebase-admin';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as sdk from 'microsoft-cognitiveservices-speech-sdk';
+import { checkRateLimitHttp, verifyAdminToken } from './rateLimit';
 
 import {
   SynthesisRequest,
@@ -82,18 +83,19 @@ const ESTIMATED_COST_PER_KCHARS = 0.000015; // ~$15 per 1M characters
  * }
  */
 export const synthesizeReading = functions.https.onRequest(async (req, res) => {
-  // Enable CORS for testing
-  res.set('Access-Control-Allow-Origin', '*');
-  res.set('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.set('Access-Control-Allow-Headers', 'Content-Type');
-
-  if (req.method === 'OPTIONS') {
-    res.status(204).send('');
+  if (!verifyAdminToken(req.headers.authorization)) {
+    res.status(401).json({ error: 'Unauthorized' });
     return;
   }
 
   if (req.method !== 'POST') {
     res.status(405).json({ error: 'Only POST requests allowed' });
+    return;
+  }
+
+  const allowed = await checkRateLimitHttp('_global', 'synthesizeReading', 20);
+  if (!allowed) {
+    res.status(429).json({ error: 'Too many requests. Please try again later.' });
     return;
   }
 
@@ -950,7 +952,16 @@ async function logFunctionError(
  */
 export const highlightingHealthCheck = functions.https.onRequest(
   async (req, res) => {
-    res.set('Access-Control-Allow-Origin', '*');
+    if (!verifyAdminToken(req.headers.authorization)) {
+      res.status(401).json({ error: 'Unauthorized' });
+      return;
+    }
+
+    const allowed = await checkRateLimitHttp('_global', 'highlightingHealthCheck', 30);
+    if (!allowed) {
+      res.status(429).json({ error: 'Too many requests. Please try again later.' });
+      return;
+    }
 
     try {
       // Check Firestore connectivity

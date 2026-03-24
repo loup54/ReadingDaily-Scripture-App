@@ -24,6 +24,7 @@ import { useAuthStore } from '@stores/useAuthStore';
 import { getFunctions, httpsCallable } from 'firebase/functions';
 import { auth } from '@/config/firebase';
 import { SUBSCRIPTION_TIERS } from '@constants/subscriptions';
+import { sanitizeGiftMessage, validateGiftMessage, validateEmail } from '@/utils/validation';
 
 interface SendGiftScreenProps {
   onBack?: () => void;
@@ -57,9 +58,9 @@ export const SendGiftScreen: React.FC<SendGiftScreenProps> = ({
   };
 
   const handleValidateEmail = () => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(recipientEmail)) {
-      Alert.alert('Invalid Email', 'Please enter a valid email address');
+    const result = validateEmail(recipientEmail);
+    if (!result.isValid) {
+      Alert.alert('Invalid Email', result.error);
       return false;
     }
     return true;
@@ -100,6 +101,14 @@ export const SendGiftScreen: React.FC<SendGiftScreenProps> = ({
       const idToken = await currentUser.getIdToken(true);
       console.log('[SendGiftScreen] Got ID token, sending gift...');
 
+      const messageValidation = validateGiftMessage(personalMessage);
+      if (!messageValidation.isValid) {
+        Alert.alert('Error', messageValidation.error);
+        setLoading(false);
+        return;
+      }
+      const sanitizedMessage = sanitizeGiftMessage(personalMessage);
+
       const functions = getFunctions();
       const sendGift = httpsCallable(functions, 'sendGift');
 
@@ -107,7 +116,7 @@ export const SendGiftScreen: React.FC<SendGiftScreenProps> = ({
         subscriptionTier: selectedTier,
         recipientEmail,
         expiresInDays: 365,
-        message: personalMessage,
+        message: sanitizedMessage,
       });
 
       const data = result.data as any;

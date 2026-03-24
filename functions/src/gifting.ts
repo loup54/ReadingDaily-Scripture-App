@@ -8,6 +8,7 @@
 
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
+import { checkRateLimit } from './rateLimit';
 
 const db = admin.firestore();
 
@@ -86,6 +87,7 @@ export const sendGift = functions.https.onCall(
     }
 
     const senderId = context.auth.uid;
+    await checkRateLimit(senderId, 'sendGift', 5);
     const currentTime = Date.now();
     const expiresAt = currentTime + data.expiresInDays * 24 * 60 * 60 * 1000;
 

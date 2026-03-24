@@ -52,57 +52,90 @@ export const ScriptureTextWithHighlighting: React.FC<ScriptureTextWithHighlighti
     }
   };
 
-  // Get current word index from highlighting state, default to -1 if no state
-  const currentWordIndex = highlightingState?.currentWordIndex ?? -1;
-
   // Split reading content into [word, space, word, space, ...] tokens once
-  // Matches the same non-whitespace split used by the TTS timing generator (main.py)
   const contentTokens = React.useMemo(
     () => reading.content.split(/(\s+)/),
     [reading.content]
   );
 
-  // Map token index → word index (skip whitespace tokens)
-  const wordIndexForToken = React.useMemo(() => {
-    let wordIdx = 0;
+  // Pre-compute the character start offset of each token within reading.content.
+  // Used to match timing data charOffset → correct token (robust against word-count mismatches).
+  const tokenStartOffsets = React.useMemo(() => {
+    let pos = 0;
     return contentTokens.map((token) => {
-      if (token.trim().length === 0) return -1;
-      return wordIdx++;
+      const start = pos;
+      pos += token.length;
+      return start;
     });
   }, [contentTokens]);
 
+  // Build lookup: normalised word text → sorted token indices, computed once per reading.
+  // Used as fallback when charOffset doesn't land exactly on a token (TTS preprocessing drift).
+  const wordTextToTokenIndices = React.useMemo(() => {
+    const map = new Map<string, number[]>();
+    contentTokens.forEach((token, idx) => {
+      if (token.trim().length === 0) return;
+      const key = token.replace(/[^\w]/g, '').toLowerCase();
+      if (!key) return;
+      if (!map.has(key)) map.set(key, []);
+      map.get(key)!.push(idx);
+    });
+    return map;
+  }, [contentTokens]);
+
+  // Resolve which token index to highlight for the current timing word.
+  // Step 1: exact charOffset match. Step 2: nearest token by word-text match.
+  const currentTokenIdx = React.useMemo(() => {
+    if (!highlightingState?.currentWord) return -1;
+    const { word, charOffset } = highlightingState.currentWord;
+
+    // Step 1: does charOffset land inside a non-whitespace token?
+    for (let i = 0; i < contentTokens.length; i++) {
+      const token = contentTokens[i];
+      if (token.trim().length === 0) continue;
+      const start = tokenStartOffsets[i];
+      if (charOffset >= start && charOffset < start + token.length) return i;
+    }
+
+    // Step 2: fuzzy — find token whose text matches `word`, closest to charOffset
+    const key = word.replace(/[^\w]/g, '').toLowerCase();
+    const candidates = wordTextToTokenIndices.get(key);
+    if (!candidates || candidates.length === 0) return -1;
+
+    let bestIdx = candidates[0];
+    let bestDist = Math.abs(tokenStartOffsets[candidates[0]] - charOffset);
+    for (const ci of candidates) {
+      const dist = Math.abs(tokenStartOffsets[ci] - charOffset);
+      if (dist < bestDist) { bestDist = dist; bestIdx = ci; }
+    }
+    return bestIdx;
+  }, [highlightingState?.currentWord, contentTokens, tokenStartOffsets, wordTextToTokenIndices]);
+
+  const isHighlightingActive = currentTokenIdx >= 0;
+
   /**
-   * Render highlighted text during audio playback
-   * Renders directly inside the outer ScrollView to avoid nested ScrollView crash on Android.
-   * Falls back to plain tappable text if no highlighting data is active.
+   * Render highlighted text during audio playback.
+   * Uses charOffset from timing data to find the correct token — robust against
+   * word-count mismatches between TTS generator and component tokenisation.
    */
   const renderContent = () => {
-    const isHighlightingActive = highlightingState !== null && currentWordIndex >= 0;
-
-    // Render word-by-word using View+flexWrap to avoid nested Text+onPress crash
-    // on iOS new architecture (Fabric). Each word is a sibling Text, not a child
-    // of another Text.
     return (
       <View style={styles.wordsContainer}>
         {contentTokens.map((token, tokenIdx) => {
           if (token.trim().length === 0) {
             return <Text key={tokenIdx} style={[styles.content, { color: colors.text.primary }]} allowFontScaling={false}>{token}</Text>;
           }
-          const wordIdx = wordIndexForToken[tokenIdx];
-          const isCurrent = isHighlightingActive && wordIdx === currentWordIndex;
+          const isCurrent = isHighlightingActive && tokenIdx === currentTokenIdx;
           return (
             <Text
               key={tokenIdx}
-              onPress={() => handleWordPress(token)}
+              onPress={translationEnabled ? () => handleWordPress(token) : undefined}
               style={[
                 styles.content,
                 styles.tappableWord,
-                { color: colors.text.primary },
-                isCurrent && {
-                  backgroundColor: colors.primary.blue,
-                  color: colors.text.white,
-                  borderRadius: 3,
-                  paddingHorizontal: 2,
+                {
+                  color: isCurrent ? colors.text.white : colors.text.primary,
+                  backgroundColor: isCurrent ? colors.primary.blue : 'transparent',
                 },
               ]}
               allowFontScaling={false}
@@ -191,19 +224,21 @@ export const ScriptureTextWithHighlighting: React.FC<ScriptureTextWithHighlighti
         />
       )}
 
-      {/* Pronunciation Practice Modal */}
-      <Modal
-        visible={showPronunciationPractice}
-        animationType="slide"
-        presentationStyle="pageSheet"
-        onRequestClose={() => setShowPronunciationPractice(false)}
-      >
-        <PronunciationPractice
-          text={reading.content}
-          reference={reading.reference}
-          onClose={() => setShowPronunciationPractice(false)}
-        />
-      </Modal>
+      {/* Pronunciation Practice Modal — only mount when opened */}
+      {showPronunciationPractice && (
+        <Modal
+          visible={showPronunciationPractice}
+          animationType="slide"
+          presentationStyle="pageSheet"
+          onRequestClose={() => setShowPronunciationPractice(false)}
+        >
+          <PronunciationPractice
+            text={reading.content}
+            reference={reading.reference}
+            onClose={() => setShowPronunciationPractice(false)}
+          />
+        </Modal>
+      )}
     </View>
   );
 };

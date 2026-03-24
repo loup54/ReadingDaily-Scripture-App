@@ -24,11 +24,17 @@ service cloud.firestore {
       allow write: if false;
     }
 
-    // Trial data collection (if needed)
+    // Trial data collection
     match /trials/{trialId} {
-      // Users can read/write their own trial data
-      allow read, write: if isAuthenticated() &&
-                            resource.data.userId == request.auth.uid;
+      // Read: users can read their own trial data
+      allow read: if isAuthenticated() &&
+                     resource.data.userId == request.auth.uid;
+      // Create: users can create their own trial document
+      allow create: if isAuthenticated() &&
+                       request.resource.data.userId == request.auth.uid;
+      // Update/Delete: users can only modify their own trial data
+      allow update, delete: if isAuthenticated() &&
+                               resource.data.userId == request.auth.uid;
     }
 
     // Readings collection (Daily scripture readings)
@@ -71,18 +77,24 @@ service cloud.firestore {
 
     // Gift codes collection (Subscription gifting system)
     match /giftCodes/{giftCode} {
-      // Read: Anyone can read gift codes (needed to validate before redemption)
-      allow read: if true;
+      // Read: Authenticated users only — prevents unauthenticated enumeration of gift codes
+      allow read: if isAuthenticated();
       // Write: Only Cloud Functions can write (via admin SDK)
       allow write: if false;
     }
 
     // Redemptions collection (Gift redemption audit trail)
     match /redemptions/{document=**} {
-      // Read: Only authorized users can read redemption records
-      allow read: if isAuthenticated();
+      // Read: Users can only read their own redemption records
+      allow read: if isAuthenticated() &&
+                     resource.data.userId == request.auth.uid;
       // Write: Only Cloud Functions can write (via admin SDK)
       allow write: if false;
+    }
+
+    // Rate limit counters — written by Cloud Functions only (admin SDK bypasses rules)
+    match /rateLimits/{document=**} {
+      allow read, write: if false;
     }
 
     // Default: Deny all access to other collections

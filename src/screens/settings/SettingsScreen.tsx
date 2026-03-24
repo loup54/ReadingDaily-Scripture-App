@@ -37,6 +37,7 @@ import {
 } from '@/stores/useNotificationStore';
 import type { CacheStats } from '@services/cache';
 import type { SupportedLanguage, VoiceType, PlaybackSpeed } from '@types/settings.types';
+import { sanitizeDisplayName, validateDisplayName } from '@/utils/validation';
 
 interface SettingsScreenProps {
   onBack?: () => void;
@@ -302,10 +303,12 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
   };
 
   const handleSaveProfile = useCallback(async () => {
-    if (!editedName.trim()) {
-      Alert.alert('Error', 'Name cannot be empty');
+    const validation = validateDisplayName(editedName);
+    if (!validation.isValid) {
+      Alert.alert('Error', validation.error);
       return;
     }
+    const sanitizedName = sanitizeDisplayName(editedName);
 
     try {
       // Update user profile via Firebase
@@ -314,7 +317,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
         const currentUser = auth.currentUser;
         if (currentUser) {
           await require('firebase/auth').updateProfile(currentUser, {
-            displayName: editedName,
+            displayName: sanitizedName,
           });
           // Update auth store
           console.log('[Settings] Profile updated successfully');
@@ -376,8 +379,8 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
       Alert.alert('Error', 'New password is required');
       return;
     }
-    if (newPassword.length < 6) {
-      Alert.alert('Error', 'Password must be at least 6 characters');
+    if (newPassword.length < 8) {
+      Alert.alert('Error', 'Password must be at least 8 characters');
       return;
     }
     if (newPassword !== confirmPassword) {

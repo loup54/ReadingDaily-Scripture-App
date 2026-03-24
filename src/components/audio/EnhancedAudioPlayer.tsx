@@ -5,7 +5,7 @@
  * Phase 11: Audio Implementation
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -56,6 +56,23 @@ export const EnhancedAudioPlayer: React.FC<EnhancedAudioPlayerProps> = ({
   // Highlighting state
   const [highlightingInitialized, setHighlightingInitialized] = useState(false);
   const [highlightingError, setHighlightingError] = useState<Error | null>(null);
+  // Ref mirrors highlightingInitialized so effects don't need it as a dep
+  const highlightingInitializedRef = useRef(false);
+
+  // Keep ref in sync with state (avoids stale closure in effects)
+  useEffect(() => {
+    highlightingInitializedRef.current = highlightingInitialized;
+  }, [highlightingInitialized]);
+
+  // Reset highlighting when the reading changes so startHighlighting is called
+  // for the new reading's timing data (not the previous reading's)
+  useEffect(() => {
+    if (highlightingInitializedRef.current) {
+      audioHighlightingService.stopHighlighting();
+      setHighlightingInitialized(false);
+      highlightingInitializedRef.current = false;
+    }
+  }, [reading.id]);
 
   // Subscribe to playback state updates
   useEffect(() => {
@@ -70,8 +87,10 @@ export const EnhancedAudioPlayer: React.FC<EnhancedAudioPlayerProps> = ({
       });
       setPlaybackState(state);
 
-      // Update highlighting service with current audio position
-      if (highlightingInitialized && state.isPlaying) {
+      // Update highlighting service with current audio position.
+      // positionMillis from Expo AV is content position (file time), which matches
+      // the timing data timestamps directly — no speed adjustment needed.
+      if (highlightingInitializedRef.current && state.currentTime > 0) {
         audioHighlightingService.updateAudioPosition(state.currentTime);
       }
 
@@ -92,18 +111,18 @@ export const EnhancedAudioPlayer: React.FC<EnhancedAudioPlayerProps> = ({
       console.log('[EnhancedAudioPlayer] Unsubscribing from playback service');
       unsubscribe();
     };
-  }, [onPlaybackComplete, highlightingInitialized]);
+  }, [onPlaybackComplete]); // highlightingInitialized read via ref — no re-sub needed
 
-  // Cleanup on unmount
+  // Cleanup on unmount only — use ref so this effect never re-runs mid-playback
   useEffect(() => {
     return () => {
       audioPlaybackService.cleanup();
-      if (highlightingInitialized) {
+      if (highlightingInitializedRef.current) {
         console.log('[EnhancedAudioPlayer] Stopping highlighting on unmount');
         audioHighlightingService.stopHighlighting();
       }
     };
-  }, [highlightingInitialized]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   /**
    * Handle play/pause toggle
@@ -154,16 +173,18 @@ export const EnhancedAudioPlayer: React.FC<EnhancedAudioPlayerProps> = ({
           if (playbackState.isFinished) {
             console.log('[EnhancedAudioPlayer] Audio finished - resetting for replay');
             await audioPlaybackService.cleanup();
-            if (highlightingInitialized) {
+            if (highlightingInitializedRef.current) {
               audioHighlightingService.stopHighlighting();
               setHighlightingInitialized(false);
+              highlightingInitializedRef.current = false; // update ref immediately so logic below sees it
             }
           }
           // Initialize highlighting before playing (only if enabled AND timing data exists)
           // Read the CURRENT store value directly to avoid stale hook values during rehydration
           const currentSettings = useSettingsStore.getState().settings;
           const enableHighlighting = currentSettings.audio.enableAudioHighlighting;
-          const shouldInitializeHighlighting = !highlightingInitialized && enableHighlighting;
+          // Use ref (not state) — state update from setHighlightingInitialized above is async
+          const shouldInitializeHighlighting = !highlightingInitializedRef.current && enableHighlighting;
 
           console.log('[EnhancedAudioPlayer] Highlighting decision:', {
             highlightingInitialized,
@@ -186,6 +207,7 @@ export const EnhancedAudioPlayer: React.FC<EnhancedAudioPlayerProps> = ({
                 },
               });
               setHighlightingInitialized(true);
+              highlightingInitializedRef.current = true;
             } catch (error) {
               // Log as warning (not error) since this is expected when timing data isn't available yet
               console.warn('[EnhancedAudioPlayer] Highlighting unavailable (timing data not ready):', error);

@@ -15,7 +15,6 @@ import {
   HighlightingState,
   HighlightingOptions,
   WordTiming,
-  WordChangeEvent,
   HighlightingConfig,
   DEFAULT_HIGHLIGHTING_CONFIG,
   HighlightingStateListener,
@@ -48,7 +47,7 @@ export class AudioHighlightingService {
   private stateListeners: Set<HighlightingStateListener> = new Set();
 
   // Callbacks
-  private onWordChangeCallback?: (event: WordChangeEvent) => void;
+  private onWordChangeCallback?: (wordIndex: number, word: WordTiming) => void;
   private onCompleteCallback?: () => void;
   private onErrorCallback?: (error: Error) => void;
 
@@ -140,7 +139,9 @@ export class AudioHighlightingService {
       this.activeReadingId = options.readingId;
       this.isStarting = false;
 
-      console.log(`[AudioHighlighting] ✅ Started with ${this.timingData.words.length} words`);
+      const firstWord = this.timingData.words[0];
+      const lastWord = this.timingData.words[this.timingData.words.length - 1];
+      console.log(`[AudioHighlighting] ✅ Started: ${this.timingData.words.length} words, charOffset ${firstWord?.charOffset}–${lastWord ? lastWord.charOffset + lastWord.charLength : '?'}, durationMs=${this.timingData.durationMs}`);
     } catch (error) {
       this.isStarting = false;
       this.activeReadingId = null;
@@ -198,14 +199,7 @@ export class AudioHighlightingService {
       this.currentState.currentWord = wordIndex >= 0 ? this.timingData.words[wordIndex] : undefined;
 
       if (wordIndex >= 0 && this.lastEmittedWordIndex >= 0) {
-        // Emit word change event
-        const event: WordChangeEvent = {
-          word: this.timingData.words[wordIndex],
-          previousWord: this.timingData.words[this.lastEmittedWordIndex],
-          positionMs,
-          timestamp: Date.now(),
-        };
-        this.onWordChangeCallback?.(event);
+        this.onWordChangeCallback?.(wordIndex, this.timingData.words[wordIndex]);
       }
 
       this.lastEmittedWordIndex = wordIndex;

@@ -74,3 +74,41 @@ export const validateRequired = (value: string, fieldName: string): ValidationRe
 
   return { isValid: true };
 };
+
+// Sanitize display name — strips HTML tags, control characters, trims whitespace
+export const sanitizeDisplayName = (name: string): string => {
+  return name
+    .replace(/<[^>]*>/g, '')         // strip HTML tags
+    .replace(/[<>"'&]/g, '')         // strip dangerous characters
+    .replace(/[\x00-\x1F\x7F]/g, '') // strip control characters
+    .trim()
+    .slice(0, 50);                   // enforce max length
+};
+
+export const validateDisplayName = (name: string): ValidationResult => {
+  const sanitized = sanitizeDisplayName(name);
+  if (!sanitized) {
+    return { isValid: false, error: 'Name is required' };
+  }
+  if (sanitized.length < 2) {
+    return { isValid: false, error: 'Name must be at least 2 characters' };
+  }
+  return { isValid: true };
+};
+
+// Sanitize gift message — strips HTML, limits length
+export const sanitizeGiftMessage = (message: string): string => {
+  return message
+    .replace(/<[^>]*>/g, '')         // strip HTML tags
+    .replace(/[<>"'&]/g, '')         // strip dangerous characters
+    .replace(/[\x00-\x1F\x7F]/g, '') // strip control characters
+    .trim()
+    .slice(0, 300);                  // enforce max length
+};
+
+export const validateGiftMessage = (message: string): ValidationResult => {
+  if (message.length > 300) {
+    return { isValid: false, error: 'Message must be 300 characters or less' };
+  }
+  return { isValid: true };
+};

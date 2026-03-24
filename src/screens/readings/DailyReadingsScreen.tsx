@@ -5,6 +5,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   Modal,
+  Platform,
   useWindowDimensions,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -175,24 +176,36 @@ export const DailyReadingsScreen: React.FC<DailyReadingsScreenProps> = ({
 
   const currentReading = getCurrentReading();
 
-  // Explicit height fixes Samsung Android 11 broken flex:1 chain.
-  // Using height + flex:0 forces Yoga to use this as the main dimension,
-  // so all flex:1 children (scriptureContainer, ScrollView) get correct heights.
-  // 240px accounts for header (~115px) + audio player container (~125px).
-  const contentHeight = Math.max(windowHeight - insets.top - insets.bottom - tabBarHeight - 240, 300);
+  // Samsung Android 11 (API 30) has a broken flex:1 chain in Yoga — we fix it with
+  // an explicit height. Android 12+ (API 31) and all iOS use proper flex layout.
+  // Galaxy S26 (Android 15) needs flex:1 — the explicit height over-estimates and
+  // clips the Translate/Practice buttons and audio player off-screen.
+  const isOldAndroid = Platform.OS === 'android' && typeof Platform.Version === 'number' && Platform.Version <= 30;
+  const contentHeight = isOldAndroid
+    ? Math.max(windowHeight - insets.top - tabBarHeight - 240, 300)
+    : undefined;
 
   // Dynamic styles with theme colors
   const dynamicStyles = {
-    content: {
-      ...styles.content,
-      backgroundColor: colors.background.primary,
-      height: contentHeight,
-      flex: 0,
-    },
+    content: isOldAndroid
+      ? {
+          ...styles.content,
+          backgroundColor: colors.background.primary,
+          height: contentHeight,
+          flex: 0 as const,
+        }
+      : {
+          ...styles.content,
+          backgroundColor: colors.background.primary,
+          flex: 1 as const,
+        },
   };
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.primary.blue }]}>
+    <SafeAreaView
+      style={[styles.container, { backgroundColor: colors.primary.blue }]}
+      edges={['top', 'left', 'right']}
+    >
         {/* Header */}
         <View style={styles.header}>
           <View style={styles.headerTop}>

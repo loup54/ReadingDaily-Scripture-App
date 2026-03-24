@@ -8,22 +8,42 @@
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
 import { google } from 'googleapis';
+import { checkRateLimit } from './rateLimit';
+
+const PACKAGE_NAME = 'com.readingdaily.scripture';
+
+const VALID_GOOGLE_PRODUCT_IDS = new Set([
+  'com.readingdaily.lifetime.access',
+  'com.readingdaily.basic.monthly',
+  'com.readingdaily.basic.yearly',
+]);
 
 /**
  * Validate Google Play Purchase Token
  * Called by client after completing purchase
  */
 export const validateGooglePurchase = functions.https.onCall(async (data, context) => {
-  const { packageName, productId, purchaseToken } = data;
+  const { productId, purchaseToken } = data;
 
-  if (!packageName || !productId || !purchaseToken) {
+  if (!productId || !purchaseToken) {
     throw new functions.https.HttpsError(
       'invalid-argument',
-      'Package name, product ID, and purchase token are required'
+      'Product ID and purchase token are required'
     );
   }
 
-  const userId = context.auth?.uid || 'anonymous';
+  if (!VALID_GOOGLE_PRODUCT_IDS.has(productId)) {
+    throw new functions.https.HttpsError('invalid-argument', 'Invalid product ID');
+  }
+
+  const userId = context.auth?.uid;
+  if (!userId) {
+    throw new functions.https.HttpsError('unauthenticated', 'Authentication required');
+  }
+
+  await checkRateLimit(userId, 'validateGooglePurchase', 10);
+
+  const packageName = PACKAGE_NAME;
 
   try {
     // Load service account from file

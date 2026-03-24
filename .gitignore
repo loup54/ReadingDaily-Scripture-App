@@ -16,6 +16,8 @@ build/
 .env
 .env.local
 .env.*.local
+.env.production
+python-functions/.env
 
 # IDE and editor settings
 .vscode/

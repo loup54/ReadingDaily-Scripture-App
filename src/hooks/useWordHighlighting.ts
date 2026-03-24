@@ -93,11 +93,10 @@ export function useWordHighlighting(
 
         if (cancelled) return;
 
-        // Subscribe to state changes — defer setState to next JS tick to
-        // prevent concurrent state updates crashing iOS new architecture (Fabric)
+        // Subscribe to state changes — direct setState, React 18 batches automatically
         const unsubscribe = audioHighlightingService.onStateChange(
           ((newState: HighlightingState) => {
-            setTimeout(() => setState(newState), 0);
+            setState(newState);
           }) as HighlightingStateListener,
         );
 
@@ -183,7 +182,7 @@ export function useWordHighlightingState(
 
   useEffect(() => {
     const unsubscribe = audioHighlightingService.onStateChange((newState) => {
-      setTimeout(() => setState(newState), 0);
+      setState(newState);
     });
 
     return () => {

@@ -165,7 +165,7 @@ export class AudioPlaybackService {
         {
           shouldPlay: true,
           rate: 1.0,
-          progressUpdateIntervalMillis: 500,
+          progressUpdateIntervalMillis: 100,
         },
         this.onPlaybackStatusUpdate.bind(this)
       );
@@ -218,7 +218,7 @@ export class AudioPlaybackService {
       clearInterval(this.pollTimer);
     }
 
-    console.log('[AudioPlaybackService] Starting playback polling every 500ms');
+    console.log('[AudioPlaybackService] Starting playback polling every 100ms');
 
     this.pollTimer = setInterval(async () => {
       if (!this.sound) {
@@ -251,7 +251,7 @@ export class AudioPlaybackService {
         clearInterval(this.pollTimer!);
         this.pollTimer = null;
       }
-    }, 500);
+    }, 100);
   }
 
   /**
