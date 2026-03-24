@@ -71,7 +71,7 @@ module.exports = {
       [
         "@sentry/react-native/expo",
         {
-          organization: "readingdaily",
+          organization: "ourenglishbest",
           project: "react-native"
         }
       ]
