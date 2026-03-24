@@ -1,5 +1,11 @@
+import * as Sentry from '@sentry/react-native';
 import { useEffect, useRef } from 'react';
 import { View, AppState, AppStateStatus } from 'react-native';
+
+Sentry.init({
+  dsn: 'https://5369c313a8933ba396469ab4e9c37708@o4511096847925248.ingest.de.sentry.io/4511096850481232',
+  tracesSampleRate: 0.2,
+});
 import { Slot } from 'expo-router';
 import Toast from 'react-native-toast-message';
 import { ThemeProvider } from '@/contexts/ThemeContext';
@@ -23,6 +29,7 @@ import { DevelopmentAuthHelper } from '@/services/auth/DevelopmentAuthHelper';
 // Temporarily disabled - requires @react-native-firebase/messaging package
 // import { FirebaseCloudMessagingService } from '@/services/notifications/FirebaseCloudMessagingService';
 import { ModalRenderer } from '@/components/ui/ModalRenderer';
+import { ErrorBoundary } from '@/components/common';
 
 /**
  * Deep Linking Configuration for Expo Router
@@ -349,6 +356,7 @@ export default function RootLayout() {
   }, [isDownloading, isSyncing]);
 
   return (
+    <ErrorBoundary>
     <ThemeProvider>
       <View style={{ flex: 1 }}>
         {/* Offline Indicator */}
@@ -383,5 +391,6 @@ export default function RootLayout() {
         <Toast config={toastConfig} />
       </View>
     </ThemeProvider>
+    </ErrorBoundary>
   );
 }

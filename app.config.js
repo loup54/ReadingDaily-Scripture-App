@@ -67,6 +67,13 @@ module.exports = {
           color: "#7C3AED",
           mode: "production"
         }
+      ],
+      [
+        "@sentry/react-native/expo",
+        {
+          organization: "readingdaily",
+          project: "react-native"
+        }
       ]
     ],
     extra: {
