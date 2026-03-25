@@ -7,9 +7,7 @@ module.exports = {
     slug: "readingdaily-scripture-app",
     scheme: "readingdaily",
     version: "1.1.30",
-    runtimeVersion: {
-      policy: "appVersion"
-    },
+    runtimeVersion: "1.1.30",
     updates: {
       url: "https://u.expo.dev/0c4f39f5-184d-4af5-8dca-2cc4d52675e6",
       enabled: true,
