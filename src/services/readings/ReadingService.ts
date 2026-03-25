@@ -115,25 +115,24 @@ export class ReadingService {
       if (docSnap.exists()) {
         const data = docSnap.data();
 
-        // Log what fields are in the document
-        console.log('[ReadingService] Firestore document fields:', Object.keys(data));
-        console.log('[ReadingService] Has gospel?', !!data.gospel);
-        console.log('[ReadingService] Has secondReading?', !!data.secondReading);
+        // For today's reading only, check freshness (< 24h) so stale data gets
+        // replaced on the next scrape cycle. Future and past dates don't change
+        // once published, so accept them regardless of age.
+        const isToday = requestedDate.getTime() === today.getTime();
 
-        // Check if data is fresh (less than 24 hours old)
-        if (data.metadata?.scrapedAt) {
+        if (isToday && data.metadata?.scrapedAt) {
           const scrapedAt = new Date(data.metadata.scrapedAt);
           const ageHours = (Date.now() - scrapedAt.getTime()) / (1000 * 60 * 60);
 
-          if (ageHours < 24) {
+          if (ageHours >= 24) {
+            console.warn(`⚠️ Today's Firestore reading is stale (${ageHours.toFixed(1)}h old), falling back`);
+            // fall through to bundled JSON / demo
+          } else {
             console.log(`✅ Using Firestore reading (${ageHours.toFixed(1)}h old)`);
             return convertFirestoreReading(data, date);
-          } else {
-            console.warn(`⚠️ Firestore reading is stale (${ageHours.toFixed(1)}h old)`);
           }
         } else {
-          // No metadata, but use it anyway
-          console.log('✅ Using Firestore reading (no timestamp)');
+          console.log(`✅ Using Firestore reading for ${dateStr}`);
           return convertFirestoreReading(data, date);
         }
       } else {
