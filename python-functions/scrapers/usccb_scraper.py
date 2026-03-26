@@ -135,24 +135,28 @@ class USCCBScraper:
                     return None
                 section = section.find_next('div', class_='content-body')
             elif reading_type == 'gospel':
-                # Find 'Gospel' heading but NOT 'Verse Before the Gospel' or 'Acclamation'
+                # Find 'Gospel' heading but NOT 'Verse Before the Gospel' or 'Acclamation'.
+                # Use get_text() instead of string= so headings with child elements (a, span)
+                # are matched correctly.
                 section = None
-                all_gospel_h3s = soup.find_all('h3', string=re.compile('Gospel', re.I))
-                for h3 in all_gospel_h3s:
+                all_h3s = soup.find_all('h3')
+                for h3 in all_h3s:
                     h3_text = h3.get_text(strip=True).lower()
-                    if 'verse before' not in h3_text and 'acclamation' not in h3_text:
+                    if 'gospel' in h3_text and 'verse before' not in h3_text and 'acclamation' not in h3_text:
                         section = h3.find_next('div', class_='content-body')
                         break
                 if not section:
-                    # Fallback: try the last content-body section, but only if it has
-                    # substantial text (>= 300 chars) — avoids picking up the short
-                    # "Verse Before the Gospel" acclamation as the gospel reading.
+                    # Fallback: largest content-body section (gospel is always the longest)
                     sections = soup.find_all('div', class_='content-body')
-                    for candidate in reversed(sections):
+                    best = None
+                    best_len = 0
+                    for candidate in sections:
                         candidate_text = candidate.get_text(separator=' ', strip=True)
-                        if len(candidate_text) >= 300:
-                            section = candidate
-                            break
+                        if len(candidate_text) > best_len:
+                            best_len = len(candidate_text)
+                            best = candidate
+                    if best_len >= 300:
+                        section = best
 
             if not section:
                 return None
