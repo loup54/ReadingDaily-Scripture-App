@@ -135,22 +135,45 @@ class USCCBScraper:
                     return None
                 section = section.find_next('div', class_='content-body')
             elif reading_type == 'gospel':
-                # Find 'Gospel' heading but NOT 'Verse Before the Gospel' or 'Acclamation'.
-                # Use get_text() instead of string= so headings with child elements (a, span)
-                # are matched correctly.
+                # Strategy: explicitly find and skip the "Verse Before the Gospel" / Acclamation
+                # block, then take the content-body that belongs to the Gospel heading.
+                # This is robust to HTML structure changes because we exclude the known
+                # non-gospel section rather than trying to guess which heading is correct.
                 section = None
                 all_h3s = soup.find_all('h3')
+
+                # Collect content-body divs that belong to non-gospel headings so we can exclude them
+                excluded_sections = set()
+                for h3 in all_h3s:
+                    h3_text = h3.get_text(strip=True).lower()
+                    if 'verse before' in h3_text or 'acclamation' in h3_text:
+                        bad = h3.find_next('div', class_='content-body')
+                        if bad:
+                            excluded_sections.add(id(bad))
+
+                # Now find the Gospel heading and take its content-body, skipping excluded ones
                 for h3 in all_h3s:
                     h3_text = h3.get_text(strip=True).lower()
                     if 'gospel' in h3_text and 'verse before' not in h3_text and 'acclamation' not in h3_text:
-                        section = h3.find_next('div', class_='content-body')
-                        break
+                        candidate = h3.find_next('div', class_='content-body')
+                        if candidate and id(candidate) not in excluded_sections:
+                            section = candidate
+                            break
+                        # If the next content-body is the excluded verse, look for the one after
+                        elif candidate and id(candidate) in excluded_sections:
+                            next_candidate = candidate.find_next('div', class_='content-body')
+                            if next_candidate and id(next_candidate) not in excluded_sections:
+                                section = next_candidate
+                                break
+
                 if not section:
-                    # Fallback: largest content-body section (gospel is always the longest)
+                    # Last resort: largest content-body not in excluded set (gospel is always longest)
                     sections = soup.find_all('div', class_='content-body')
                     best = None
                     best_len = 0
                     for candidate in sections:
+                        if id(candidate) in excluded_sections:
+                            continue
                         candidate_text = candidate.get_text(separator=' ', strip=True)
                         if len(candidate_text) > best_len:
                             best_len = len(candidate_text)
