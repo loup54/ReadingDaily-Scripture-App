@@ -1,5 +1,29 @@
 # ReadingDaily Scripture App — Claude Context
 
+## Development rules (agreed 2026-03-26)
+
+### Minimise store builds
+OTA updates are live from v1.1.31. All JS/UI changes ship via `eas update --channel production --message "..."` — no store build required. A new store build is only needed for native module changes or Expo SDK upgrades. **Always ask "is this native?" before triggering a build.** If the answer is no, use OTA.
+
+### Protect stable code
+Before touching any existing feature:
+1. **Feature flags first** — new work goes behind a boolean in a config file (e.g. `ENABLE_LITURGICAL_THEMES = false`). Build and test with flag on, ship with flag off, enable via OTA once confident. A broken feature cannot break the reading.
+2. **New code in new files** — new services, themes, and components go in new files. Existing files (colors.ts, ThemeContext.tsx, screen files) are wired in minimally, not rewritten.
+3. **Preserve existing theme** — before changing colors.ts, snapshot current values as `classicTheme` export. One-line rollback if needed.
+4. **Run tests before and after each phase** — existing test suite must pass before starting and after completing each change.
+
+### Visual refresh phases (Project Vespers)
+All phases are pure JS — ship via OTA, no store builds needed.
+1. **Liturgical colour themes** — seasonal palette + intensification toward liturgical highpoints
+2. **Tab bar simplification** — collapse 5 tabs to 3 (Readings · Practice · Profile)
+3. **Grace feature** — remove broken-streak UI, return = seasonal colour + reading waiting
+4. **Completion state ("Offered")** — post-audio quiet hold, "Stay with a verse?" prompt
+- Each phase independently shippable and flag-gated
+- Colours intensify as season approaches its highpoint (lerp keyed to days_remaining/season_length)
+- Ordinary Time is intentionally flat — meaningful contrast to the peaks
+
+---
+
 ## What this app is
 Catholic daily Mass readings with audio playback, word-level highlighting, pronunciation practice, and translation. Primary audience: non-native English speakers wanting to engage with scripture.
 
