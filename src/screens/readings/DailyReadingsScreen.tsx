@@ -58,6 +58,7 @@ export const DailyReadingsScreen: React.FC<DailyReadingsScreenProps> = ({
   selectedDate = new Date(),
 }) => {
   const { isOnline } = useOfflineStore();
+  const { liturgical } = useTheme();
   const { loading } = useReadingStore();
   const { settings: appSettings, addDiscoveredFeature, hasDiscoveredFeature } = useSettingsStore();
   const [isReadingCached, setIsReadingCached] = useState(false);
@@ -203,7 +204,7 @@ export const DailyReadingsScreen: React.FC<DailyReadingsScreenProps> = ({
 
   return (
     <SafeAreaView
-      style={[styles.container, { backgroundColor: colors.primary.blue }]}
+      style={[styles.container, { backgroundColor: liturgical ? liturgical.theme.accent : colors.primary.blue }]}
       edges={['top', 'left', 'right']}
     >
         {/* Header */}
@@ -233,7 +234,9 @@ export const DailyReadingsScreen: React.FC<DailyReadingsScreenProps> = ({
             />
           </View>
 
-          <Text style={[styles.subtitle, { color: colors.text.white }]}>Practice English with Sacred Scripture</Text>
+          <Text style={[styles.subtitle, { color: colors.text.white, opacity: 0.85 }]}>
+            {liturgical ? liturgical.moment.label : 'Practice English with Sacred Scripture'}
+          </Text>
         </View>
 
         {/* Main Content */}

@@ -169,3 +169,205 @@ export const Colors = {
 };
 
 export type ColorTheme = typeof lightTheme;
+
+// ─── Liturgical Season Themes ────────────────────────────────────────────────
+// Each season defines a base colour set (intensity 0.0) and a peak colour set
+// (intensity 1.0). The UI lerps between them based on LiturgicalThemeService.
+// These are ADDITIVE — they overlay the existing light/dark theme accents only.
+// Existing Colors export is NOT modified.
+
+export interface LiturgicalSeasonTheme {
+  /** Background gradient colours [top, bottom] */
+  backgroundGradient: [string, string];
+  /** Primary accent — buttons, active tab, highlights */
+  accent: string;
+  /** Subtle tint for cards and surfaces */
+  surfaceTint: string;
+  /** Tab bar background */
+  tabBackground: string;
+  /** Completion animation colour */
+  completionColor: string;
+  /** Season label text colour */
+  labelColor: string;
+}
+
+/** Lerp a hex colour between two values — used for intensity transitions */
+function lerpHex(a: string, b: string, t: number): string {
+  const ah = parseInt(a.slice(1), 16);
+  const bh = parseInt(b.slice(1), 16);
+  const ar = (ah >> 16) & 0xff, ag = (ah >> 8) & 0xff, ab = ah & 0xff;
+  const br = (bh >> 16) & 0xff, bg = (bh >> 8) & 0xff, bb = bh & 0xff;
+  const rr = Math.round(ar + (br - ar) * t);
+  const rg = Math.round(ag + (bg - ag) * t);
+  const rb = Math.round(ab + (bb - ab) * t);
+  return `#${((1 << 24) | (rr << 16) | (rg << 8) | rb).toString(16).slice(1)}`;
+}
+
+const liturgicalSeasonBase: Record<string, { base: LiturgicalSeasonTheme; peak: LiturgicalSeasonTheme }> = {
+  advent: {
+    base: {
+      backgroundGradient: ['#2D1B4E', '#1A1035'],
+      accent: '#7B5EA7',
+      surfaceTint: 'rgba(123, 94, 167, 0.08)',
+      tabBackground: '#1A1035',
+      completionColor: '#9B7EC8',
+      labelColor: '#C4A8E0',
+    },
+    peak: {
+      backgroundGradient: ['#4A1B7A', '#2D0D5C'],
+      accent: '#B088E8',
+      surfaceTint: 'rgba(176, 136, 232, 0.14)',
+      tabBackground: '#2D0D5C',
+      completionColor: '#D4B8FF',
+      labelColor: '#E0CCFF',
+    },
+  },
+  christmas: {
+    base: {
+      backgroundGradient: ['#1A3A1A', '#0F2A1A'],
+      accent: '#C9A227',
+      surfaceTint: 'rgba(201, 162, 39, 0.08)',
+      tabBackground: '#0F2A1A',
+      completionColor: '#F0C040',
+      labelColor: '#F0C040',
+    },
+    peak: {
+      backgroundGradient: ['#1A3A1A', '#0F2A1A'],
+      accent: '#C9A227',
+      surfaceTint: 'rgba(201, 162, 39, 0.08)',
+      tabBackground: '#0F2A1A',
+      completionColor: '#F0C040',
+      labelColor: '#F0C040',
+    },
+  },
+  lent: {
+    base: {
+      backgroundGradient: ['#2A2030', '#1A1525'],
+      accent: '#7A5C7A',
+      surfaceTint: 'rgba(122, 92, 122, 0.08)',
+      tabBackground: '#1A1525',
+      completionColor: '#9A7C9A',
+      labelColor: '#B89AB8',
+    },
+    peak: {
+      backgroundGradient: ['#3A1515', '#250A0A'],
+      accent: '#8B2020',
+      surfaceTint: 'rgba(139, 32, 32, 0.10)',
+      tabBackground: '#250A0A',
+      completionColor: '#A83030',
+      labelColor: '#C84848',
+    },
+  },
+  'holy-week': {
+    base: {
+      backgroundGradient: ['#3A1515', '#250A0A'],
+      accent: '#8B2020',
+      surfaceTint: 'rgba(139, 32, 32, 0.10)',
+      tabBackground: '#250A0A',
+      completionColor: '#A83030',
+      labelColor: '#C84848',
+    },
+    peak: {
+      backgroundGradient: ['#1A0505', '#0D0000'],
+      accent: '#6B0000',
+      surfaceTint: 'rgba(107, 0, 0, 0.12)',
+      tabBackground: '#0D0000',
+      completionColor: '#8B1010',
+      labelColor: '#A82828',
+    },
+  },
+  easter: {
+    base: {
+      backgroundGradient: ['#1A3A20', '#0F2515'],
+      accent: '#C9A227',
+      surfaceTint: 'rgba(201, 162, 39, 0.08)',
+      tabBackground: '#0F2515',
+      completionColor: '#E8C840',
+      labelColor: '#E8C840',
+    },
+    peak: {
+      backgroundGradient: ['#2A1500', '#1A0D00'],
+      accent: '#E05C10',
+      surfaceTint: 'rgba(224, 92, 16, 0.10)',
+      tabBackground: '#1A0D00',
+      completionColor: '#FF7A30',
+      labelColor: '#FF9050',
+    },
+  },
+  pentecost: {
+    base: {
+      backgroundGradient: ['#3A1500', '#250900'],
+      accent: '#E05C10',
+      surfaceTint: 'rgba(224, 92, 16, 0.12)',
+      tabBackground: '#250900',
+      completionColor: '#FF7A30',
+      labelColor: '#FF9050',
+    },
+    peak: {
+      backgroundGradient: ['#3A1500', '#250900'],
+      accent: '#E05C10',
+      surfaceTint: 'rgba(224, 92, 16, 0.12)',
+      tabBackground: '#250900',
+      completionColor: '#FF7A30',
+      labelColor: '#FF9050',
+    },
+  },
+  'ordinary-time': {
+    base: {
+      backgroundGradient: ['#1A2A1A', '#101D10'],
+      accent: '#4A7A4A',
+      surfaceTint: 'rgba(74, 122, 74, 0.08)',
+      tabBackground: '#101D10',
+      completionColor: '#5A9A5A',
+      labelColor: '#7ABE7A',
+    },
+    peak: {
+      backgroundGradient: ['#1A2A1A', '#101D10'],
+      accent: '#4A7A4A',
+      surfaceTint: 'rgba(74, 122, 74, 0.08)',
+      tabBackground: '#101D10',
+      completionColor: '#5A9A5A',
+      labelColor: '#7ABE7A',
+    },
+  },
+  'ordinary-time-early': {
+    base: {
+      backgroundGradient: ['#1A2A1A', '#101D10'],
+      accent: '#4A7A4A',
+      surfaceTint: 'rgba(74, 122, 74, 0.08)',
+      tabBackground: '#101D10',
+      completionColor: '#5A9A5A',
+      labelColor: '#7ABE7A',
+    },
+    peak: {
+      backgroundGradient: ['#1A2A1A', '#101D10'],
+      accent: '#4A7A4A',
+      surfaceTint: 'rgba(74, 122, 74, 0.08)',
+      tabBackground: '#101D10',
+      completionColor: '#5A9A5A',
+      labelColor: '#7ABE7A',
+    },
+  },
+};
+
+/**
+ * Returns the interpolated liturgical theme for the given season and intensity.
+ * intensity: 0.0 = start of season, 1.0 = highpoint.
+ */
+export function getLiturgicalTheme(season: string, intensity: number): LiturgicalSeasonTheme {
+  const entry = liturgicalSeasonBase[season] ?? liturgicalSeasonBase['ordinary-time'];
+  const { base, peak } = entry;
+  const t = Math.max(0, Math.min(1, intensity));
+
+  return {
+    backgroundGradient: [
+      lerpHex(base.backgroundGradient[0], peak.backgroundGradient[0], t),
+      lerpHex(base.backgroundGradient[1], peak.backgroundGradient[1], t),
+    ],
+    accent: lerpHex(base.accent, peak.accent, t),
+    surfaceTint: t < 0.5 ? base.surfaceTint : peak.surfaceTint,
+    tabBackground: lerpHex(base.tabBackground, peak.tabBackground, t),
+    completionColor: lerpHex(base.completionColor, peak.completionColor, t),
+    labelColor: lerpHex(base.labelColor, peak.labelColor, t),
+  };
+}
