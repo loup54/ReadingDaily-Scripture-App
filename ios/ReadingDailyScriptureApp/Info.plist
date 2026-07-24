@@ -19,7 +19,7 @@
     <key>CFBundlePackageType</key>
     <string>$(PRODUCT_BUNDLE_PACKAGE_TYPE)</string>
     <key>CFBundleShortVersionString</key>
-    <string>1.1.31</string>
+    <string>1.1.33</string>
     <key>CFBundleSignature</key>
     <string>????</string>
     <key>CFBundleURLTypes</key>
@@ -39,7 +39,7 @@
       </dict>
     </array>
     <key>CFBundleVersion</key>
-    <string>150</string>
+    <string>159</string>
     <key>ITSAppUsesNonExemptEncryption</key>
     <false/>
     <key>LSMinimumSystemVersion</key>
@@ -56,7 +56,7 @@
     <key>NSFaceIDUsageDescription</key>
     <string>Allow $(PRODUCT_NAME) to use Face ID</string>
     <key>NSMicrophoneUsageDescription</key>
-    <string>This app needs access to your microphone to practice pronunciation of sacred scripture.</string>
+    <string>This app needs microphone access to practice pronunciation of sacred scripture readings.</string>
     <key>NSUserNotificationsUsageDescription</key>
     <string>This app needs permission to send you daily reading reminders to help you maintain your spiritual practice.</string>
     <key>RCTNewArchEnabled</key>

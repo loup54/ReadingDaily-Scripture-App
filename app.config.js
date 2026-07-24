@@ -6,7 +6,7 @@ module.exports = {
     name: "ReadingDaily Scripture App",
     slug: "readingdaily-scripture-app",
     scheme: "readingdaily",
-    version: "1.1.32",
+    version: "1.1.33",
     runtimeVersion: "1.1.32",
     updates: {
       url: "https://u.expo.dev/0c4f39f5-184d-4af5-8dca-2cc4d52675e6",
@@ -25,7 +25,7 @@ module.exports = {
     },
     ios: {
       bundleIdentifier: "com.readingdaily.scripture",
-      buildNumber: "158",
+      buildNumber: "159",
       appleTeamId: "A696BUAT9R",
       entitlements: {
         "com.apple.security.application-groups": ["group.com.readingdaily.scripture"]
