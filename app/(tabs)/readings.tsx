@@ -7,7 +7,7 @@ import { UpgradePrompt } from '@/components/trial';
 import { ReadingService } from '@/services/readings/ReadingService';
 import { DailyReadings, ReadingType } from '@/types/reading.types';
 import { useTrialStore } from '@/stores/useTrialStore';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Colors } from '@constants';
 import { ErrorBoundary } from '@/components/common';
 import { useTheme } from '@/hooks/useTheme';
@@ -24,6 +24,7 @@ function ReadingsTabContent() {
 
   const router = useRouter();
   const { colors, isDark } = useTheme();
+  const params = useLocalSearchParams<{ action?: string }>();
 
   const {
     isActive,
@@ -216,6 +217,7 @@ function ReadingsTabContent() {
         onSettingsPress={handleSettingsPress}
         onCalendarPress={handleCalendarPress}
         selectedDate={selectedDate}
+        autoPlayAudio={params.action === 'listen'}
       />
 
       {/* Calendar Modal */}

@@ -10,6 +10,7 @@ import { doc, getDoc } from 'firebase/firestore';
 import bundledReadings from '@/assets/readings-bundle.json';
 import { ReadingDownloadService } from '@/services/offline/ReadingDownloadService';
 import { NetworkStatusService } from '@/services/network/NetworkStatusService';
+import { updateWidgetData } from '@/services/widget/WidgetDataService';
 
 /**
  * Format date to YYYY-MM-DD in local timezone
@@ -270,7 +271,11 @@ export class ReadingService {
    */
   static async getTodayReadings(): Promise<DailyReadings> {
     const today = new Date();
-    return this.getDailyReadings(today);
+    const readings = await this.getDailyReadings(today);
+    updateWidgetData(readings).catch((err) => {
+      console.warn('[ReadingService] Widget data mirror failed:', err);
+    });
+    return readings;
   }
 
   /**

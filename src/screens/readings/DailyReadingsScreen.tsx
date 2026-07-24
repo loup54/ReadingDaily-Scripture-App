@@ -44,6 +44,8 @@ interface DailyReadingsScreenProps {
   onSettingsPress?: () => void;
   onCalendarPress?: () => void;
   selectedDate?: Date;
+  /** From the widget's Listen deep link — auto-starts audio on the active reading. */
+  autoPlayAudio?: boolean;
 }
 
 export const DailyReadingsScreen: React.FC<DailyReadingsScreenProps> = ({
@@ -56,6 +58,7 @@ export const DailyReadingsScreen: React.FC<DailyReadingsScreenProps> = ({
   onSettingsPress,
   onCalendarPress,
   selectedDate = new Date(),
+  autoPlayAudio,
 }) => {
   const { isOnline } = useOfflineStore();
   const { liturgical } = useTheme();
@@ -293,6 +296,7 @@ export const DailyReadingsScreen: React.FC<DailyReadingsScreenProps> = ({
           <EnhancedAudioPlayer
             reading={currentReading}
             onPlaybackComplete={onPlaybackComplete}
+            autoPlay={autoPlayAudio}
           />
         </View>
 

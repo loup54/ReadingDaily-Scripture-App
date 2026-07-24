@@ -6,7 +6,8 @@
 import { create } from 'zustand';
 import { DailyReadings, ReadingType } from '../types/reading.types';
 import { ReadingService } from '../services/readings/ReadingService';
-import { addDays } from '../utils/timezone';
+import { addDays, isToday } from '../utils/timezone';
+import { updateWidgetData } from '../services/widget/WidgetDataService';
 
 interface ReadingStoreState {
   currentDate: Date;
@@ -37,6 +38,12 @@ export const useReadingStore = create<ReadingStoreState>((set, get) => ({
 
     try {
       const readings = await ReadingService.getDailyReadings(date);
+
+      if (isToday(date)) {
+        updateWidgetData(readings).catch((err) => {
+          console.warn('[useReadingStore] Widget data mirror failed:', err);
+        });
+      }
 
       set({
         readings,

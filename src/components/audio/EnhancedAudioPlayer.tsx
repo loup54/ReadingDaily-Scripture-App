@@ -30,6 +30,8 @@ import type { Reading } from '@/types/reading.types';
 export interface EnhancedAudioPlayerProps {
   reading: Reading;
   onPlaybackComplete?: () => void;
+  /** Start playback automatically once, e.g. when opened via the widget's Listen deep link. */
+  autoPlay?: boolean;
 }
 
 /**
@@ -39,6 +41,7 @@ export interface EnhancedAudioPlayerProps {
 export const EnhancedAudioPlayer: React.FC<EnhancedAudioPlayerProps> = ({
   reading,
   onPlaybackComplete,
+  autoPlay,
 }) => {
   const { colors } = useTheme();
   const router = useRouter();
@@ -252,6 +255,17 @@ export const EnhancedAudioPlayer: React.FC<EnhancedAudioPlayerProps> = ({
       );
     }
   };
+
+  // Auto-start playback once when opened via the widget's Listen deep link.
+  // Guarded by a ref (not state) so it fires exactly once even if this
+  // component re-renders while autoPlay stays true.
+  const autoPlayFiredRef = useRef(false);
+  useEffect(() => {
+    if (autoPlay && !autoPlayFiredRef.current) {
+      autoPlayFiredRef.current = true;
+      handlePlayPause();
+    }
+  }, [autoPlay, reading.id]);
 
   /**
    * Handle speed change

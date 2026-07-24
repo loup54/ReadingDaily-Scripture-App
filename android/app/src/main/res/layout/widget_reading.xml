@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:background="#1A2A1A">
+
+    <TextView
+        android:id="@+id/widget_date"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="#B3FFFFFF"
+        android:textSize="12sp"
+        android:text="Fri, Jul 24" />
+
+    <TextView
+        android:id="@+id/widget_season_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:textColor="#7ABE7A"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:maxLines="2"
+        android:text="Week 9 in Ordinary Time" />
+
+    <TextView
+        android:id="@+id/widget_reading_reference"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:textColor="#99FFFFFF"
+        android:textSize="11sp"
+        android:text="" />
+
+    <TextView
+        android:id="@+id/widget_reading_excerpt"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginTop="2dp"
+        android:textColor="#E6FFFFFF"
+        android:textSize="12sp"
+        android:maxLines="4"
+        android:ellipsize="end"
+        android:text="" />
+
+    <TextView
+        android:id="@+id/widget_listen_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:textColor="#4A7A4A"
+        android:textSize="12sp"
+        android:textStyle="bold"
+        android:visibility="gone"
+        android:text="▶ Listen" />
+
+</LinearLayout>

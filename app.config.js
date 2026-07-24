@@ -26,6 +26,10 @@ module.exports = {
     ios: {
       bundleIdentifier: "com.readingdaily.scripture",
       buildNumber: "158",
+      appleTeamId: "A696BUAT9R",
+      entitlements: {
+        "com.apple.security.application-groups": ["group.com.readingdaily.scripture"]
+      },
       splash: {
         image: "./assets/splash.png",
         resizeMode: "contain",
@@ -56,7 +60,7 @@ module.exports = {
         "expo-build-properties",
         {
           ios: {
-            deploymentTarget: "15.1",
+            deploymentTarget: "17.0",
             flipper: false
           },
           android: {
@@ -81,7 +85,8 @@ module.exports = {
           organization: "ourenglishbest",
           project: "react-native"
         }
-      ]
+      ],
+      "@bacons/apple-targets"
     ],
     extra: {
       eas: {
