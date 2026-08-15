@@ -100,11 +100,13 @@ eas update --channel production --message "description of fix"
 
 **iOS — critical: bare workflow requires updating TWO places for version:**
 1. `app.config.js` → bump `version` and `runtimeVersion` (must match)
-2. `ios/ReadingDailyScriptureApp/Info.plist` → bump `CFBundleShortVersionString`
+2. `ios/ReadingDailyScriptureApp/Info.plist` → bump `CFBundleShortVersionString`, and `Supporting/Expo.plist`'s `EXUpdatesRuntimeVersion` (bare workflow doesn't always regen this automatically, and if it does it can regen a stale value — check it explicitly)
 3. `eas build:version:set --platform ios --profile production` — interactive, type new build number
 4. `eas build --platform ios --profile production`
-5. `eas submit --platform ios --profile production --latest`
+5. `eas submit --platform ios --profile production --latest --no-wait` — same CLI-hang risk as Android, use `--no-wait`
 6. App Store Connect → create new version → attach build → Submit for Review
+
+**Do the version bump BEFORE building, not after (2026-08-15 lesson):** a build's marketing version string (`CFBundleShortVersionString`) is baked in at build time and can never be changed post-hoc. App Store Connect only lets you attach a build to an App Store version whose string matches *exactly* — if you create a new App Store Connect version (e.g. 1.1.34) after already building with the old string (1.1.33) still baked in, the build picker will be silently empty with no explanation, because that build genuinely isn't eligible. If the *previous* version is already "Ready for Distribution" (Apple-approved, awaiting release), its build is permanently locked — you can't swap it retroactively either. Confirm `app.config.js`'s `version` matches the App Store Connect version you're about to create BEFORE running `eas build`.
 
 **Android:**
 1. `eas build:version:set --platform android --profile production` — interactive, type new versionCode
