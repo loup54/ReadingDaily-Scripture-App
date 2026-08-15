@@ -84,7 +84,10 @@
     "typescript": "^5.3.3"
   },
   "jest": {
-    "preset": "jest-expo"
+    "preset": "jest-expo",
+    "setupFilesAfterEnv": [
+      "@testing-library/react-native/extend-expect"
+    ]
   },
   "private": true,
   "engines": {
