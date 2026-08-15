@@ -27,5 +27,10 @@
       "@locales/*": ["src/locales/*"]
     }
   },
-  "extends": "expo/tsconfig.base"
+  "extends": "expo/tsconfig.base",
+  "exclude": [
+    "node_modules",
+    "functions",
+    "functions-python-backup"
+  ]
 }
