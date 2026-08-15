@@ -2,6 +2,14 @@
 
 ## Pending
 
+### Type-check debt (found 2026-08-15, `verify.sh` added — see git log `7b0e868`)
+`npx tsc --noEmit` went from ~785 to 649 errors after fixing an unrelated parse bug that had been masking the real count, plus a jest-native matcher type gap (git log `e4a3676`). Remaining, parked, not urgent (doesn't block builds/OTA — RN doesn't enforce types at runtime):
+- [ ] Theme key mismatches (~50 errors, 10 files) — real call-site bugs, not a stale type def. `theme.typography.title` doesn't exist (`Typography` in `src/constants/typography.ts` has `h1/h2/h3/body/label/displayLarge/displayMedium`, no `title`); `theme.colors.primary.main`/`.card`/`.border`/`.textSecondary` don't exist either (color objects are shaped `{purple, blue, gradient}` etc, no `.main`). Affects `app/test-pronunciation.tsx`, `app/test-recording.tsx`, `src/components/progress/ReadingCalendar.tsx`, `src/components/pronunciation/PracticeSentenceDisplay.tsx`, `src/components/translation/WordTranslation.tsx`, `src/screens/PronunciationPractice.tsx`, `src/screens/legal/ComplianceAnalyticsScreen.tsx`, `src/screens/progress/ProgressDashboard.tsx`, `src/screens/subscription/{RedeemGiftScreen,SubscriptionScreen}.tsx`. Needs per-file review (right key vs. wrong key is a judgment call each time), not a batch fix.
+- [ ] `container` destructured from `render()` in ~45 test errors — that's web Testing Library's API; React Native Testing Library doesn't return it. Tests need rewriting to use `getByTestId`/`queryByText` etc.
+- [ ] Service mocks vs real class shape drift (~44 errors) — `getInstance`, `getUserAcceptances`, `getAllDocuments` missing on mocked services in `legal/`/`notifications/` tests; services evolved, test mocks didn't.
+- [ ] Remaining ~510 errors, mostly `src/screens/legal/`, `src/screens/subscription/`, `src/services/notifications/`, `src/services/payment/` — untriaged, real per-file review needed.
+- [ ] Separately: `jest-expo` pinned at `~52.0.6` (installed) vs Expo `~54` (installed) — mismatched, causes `jest-expo`'s own setup to crash if bumped naively. Bumping to `~54.x` is blocked by a `@types/react` (`~18.3.12`) vs `react` (`19.1.0`) peer conflict elsewhere in the tree — fix that first.
+
 ### App Store / Play Store
 - [x] Android target API level 36 (Android 16) — bumped `android/gradle.properties` + `app.config.js` 2026-07-22, verified release build succeeds. Google Play deadline Aug 31 2026.
 - [ ] Submit new Android build/version with API36 to Play Console before Aug 31 2026 deadline
