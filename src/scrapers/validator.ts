@@ -50,13 +50,13 @@ export function validateReading(reading: any): ValidationResult {
   const requiredFields = ['date', 'liturgicalDate', 'firstReading', 'gospel', 'metadata'];
   for (const field of requiredFields) {
     if (!reading[field]) {
-      errors.push(\`Missing required field: \${field}\`);
+      errors.push(`Missing required field: ${field}`);
     }
   }
 
   // Validate date format (YYYY-MM-DD)
   if (reading.date && !/^\d{4}-\d{2}-\d{2}$/.test(reading.date)) {
-    errors.push(\`Invalid date format: \${reading.date}\`);
+    errors.push(`Invalid date format: ${reading.date}`);
   }
 
   // Validate liturgical date
@@ -116,16 +116,16 @@ function validateReadingObject(reading: any, readingType: string): string[] {
   const errors: string[] = [];
 
   if (!reading.reference) {
-    errors.push(\`\${readingType}: Missing reference\`);
+    errors.push(`${readingType}: Missing reference`);
   }
   if (!reading.citation) {
-    errors.push(\`\${readingType}: Missing citation\`);
+    errors.push(`${readingType}: Missing citation`);
   }
   if (!reading.text || reading.text.trim().length === 0) {
-    errors.push(\`\${readingType}: Missing or empty text\`);
+    errors.push(`${readingType}: Missing or empty text`);
   }
   if (!reading.title) {
-    errors.push(\`\${readingType}: Missing title\`);
+    errors.push(`${readingType}: Missing title`);
   }
 
   return errors;
