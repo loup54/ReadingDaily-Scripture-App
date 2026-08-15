@@ -12,12 +12,15 @@
 
 ### App Store / Play Store
 - [x] Android target API level 36 (Android 16) — bumped `android/gradle.properties` + `app.config.js` 2026-07-22, verified release build succeeds. Google Play deadline Aug 31 2026.
-- [ ] Submit new Android build/version with API36 to Play Console before Aug 31 2026 deadline
+- [x] Submit new Android build/version with API36 to Play Console before Aug 31 2026 deadline — **submitted 2026-08-15**, versionCode 31 (also carries the home-screen widget + Android OTA fix, see below). Play Console had 2 unused service-account keys already granted Release-to-production; got a fresh key for `readingdaily-play-billing-982@...`, saved in repo root (gitignored), wired into `eas.json`. First submit attempt failed ("Version code 30 has already been used" — that code was burned by an earlier abandoned upload); bumped to 31, rebuilt, resubmitted, Success.
 - [x] iOS v1.1.31 (build 161) — approved & released 2026-04-06
 - [x] iOS v1.1.32 — approved & live on App Store 2026-04-16
+- [x] iOS v1.1.33 build 163 (home-screen widget) — submitted 2026-08-14, uploaded to App Store Connect successfully. **Still needs the manual step**: App Store Connect → attach build to a new version → Submit for Review (no CLI equivalent).
 - [x] Android versionCode 28 (v1.1.29) — was live, not v1.1.31 as previously thought
 - [x] Android versionCode 29 (v1.1.31) — approved & live on Google Play 2026-04-16
+- [x] Android versionCode 31 (home-screen widget + API36 + OTA fix) — submitted 2026-08-15, Success, in Google Play review
 - [x] Android layout fix (Galaxy S26) — shipped v1.1.31, verification removed
+- [x] Android OTA updates were never actually enabled (`expo.modules.updates.ENABLED=false`) and had no runtime version set — fixed 2026-08-15, matches iOS now
 - [x] Google Play self-declaration deadline (May 27, 2026) — passed, no action taken
 
 ### Monetisation (new model — 2026-06-02)
