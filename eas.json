@@ -58,6 +58,10 @@
         "appleId": "louispage@icloud.com",
         "ascAppId": "6753561999",
         "appleTeamId": "A696BUAT9R"
+      },
+      "android": {
+        "serviceAccountKeyPath": "./readingdaily-scripture-fe502-7e5cff3f3956.json",
+        "track": "production"
       }
     }
   }

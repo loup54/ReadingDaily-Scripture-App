@@ -104,3 +104,7 @@ build/
 .cache/
 *.orig
 *.tmp
+
+# Google Cloud / Play service account keys -- never commit
+*service-account*.json
+readingdaily-scripture-fe502-*.json
