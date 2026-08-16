@@ -29,8 +29,10 @@ describe('DocumentSigningService', () => {
   const testUserId = 'test-user-001';
 
   const testSignature = {
-    type: 'sketch' as const,
+    type: 'typed' as const,
     data: 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==',
+    timestamp: Date.now(),
+    device: 'iPhone 15',
   };
 
   beforeEach(() => {
@@ -106,12 +108,12 @@ describe('DocumentSigningService', () => {
     test('captureSignature supports sketch type', async () => {
       const sketchSignature = await service.captureSignature(
         testDocId,
-        { ...testSignature, type: 'sketch' },
+        { ...testSignature, type: 'typed' },
         '1.0.0',
         'ios'
       );
 
-      expect(sketchSignature.signatureType).toBe('sketch');
+      expect(sketchSignature.signatureType).toBe('typed');
     });
 
     test('captureSignature supports typed type', async () => {
@@ -133,9 +135,9 @@ describe('DocumentSigningService', () => {
         'ios'
       );
 
-      expect(signature.verificationHash).toBeDefined();
-      expect(typeof signature.verificationHash).toBe('string');
-      expect(signature.verificationHash.length).toBeGreaterThan(0);
+      expect(signature.verification.hash).toBeDefined();
+      expect(typeof signature.verification.hash).toBe('string');
+      expect(signature.verification.hash!.length).toBeGreaterThan(0);
     });
 
     test('captureSignature sets expiry to 1 year', async () => {
@@ -213,11 +215,15 @@ describe('DocumentSigningService', () => {
         signedAt: Date.now() - 2 * 365 * 24 * 60 * 60 * 1000, // 2 years ago
         expiresAt: Date.now() - 24 * 60 * 60 * 1000, // Expired yesterday
         metadata: {
-          platform: 'ios',
+          platform: 'ios' as const,
           appVersion: '1.0.0',
           device: 'iPhone',
         },
-        verificationHash: 'hash-123',
+        verification: {
+          verified: false,
+          hash: 'hash-123',
+        },
+        syncStatus: 'pending' as const,
       };
 
       const isValid = service.isSignatureValid(expiredSignature);
@@ -235,11 +241,15 @@ describe('DocumentSigningService', () => {
         signedAt: Date.now(),
         expiresAt: Date.now() + 365 * 24 * 60 * 60 * 1000,
         metadata: {
-          platform: 'ios',
+          platform: 'ios' as const,
           appVersion: '1.0.0',
           device: 'iPhone',
         },
-        verificationHash: 'original-hash', // Original hash won't match
+        verification: {
+          verified: false,
+          hash: 'original-hash', // Original hash won't match
+        },
+        syncStatus: 'pending' as const,
       };
 
       const isValid = service.isSignatureValid(tampered);
@@ -424,7 +434,7 @@ describe('DocumentSigningService', () => {
       const exported = await service.exportSignatures(testUserId);
 
       expect(exported.exportedAt).toBeDefined();
-      expect(exported.count).toBe(1);
+      expect(exported.signatures.length).toBe(1);
     });
   });
 
@@ -442,8 +452,10 @@ describe('DocumentSigningService', () => {
 
     test('handles very large signature data', async () => {
       const largeSignature = {
-        type: 'sketch' as const,
+        type: 'typed' as const,
         data: 'x'.repeat(10000000), // 10MB of data
+        timestamp: Date.now(),
+        device: 'iPhone 15',
       };
 
       // Should handle large data
@@ -476,7 +488,11 @@ describe('DocumentSigningService', () => {
         signedAt: Date.now(),
         expiresAt: Date.now() + 365 * 24 * 60 * 60 * 1000,
         metadata: undefined as any,
-        verificationHash: 'hash-123',
+        verification: {
+          verified: false,
+          hash: 'hash-123',
+        },
+        syncStatus: 'pending' as const,
       };
 
       const isValid = service.isSignatureValid(signatureWithoutMetadata);
@@ -642,14 +658,14 @@ describe('DocumentSigningService', () => {
         'ios'
       );
 
-      expect(signature.verificationHash).toBeDefined();
-      expect(typeof signature.verificationHash).toBe('string');
+      expect(signature.verification.hash).toBeDefined();
+      expect(typeof signature.verification.hash).toBe('string');
     });
 
     test('signature type is preserved', async () => {
-      const sketch = await service.captureSignature(
+      const first = await service.captureSignature(
         testDocId,
-        { ...testSignature, type: 'sketch' },
+        { ...testSignature, type: 'typed' },
         '1.0.0',
         'ios'
       );
@@ -661,7 +677,7 @@ describe('DocumentSigningService', () => {
         'ios'
       );
 
-      expect(sketch.signatureType).toBe('sketch');
+      expect(first.signatureType).toBe('typed');
       expect(typed.signatureType).toBe('typed');
     });
 
