@@ -203,7 +203,7 @@ export const ReadingCalendar: React.FC<ReadingCalendarProps> = ({
             style={[
               styles.todayBackground,
               {
-                backgroundColor: colors.primary.main + '20',
+                backgroundColor: colors.primary.blue + '20',
               },
             ]}
           />
@@ -215,7 +215,7 @@ export const ReadingCalendar: React.FC<ReadingCalendarProps> = ({
             style={[
               styles.readingDayBackground,
               {
-                backgroundColor: colors.primary.main,
+                backgroundColor: colors.primary.blue,
               },
             ]}
           />
@@ -244,7 +244,7 @@ export const ReadingCalendar: React.FC<ReadingCalendarProps> = ({
             style={[
               styles.indicatorDot,
               {
-                backgroundColor: colors.primary.main,
+                backgroundColor: colors.primary.blue,
               },
             ]}
           />
@@ -346,7 +346,7 @@ export const ReadingCalendar: React.FC<ReadingCalendarProps> = ({
             style={[
               styles.legendIndicator,
               {
-                backgroundColor: colors.primary.main,
+                backgroundColor: colors.primary.blue,
               },
             ]}
           />
@@ -369,7 +369,7 @@ export const ReadingCalendar: React.FC<ReadingCalendarProps> = ({
               {
                 backgroundColor: 'transparent',
                 borderWidth: 2,
-                borderColor: colors.primary.main,
+                borderColor: colors.primary.blue,
               },
             ]}
           />

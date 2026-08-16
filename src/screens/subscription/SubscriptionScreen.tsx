@@ -364,25 +364,25 @@ export const SubscriptionScreen: React.FC<SubscriptionScreenProps> = ({
                 end={{ x: 1, y: 1 }}
                 style={styles.pricingCardGradient}
               >
-                <View style={[styles.pricingCard, { backgroundColor: colors.card }]}>
+                <View style={[styles.pricingCard, { backgroundColor: colors.background.card }]}>
                   <View style={styles.pricingHeader}>
-                    <Text style={[styles.pricingTitle, { color: colors.text }]}>Basic</Text>
+                    <Text style={[styles.pricingTitle, { color: colors.text.primary }]}>Basic</Text>
                     <View style={styles.priceBadge}>
-                      <Text style={[styles.priceAmount, { color: colors.primary }]}>$2.99</Text>
-                      <Text style={[styles.priceLabel, { color: colors.textSecondary }]}>/month</Text>
+                      <Text style={[styles.priceAmount, { color: colors.primary.blue }]}>$2.99</Text>
+                      <Text style={[styles.priceLabel, { color: colors.text.secondary }]}>/month</Text>
                     </View>
                   </View>
 
-                  <View style={[styles.divider, { backgroundColor: colors.border }]} />
+                  <View style={[styles.divider, { backgroundColor: colors.ui.border }]} />
 
                   <View style={styles.featuresList}>
                     <View style={styles.featureRow}>
                       <Ionicons
                         name="checkmark-circle"
                         size={20}
-                        color={colors.primary}
+                        color={colors.primary.blue}
                       />
-                      <Text style={[styles.featureText, { color: colors.text }]}>
+                      <Text style={[styles.featureText, { color: colors.text.primary }]}>
                         Daily Scripture readings
                       </Text>
                     </View>
@@ -390,9 +390,9 @@ export const SubscriptionScreen: React.FC<SubscriptionScreenProps> = ({
                       <Ionicons
                         name="checkmark-circle"
                         size={20}
-                        color={colors.primary}
+                        color={colors.primary.blue}
                       />
-                      <Text style={[styles.featureText, { color: colors.text }]}>
+                      <Text style={[styles.featureText, { color: colors.text.primary }]}>
                         Audio narration
                       </Text>
                     </View>
@@ -400,9 +400,9 @@ export const SubscriptionScreen: React.FC<SubscriptionScreenProps> = ({
                       <Ionicons
                         name="checkmark-circle"
                         size={20}
-                        color={colors.primary}
+                        color={colors.primary.blue}
                       />
-                      <Text style={[styles.featureText, { color: colors.text }]}>
+                      <Text style={[styles.featureText, { color: colors.text.primary }]}>
                         Offline access
                       </Text>
                     </View>
@@ -427,30 +427,30 @@ export const SubscriptionScreen: React.FC<SubscriptionScreenProps> = ({
                 end={{ x: 1, y: 1 }}
                 style={styles.pricingCardGradient}
               >
-                <View style={[styles.pricingCard, { backgroundColor: colors.card }]}>
+                <View style={[styles.pricingCard, { backgroundColor: colors.background.card }]}>
                   <View style={styles.pricingHeader}>
                     <View style={styles.badgeContainer}>
                       <View style={[styles.bestValueBadge, { backgroundColor: colors.accent.green + '30' }]}>
                         <Text style={[styles.badgeText, { color: colors.accent.green }]}>Popular</Text>
                       </View>
                     </View>
-                    <Text style={[styles.pricingTitle, { color: colors.text }]}>Premium</Text>
+                    <Text style={[styles.pricingTitle, { color: colors.text.primary }]}>Premium</Text>
                     <View style={styles.priceBadge}>
-                      <Text style={[styles.priceAmount, { color: colors.primary }]}>$19.99</Text>
-                      <Text style={[styles.priceLabel, { color: colors.textSecondary }]}>/year</Text>
+                      <Text style={[styles.priceAmount, { color: colors.primary.blue }]}>$19.99</Text>
+                      <Text style={[styles.priceLabel, { color: colors.text.secondary }]}>/year</Text>
                     </View>
                   </View>
 
-                  <View style={[styles.divider, { backgroundColor: colors.border }]} />
+                  <View style={[styles.divider, { backgroundColor: colors.ui.border }]} />
 
                   <View style={styles.featuresList}>
                     <View style={styles.featureRow}>
                       <Ionicons
                         name="checkmark-circle"
                         size={20}
-                        color={colors.primary}
+                        color={colors.primary.blue}
                       />
-                      <Text style={[styles.featureText, { color: colors.text }]}>
+                      <Text style={[styles.featureText, { color: colors.text.primary }]}>
                         All Basic features
                       </Text>
                     </View>
@@ -458,9 +458,9 @@ export const SubscriptionScreen: React.FC<SubscriptionScreenProps> = ({
                       <Ionicons
                         name="checkmark-circle"
                         size={20}
-                        color={colors.primary}
+                        color={colors.primary.blue}
                       />
-                      <Text style={[styles.featureText, { color: colors.text }]}>
+                      <Text style={[styles.featureText, { color: colors.text.primary }]}>
                         Sync across devices
                       </Text>
                     </View>
@@ -468,9 +468,9 @@ export const SubscriptionScreen: React.FC<SubscriptionScreenProps> = ({
                       <Ionicons
                         name="checkmark-circle"
                         size={20}
-                        color={colors.primary}
+                        color={colors.primary.blue}
                       />
-                      <Text style={[styles.featureText, { color: colors.text }]}>
+                      <Text style={[styles.featureText, { color: colors.text.primary }]}>
                         Ad-free experience
                       </Text>
                     </View>
@@ -495,21 +495,21 @@ export const SubscriptionScreen: React.FC<SubscriptionScreenProps> = ({
                 end={{ x: 1, y: 1 }}
                 style={styles.pricingCardGradient}
               >
-                <View style={[styles.pricingCard, { backgroundColor: colors.card }]}>
+                <View style={[styles.pricingCard, { backgroundColor: colors.background.card }]}>
                   <View style={styles.pricingHeader}>
                     <View style={styles.badgeContainer}>
                       <View style={[styles.bestValueBadge, { backgroundColor: colors.accent.green + '30' }]}>
                         <Text style={[styles.badgeText, { color: colors.accent.green }]}>Best Value</Text>
                       </View>
                     </View>
-                    <Text style={[styles.pricingTitle, { color: colors.text }]}>Lifetime</Text>
+                    <Text style={[styles.pricingTitle, { color: colors.text.primary }]}>Lifetime</Text>
                     <View style={styles.priceBadge}>
-                      <Text style={[styles.priceAmount, { color: colors.primary }]}>$49.99</Text>
-                      <Text style={[styles.priceLabel, { color: colors.textSecondary }]}>one-time</Text>
+                      <Text style={[styles.priceAmount, { color: colors.primary.blue }]}>$49.99</Text>
+                      <Text style={[styles.priceLabel, { color: colors.text.secondary }]}>one-time</Text>
                     </View>
                   </View>
 
-                  <View style={[styles.divider, { backgroundColor: colors.border }]} />
+                  <View style={[styles.divider, { backgroundColor: colors.ui.border }]} />
 
                   <View style={styles.featuresList}>
                     <View style={styles.featureRow}>
@@ -518,7 +518,7 @@ export const SubscriptionScreen: React.FC<SubscriptionScreenProps> = ({
                         size={isTablet ? 24 : 20}
                         color={colors.accent.green}
                       />
-                      <Text style={[styles.featureText, { color: colors.text }]}>
+                      <Text style={[styles.featureText, { color: colors.text.primary }]}>
                         All Premium features
                       </Text>
                     </View>
@@ -528,7 +528,7 @@ export const SubscriptionScreen: React.FC<SubscriptionScreenProps> = ({
                         size={isTablet ? 24 : 20}
                         color={colors.accent.green}
                       />
-                      <Text style={[styles.featureText, { color: colors.text }]}>
+                      <Text style={[styles.featureText, { color: colors.text.primary }]}>
                         Lifetime updates
                       </Text>
                     </View>
@@ -538,7 +538,7 @@ export const SubscriptionScreen: React.FC<SubscriptionScreenProps> = ({
                         size={isTablet ? 24 : 20}
                         color={colors.accent.green}
                       />
-                      <Text style={[styles.featureText, { color: colors.text }]}>
+                      <Text style={[styles.featureText, { color: colors.text.primary }]}>
                         Priority support
                       </Text>
                     </View>
@@ -548,7 +548,7 @@ export const SubscriptionScreen: React.FC<SubscriptionScreenProps> = ({
                         size={isTablet ? 24 : 20}
                         color={colors.accent.green}
                       />
-                      <Text style={[styles.featureText, { color: colors.text }]}>
+                      <Text style={[styles.featureText, { color: colors.text.primary }]}>
                         Exclusive content
                       </Text>
                     </View>
@@ -558,7 +558,7 @@ export const SubscriptionScreen: React.FC<SubscriptionScreenProps> = ({
                         size={isTablet ? 24 : 20}
                         color={colors.accent.green}
                       />
-                      <Text style={[styles.featureText, { color: colors.text }]}>
+                      <Text style={[styles.featureText, { color: colors.text.primary }]}>
                         Never expires
                       </Text>
                     </View>
@@ -568,7 +568,7 @@ export const SubscriptionScreen: React.FC<SubscriptionScreenProps> = ({
                         size={isTablet ? 24 : 20}
                         color={colors.accent.green}
                       />
-                      <Text style={[styles.featureText, { color: colors.text }]}>
+                      <Text style={[styles.featureText, { color: colors.text.primary }]}>
                         One-time payment
                       </Text>
                     </View>

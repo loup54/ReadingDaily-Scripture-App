@@ -290,7 +290,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   headerTitle: {
-    ...Typography.title,
+    ...Typography.h1,
     fontSize: 24,
     fontWeight: 'bold',
   },
@@ -319,7 +319,7 @@ const styles = StyleSheet.create({
     gap: Spacing.sm,
   },
   sectionTitle: {
-    ...Typography.title,
+    ...Typography.h3,
     fontSize: 18,
     fontWeight: '600',
   },
@@ -363,7 +363,7 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.lg,
   },
   analyzingText: {
-    ...Typography.title,
+    ...Typography.h3,
     fontSize: 18,
     fontWeight: '600',
   },

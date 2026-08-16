@@ -248,7 +248,7 @@ const styles = StyleSheet.create({
     gap: Spacing.xs,
   },
   title: {
-    ...Typography.title,
+    ...Typography.h1,
     fontSize: 28,
     fontWeight: 'bold',
   },
@@ -262,7 +262,7 @@ const styles = StyleSheet.create({
     gap: Spacing.sm,
   },
   sectionTitle: {
-    ...Typography.title,
+    ...Typography.h3,
     fontSize: 18,
     fontWeight: '600',
   },

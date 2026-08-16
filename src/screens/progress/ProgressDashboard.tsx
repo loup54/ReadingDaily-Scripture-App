@@ -206,7 +206,7 @@ export const ProgressDashboard: React.FC<ProgressDashboardProps> = ({
             {error}
           </Text>
           <TouchableOpacity
-            style={[styles.retryButton, { backgroundColor: colors.primary.main }]}
+            style={[styles.retryButton, { backgroundColor: colors.primary.blue }]}
             onPress={handleRefresh}
           >
             <Text style={[styles.retryButtonText, { color: colors.text.white }]}>
@@ -252,7 +252,7 @@ export const ProgressDashboard: React.FC<ProgressDashboardProps> = ({
           <RefreshControl
             refreshing={refreshing}
             onRefresh={handleRefresh}
-            tintColor={colors.primary.main}
+            tintColor={colors.primary.blue}
           />
         }
         showsVerticalScrollIndicator={false}
@@ -264,7 +264,7 @@ export const ProgressDashboard: React.FC<ProgressDashboardProps> = ({
             <View
               style={[
                 styles.avatarContainer,
-                { backgroundColor: colors.primary.main },
+                { backgroundColor: colors.primary.blue },
               ]}
             >
               <Text style={[styles.avatarText, { color: colors.text.white }]}>
@@ -300,7 +300,7 @@ export const ProgressDashboard: React.FC<ProgressDashboardProps> = ({
               <Ionicons
                 name="refresh"
                 size={20}
-                color={colors.primary.main}
+                color={colors.primary.blue}
               />
             </TouchableOpacity>
           </View>
@@ -337,7 +337,7 @@ export const ProgressDashboard: React.FC<ProgressDashboardProps> = ({
             <Ionicons
               name="book-outline"
               size={24}
-              color={colors.primary.main}
+              color={colors.primary.blue}
             />
             <Text
               style={[
@@ -533,7 +533,7 @@ export const ProgressDashboard: React.FC<ProgressDashboardProps> = ({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background.main,
+    backgroundColor: Colors.background.primary,
   },
 
   scrollView: {
@@ -623,7 +623,7 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.md,
     paddingBottom: Spacing.md,
     borderBottomWidth: 2,
-    borderBottomColor: Colors.primary.main + '20',
+    borderBottomColor: Colors.primary.blue + '20',
   },
 
   // Statistics

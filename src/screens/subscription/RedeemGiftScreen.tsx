@@ -157,7 +157,7 @@ export const RedeemGiftScreen: React.FC<RedeemGiftScreenProps> = ({
   };
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background.primary }]}>
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
@@ -166,7 +166,7 @@ export const RedeemGiftScreen: React.FC<RedeemGiftScreenProps> = ({
         {/* Header with back button */}
         <View style={styles.header}>
           <IconButton icon="chevron-back" onPress={onBack} />
-          <Text style={[styles.title, { color: colors.text }]}>Redeem Gift</Text>
+          <Text style={[styles.title, { color: colors.text.primary }]}>Redeem Gift</Text>
           <View style={{ width: 40 }} />
         </View>
 
@@ -175,50 +175,50 @@ export const RedeemGiftScreen: React.FC<RedeemGiftScreenProps> = ({
           {/* Gift Icon with Gradient Background */}
           <View style={styles.iconContainer}>
             <LinearGradient
-              colors={[colors.primary, colors.secondary]}
+              colors={colors.primary.gradient}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
               style={styles.iconGradient}
             >
-              <Ionicons name="gift" size={48} color={Colors.white} />
+              <Ionicons name="gift" size={48} color={Colors.text.white} />
             </LinearGradient>
           </View>
 
           {/* Main Title and Description */}
-          <Text style={[styles.mainTitle, { color: colors.text }]}>
+          <Text style={[styles.mainTitle, { color: colors.text.primary }]}>
             Unlock Your Gift
           </Text>
-          <Text style={[styles.description, { color: colors.textSecondary }]}>
+          <Text style={[styles.description, { color: colors.text.secondary }]}>
             Enter your gift code to unlock premium features and benefits
           </Text>
 
           {/* Code Input Section with Gradient Border */}
           <LinearGradient
-            colors={[colors.primary + '15', colors.secondary + '15']}
+            colors={[colors.primary.gradient[0] + '15', colors.primary.gradient[1] + '15']}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
-            style={[styles.inputSectionGradient, { borderColor: colors.border }]}
+            style={[styles.inputSectionGradient, { borderColor: colors.ui.border }]}
           >
-            <View style={[styles.inputSection, { backgroundColor: colors.card }]}>
-              <Text style={[styles.inputLabel, { color: colors.text }]}>Gift Code</Text>
+            <View style={[styles.inputSection, { backgroundColor: colors.background.card }]}>
+              <Text style={[styles.inputLabel, { color: colors.text.primary }]}>Gift Code</Text>
 
-              <View style={[styles.inputContainer, { borderColor: colors.border }]}>
+              <View style={[styles.inputContainer, { borderColor: colors.ui.border }]}>
                 <Ionicons
                   name="card"
                   size={20}
-                  color={colors.primary}
+                  color={colors.primary.blue}
                   style={styles.inputIcon}
                 />
                 <TextInput
                   style={[
                     styles.input,
                     {
-                      color: colors.text,
-                      borderBottomColor: validated ? colors.success : colors.primary,
+                      color: colors.text.primary,
+                      borderBottomColor: validated ? colors.ui.success : colors.primary.blue,
                     },
                   ]}
                   placeholder="GIFT-XXXXXXXX-XXXX"
-                  placeholderTextColor={colors.textTertiary}
+                  placeholderTextColor={colors.text.tertiary}
                   value={displayCode}
                   onChangeText={handleCodeInput}
                   onBlur={handleCodeBlur}
@@ -230,20 +230,20 @@ export const RedeemGiftScreen: React.FC<RedeemGiftScreenProps> = ({
                   <IconButton
                     icon={validated ? 'checkmark-circle' : 'close-circle'}
                     size={20}
-                    color={validated ? colors.success : colors.error}
+                    color={validated ? colors.ui.success : colors.ui.error}
                     onPress={handleClear}
                   />
                 )}
               </View>
 
               {validationMessage && (
-                <Text style={[styles.validationMessage, { color: colors.error }]}>
+                <Text style={[styles.validationMessage, { color: colors.ui.error }]}>
                   {validationMessage}
                 </Text>
               )}
 
               {validated && (
-                <Text style={[styles.validationMessage, { color: colors.success }]}>
+                <Text style={[styles.validationMessage, { color: colors.ui.success }]}>
                   ✓ Code format is valid
                 </Text>
               )}
@@ -252,7 +252,7 @@ export const RedeemGiftScreen: React.FC<RedeemGiftScreenProps> = ({
 
           {/* Instructions with Colored Background */}
           <LinearGradient
-            colors={[colors.primary + '10', colors.secondary + '10']}
+            colors={[colors.primary.gradient[0] + '10', colors.primary.gradient[1] + '10']}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={styles.instructionGradient}
@@ -261,10 +261,10 @@ export const RedeemGiftScreen: React.FC<RedeemGiftScreenProps> = ({
               <Ionicons
                 name="information-circle"
                 size={24}
-                color={colors.primary}
+                color={colors.primary.blue}
                 style={styles.instructionIcon}
               />
-              <Text style={[styles.instructionsText, { color: colors.textSecondary }]}>
+              <Text style={[styles.instructionsText, { color: colors.text.secondary }]}>
                 Gift codes are case-insensitive and valid for 1 year from purchase
               </Text>
             </View>
@@ -280,7 +280,7 @@ export const RedeemGiftScreen: React.FC<RedeemGiftScreenProps> = ({
 
           {/* Help Section with Cards */}
           <View style={styles.helpSection}>
-            <Text style={[styles.helpTitle, { color: colors.text }]}>
+            <Text style={[styles.helpTitle, { color: colors.text.primary }]}>
               Need assistance?
             </Text>
 
@@ -309,10 +309,10 @@ export const RedeemGiftScreen: React.FC<RedeemGiftScreenProps> = ({
 
         {/* Loading Overlay */}
         {loading && (
-          <View style={[styles.loadingOverlay, { backgroundColor: colors.overlay }]}>
-            <ActivityIndicator size="large" color={colors.primary} />
+          <View style={[styles.loadingOverlay, { backgroundColor: colors.background.overlay }]}>
+            <ActivityIndicator size="large" color={colors.primary.blue} />
             <Text
-              style={[styles.loadingText, { color: colors.text, marginTop: Spacing.md }]}
+              style={[styles.loadingText, { color: colors.text.primary, marginTop: Spacing.md }]}
             >
               Redeeming your gift...
             </Text>
@@ -334,11 +334,11 @@ interface HelpItemProps {
 }
 
 const HelpItem: React.FC<HelpItemProps> = ({ icon, title, description, colors }) => (
-  <View style={[styles.helpItemContainer, { backgroundColor: colors.card }]}>
-    <Ionicons name={icon} size={20} color={colors.primary} style={styles.helpIcon} />
+  <View style={[styles.helpItemContainer, { backgroundColor: colors.background.card }]}>
+    <Ionicons name={icon} size={20} color={colors.primary.blue} style={styles.helpIcon} />
     <View style={styles.helpContent}>
-      <Text style={[styles.helpItemTitle, { color: colors.text }]}>{title}</Text>
-      <Text style={[styles.helpItemDescription, { color: colors.textSecondary }]}>
+      <Text style={[styles.helpItemTitle, { color: colors.text.primary }]}>{title}</Text>
+      <Text style={[styles.helpItemDescription, { color: colors.text.secondary }]}>
         {description}
       </Text>
     </View>

@@ -265,7 +265,7 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.md,
   },
   title: {
-    ...Typography.title,
+    ...Typography.h2,
   },
   wordContainer: {
     padding: Spacing.md,

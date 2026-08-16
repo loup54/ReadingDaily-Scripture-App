@@ -87,7 +87,7 @@ export const PracticeSentenceDisplay: React.FC<PracticeSentenceDisplayProps> = (
       case 'easy':
         return Colors.accent.green;
       case 'medium':
-        return Colors.accent.yellow;
+        return Colors.accent.orange;
       case 'hard':
         return Colors.accent.red;
       default:
@@ -125,7 +125,7 @@ export const PracticeSentenceDisplay: React.FC<PracticeSentenceDisplayProps> = (
     <View style={styles.container}>
       {/* TOP HEADER: Left Arrow | Difficulty Badge | Right Arrow | Record Button */}
       {showNavigation && (
-        <View style={[styles.topHeaderRow, { backgroundColor: colors.card }]}>
+        <View style={[styles.topHeaderRow, { backgroundColor: colors.background.card }]}>
           {/* Left Arrow - Navigate readings (LARGER) */}
           <IconButton
             icon="chevron-back"
@@ -257,7 +257,7 @@ export const PracticeSentenceDisplay: React.FC<PracticeSentenceDisplayProps> = (
               onPress={() => handlePreviousSentence?.()}
               size="md"
               variant="default"
-              color={colors.primary}
+              color={colors.primary.blue}
               disabled={!handlePreviousSentence}
               accessibilityLabel="Previous sentence"
             />
@@ -269,7 +269,7 @@ export const PracticeSentenceDisplay: React.FC<PracticeSentenceDisplayProps> = (
                     styles.dot,
                     index === currentIndex && styles.dotActive,
                     index === currentIndex && {
-                      backgroundColor: colors.primary,
+                      backgroundColor: colors.primary.blue,
                     },
                   ]}
                 />
@@ -280,7 +280,7 @@ export const PracticeSentenceDisplay: React.FC<PracticeSentenceDisplayProps> = (
               onPress={() => handleNextSentence?.()}
               size="md"
               variant="default"
-              color={colors.primary}
+              color={colors.primary.blue}
               disabled={!handleNextSentence}
               accessibilityLabel="Next sentence"
             />

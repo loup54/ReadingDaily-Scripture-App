@@ -64,17 +64,17 @@ interface EmptyStateProps {
 const EmptyState: React.FC<EmptyStateProps> = ({ icon, title, message, actionText, onAction, colors }) => {
   return (
     <View style={{ alignItems: 'center', paddingVertical: 48, paddingHorizontal: 24 }}>
-      <Ionicons name={icon as any} size={64} color={colors.textSecondary} style={{ marginBottom: 16 }} />
-      <Text style={{ fontSize: 18, fontWeight: '600', color: colors.text, marginBottom: 8, textAlign: 'center' }}>
+      <Ionicons name={icon as any} size={64} color={colors.text.secondary} style={{ marginBottom: 16 }} />
+      <Text style={{ fontSize: 18, fontWeight: '600', color: colors.text.primary, marginBottom: 8, textAlign: 'center' }}>
         {title}
       </Text>
-      <Text style={{ fontSize: 14, color: colors.textSecondary, textAlign: 'center', marginBottom: 24 }}>
+      <Text style={{ fontSize: 14, color: colors.text.secondary, textAlign: 'center', marginBottom: 24 }}>
         {message}
       </Text>
       {actionText && onAction && (
         <TouchableOpacity
           style={{
-            backgroundColor: colors.primary,
+            backgroundColor: colors.primary.blue,
             paddingHorizontal: 24,
             paddingVertical: 12,
             borderRadius: 8,
@@ -243,7 +243,7 @@ export const ComplianceAnalyticsScreen: React.FC = () => {
   const dynamicStyles = StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: colors.background,
+      backgroundColor: colors.background.primary,
     },
     scrollContent: {
       paddingHorizontal: 16,
@@ -252,23 +252,23 @@ export const ComplianceAnalyticsScreen: React.FC = () => {
     header: {
       paddingVertical: 24,
       borderBottomWidth: 1,
-      borderBottomColor: colors.border,
+      borderBottomColor: colors.ui.border,
     },
     headerTitle: {
       fontSize: 28,
       fontWeight: '700',
-      color: colors.text,
+      color: colors.text.primary,
       marginBottom: 4,
     },
     headerSubtitle: {
       fontSize: 14,
-      color: colors.textSecondary,
+      color: colors.text.secondary,
     },
     tabBar: {
       flexDirection: 'row',
       paddingVertical: 12,
       borderBottomWidth: 1,
-      borderBottomColor: colors.border,
+      borderBottomColor: colors.ui.border,
       marginVertical: 16,
     },
     tab: {
@@ -276,31 +276,31 @@ export const ComplianceAnalyticsScreen: React.FC = () => {
       paddingVertical: 8,
       marginRight: 8,
       borderRadius: 20,
-      backgroundColor: colors.cardBackground,
+      backgroundColor: colors.background.card,
     },
     tabActive: {
-      backgroundColor: colors.primary,
+      backgroundColor: colors.primary.blue,
     },
     tabText: {
       fontSize: 14,
       fontWeight: '500',
-      color: colors.textSecondary,
+      color: colors.text.secondary,
     },
     tabTextActive: {
       color: '#FFFFFF',
     },
     card: {
-      backgroundColor: colors.cardBackground,
+      backgroundColor: colors.background.card,
       borderRadius: 12,
       padding: 16,
       marginBottom: 12,
       borderWidth: 1,
-      borderColor: colors.border,
+      borderColor: colors.ui.border,
     },
     complianceMeter: {
       height: 8,
       borderRadius: 4,
-      backgroundColor: colors.border,
+      backgroundColor: colors.ui.border,
       overflow: 'hidden',
       marginTop: 8,
     },
@@ -314,16 +314,16 @@ export const ComplianceAnalyticsScreen: React.FC = () => {
       alignItems: 'center',
       paddingVertical: 12,
       borderBottomWidth: 1,
-      borderBottomColor: colors.border,
+      borderBottomColor: colors.ui.border,
     },
     statLabel: {
       fontSize: 14,
-      color: colors.textSecondary,
+      color: colors.text.secondary,
     },
     statValue: {
       fontSize: 18,
       fontWeight: '600',
-      color: colors.text,
+      color: colors.text.primary,
     },
     statusBadge: {
       paddingHorizontal: 12,
@@ -358,7 +358,7 @@ export const ComplianceAnalyticsScreen: React.FC = () => {
       alignItems: 'center',
       paddingVertical: 12,
       borderBottomWidth: 1,
-      borderBottomColor: colors.border,
+      borderBottomColor: colors.ui.border,
     },
     documentInfo: {
       flex: 1,
@@ -367,12 +367,12 @@ export const ComplianceAnalyticsScreen: React.FC = () => {
     documentTitle: {
       fontSize: 14,
       fontWeight: '600',
-      color: colors.text,
+      color: colors.text.primary,
       marginBottom: 4,
     },
     documentStatus: {
       fontSize: 12,
-      color: colors.textSecondary,
+      color: colors.text.secondary,
     },
     documentIcon: {
       fontSize: 24,
@@ -386,7 +386,7 @@ export const ComplianceAnalyticsScreen: React.FC = () => {
       width: 12,
       height: 12,
       borderRadius: 6,
-      backgroundColor: colors.primary,
+      backgroundColor: colors.primary.blue,
       marginRight: 12,
       marginTop: 4,
     },
@@ -395,17 +395,17 @@ export const ComplianceAnalyticsScreen: React.FC = () => {
     },
     timelineDate: {
       fontSize: 12,
-      color: colors.textSecondary,
+      color: colors.text.secondary,
       marginBottom: 2,
     },
     timelineTitle: {
       fontSize: 14,
       fontWeight: '600',
-      color: colors.text,
+      color: colors.text.primary,
     },
     timelineSubtitle: {
       fontSize: 12,
-      color: colors.textSecondary,
+      color: colors.text.secondary,
       marginTop: 2,
     },
     button: {
@@ -414,14 +414,14 @@ export const ComplianceAnalyticsScreen: React.FC = () => {
       borderRadius: 8,
       alignItems: 'center',
       justifyContent: 'center',
-      backgroundColor: colors.primary,
+      backgroundColor: colors.primary.blue,
       marginBottom: 8,
       flexDirection: 'row',
     },
     buttonSecondary: {
-      backgroundColor: colors.cardBackground,
+      backgroundColor: colors.background.card,
       borderWidth: 1,
-      borderColor: colors.border,
+      borderColor: colors.ui.border,
     },
     buttonText: {
       color: '#FFFFFF',
@@ -430,7 +430,7 @@ export const ComplianceAnalyticsScreen: React.FC = () => {
       marginLeft: 8,
     },
     buttonTextSecondary: {
-      color: colors.text,
+      color: colors.text.primary,
     },
     emptyState: {
       alignItems: 'center',
@@ -439,18 +439,18 @@ export const ComplianceAnalyticsScreen: React.FC = () => {
     },
     emptyIcon: {
       fontSize: 48,
-      color: colors.textSecondary,
+      color: colors.text.secondary,
       marginBottom: 12,
     },
     emptyText: {
       fontSize: 16,
-      color: colors.text,
+      color: colors.text.primary,
       fontWeight: '600',
       marginBottom: 4,
     },
     emptySubtext: {
       fontSize: 14,
-      color: colors.textSecondary,
+      color: colors.text.secondary,
       textAlign: 'center',
     },
   });
@@ -519,7 +519,7 @@ export const ComplianceAnalyticsScreen: React.FC = () => {
           }}>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <Ionicons name="alert-circle" size={20} color={Colors.status.error} style={{ marginRight: 8 }} />
-              <Text style={{ color: colors.text, fontSize: 14, flex: 1 }}>
+              <Text style={{ color: colors.text.primary, fontSize: 14, flex: 1 }}>
                 {state.error}
               </Text>
             </View>
@@ -555,8 +555,8 @@ export const ComplianceAnalyticsScreen: React.FC = () => {
             <View style={dynamicStyles.card}>
               <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
                 <View>
-                  <Text style={{ fontSize: 16, fontWeight: '600', color: colors.text }}>Overall Compliance</Text>
-                  <Text style={{ fontSize: 32, fontWeight: '700', color: colors.text, marginTop: 8 }}>
+                  <Text style={{ fontSize: 16, fontWeight: '600', color: colors.text.primary }}>Overall Compliance</Text>
+                  <Text style={{ fontSize: 32, fontWeight: '700', color: colors.text.primary, marginTop: 8 }}>
                     {state.report.summary.overallCompliance}%
                   </Text>
                 </View>
@@ -604,13 +604,13 @@ export const ComplianceAnalyticsScreen: React.FC = () => {
 
             {/* Document Status */}
             <View style={dynamicStyles.card}>
-              <Text style={{ fontSize: 16, fontWeight: '600', color: colors.text, marginBottom: 12 }}>Document Status</Text>
+              <Text style={{ fontSize: 16, fontWeight: '600', color: colors.text.primary, marginBottom: 12 }}>Document Status</Text>
               {state.report.documents.map((doc, index) => (
                 <View key={doc.documentId} style={[dynamicStyles.documentRow, index === state.report!.documents.length - 1 && { borderBottomWidth: 0 }]}>
                   <Ionicons
                     name={doc.accepted ? 'checkmark-circle' : 'document-outline'}
                     size={24}
-                    color={doc.accepted ? '#10B981' : colors.textSecondary}
+                    color={doc.accepted ? '#10B981' : colors.text.secondary}
                     style={dynamicStyles.documentIcon}
                   />
                   <View style={dynamicStyles.documentInfo}>
@@ -638,7 +638,7 @@ export const ComplianceAnalyticsScreen: React.FC = () => {
           state.report && state.report.timeline && state.report.timeline.length > 0 ? (
           <>
             <View style={dynamicStyles.card}>
-              <Text style={{ fontSize: 16, fontWeight: '600', color: colors.text, marginBottom: 16 }}>Acceptance Timeline</Text>
+              <Text style={{ fontSize: 16, fontWeight: '600', color: colors.text.primary, marginBottom: 16 }}>Acceptance Timeline</Text>
               {state.report.acceptanceTimeline.length > 0 ? (
                 state.report.acceptanceTimeline.map((event, index) => (
                   <View key={`${event.documentId}-${index}`} style={dynamicStyles.timelineItem}>
@@ -651,12 +651,12 @@ export const ComplianceAnalyticsScreen: React.FC = () => {
                   </View>
                 ))
               ) : (
-                <Text style={{ color: colors.textSecondary }}>No acceptances yet</Text>
+                <Text style={{ color: colors.text.secondary }}>No acceptances yet</Text>
               )}
             </View>
 
             <View style={dynamicStyles.card}>
-              <Text style={{ fontSize: 16, fontWeight: '600', color: colors.text, marginBottom: 16 }}>Signature Timeline</Text>
+              <Text style={{ fontSize: 16, fontWeight: '600', color: colors.text.primary, marginBottom: 16 }}>Signature Timeline</Text>
               {state.report.signatureTimeline.length > 0 ? (
                 state.report.signatureTimeline.map((event, index) => (
                   <View key={`${event.documentId}-${index}`} style={dynamicStyles.timelineItem}>
@@ -669,7 +669,7 @@ export const ComplianceAnalyticsScreen: React.FC = () => {
                   </View>
                 ))
               ) : (
-                <Text style={{ color: colors.textSecondary }}>No signatures yet</Text>
+                <Text style={{ color: colors.text.secondary }}>No signatures yet</Text>
               )}
             </View>
           </>
@@ -689,7 +689,7 @@ export const ComplianceAnalyticsScreen: React.FC = () => {
           <>
             {state.viewStats && (
               <View style={dynamicStyles.card}>
-                <Text style={{ fontSize: 16, fontWeight: '600', color: colors.text, marginBottom: 12 }}>View Statistics</Text>
+                <Text style={{ fontSize: 16, fontWeight: '600', color: colors.text.primary, marginBottom: 12 }}>View Statistics</Text>
                 <View style={dynamicStyles.statRow}>
                   <Text style={dynamicStyles.statLabel}>Total Documents Viewed</Text>
                   <Text style={dynamicStyles.statValue}>{state.viewStats.totalDocumentsViewed}</Text>
@@ -709,7 +709,7 @@ export const ComplianceAnalyticsScreen: React.FC = () => {
 
             {state.signatureStats && (
               <View style={dynamicStyles.card}>
-                <Text style={{ fontSize: 16, fontWeight: '600', color: colors.text, marginBottom: 12 }}>Signature Statistics</Text>
+                <Text style={{ fontSize: 16, fontWeight: '600', color: colors.text.primary, marginBottom: 12 }}>Signature Statistics</Text>
                 <View style={dynamicStyles.statRow}>
                   <Text style={dynamicStyles.statLabel}>Total Attempts</Text>
                   <Text style={dynamicStyles.statValue}>{state.signatureStats.totalAttempts}</Text>
@@ -733,7 +733,7 @@ export const ComplianceAnalyticsScreen: React.FC = () => {
 
             {state.report?.jurisdictionalCompliance && (
               <View style={dynamicStyles.card}>
-                <Text style={{ fontSize: 16, fontWeight: '600', color: colors.text, marginBottom: 12 }}>Jurisdictional Compliance</Text>
+                <Text style={{ fontSize: 16, fontWeight: '600', color: colors.text.primary, marginBottom: 12 }}>Jurisdictional Compliance</Text>
                 {state.report.jurisdictionalCompliance.map((juris, index) => (
                   <View key={juris.jurisdiction} style={[dynamicStyles.statRow, index === state.report!.jurisdictionalCompliance.length - 1 && { borderBottomWidth: 0 }]}>
                     <Text style={dynamicStyles.statLabel}>{juris.jurisdiction}</Text>
@@ -772,7 +772,7 @@ export const ComplianceAnalyticsScreen: React.FC = () => {
           state.report ? (
           <>
             <View style={dynamicStyles.card}>
-              <Text style={{ fontSize: 16, fontWeight: '600', color: colors.text, marginBottom: 16 }}>Export Report</Text>
+              <Text style={{ fontSize: 16, fontWeight: '600', color: colors.text.primary, marginBottom: 16 }}>Export Report</Text>
 
               <TouchableOpacity
                 style={dynamicStyles.button}
@@ -800,17 +800,17 @@ export const ComplianceAnalyticsScreen: React.FC = () => {
             </View>
 
             <View style={dynamicStyles.card}>
-              <Text style={{ fontSize: 16, fontWeight: '600', color: colors.text, marginBottom: 16 }}>Verification</Text>
+              <Text style={{ fontSize: 16, fontWeight: '600', color: colors.text.primary, marginBottom: 16 }}>Verification</Text>
 
               <TouchableOpacity
                 style={[dynamicStyles.button, dynamicStyles.buttonSecondary]}
                 onPress={handleVerifyAcceptances}
               >
-                <Ionicons name="shield-checkmark-outline" size={20} color={colors.text} />
+                <Ionicons name="shield-checkmark-outline" size={20} color={colors.text.primary} />
                 <Text style={[dynamicStyles.buttonText, dynamicStyles.buttonTextSecondary]}>Verify Acceptances</Text>
               </TouchableOpacity>
 
-              <Text style={{ fontSize: 12, color: colors.textSecondary, marginTop: 12 }}>
+              <Text style={{ fontSize: 12, color: colors.text.secondary, marginTop: 12 }}>
                 Verify that all document acceptances are valid and current versions.
               </Text>
             </View>
