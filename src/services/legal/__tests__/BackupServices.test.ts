@@ -5,9 +5,9 @@
  * Unit tests for BackupService, CloudBackupService, and BackupScheduleService
  */
 
-import { BackupService } from '../BackupService';
-import { CloudBackupService } from '../CloudBackupService';
-import { BackupScheduleService } from '../BackupScheduleService';
+import BackupService from '../BackupService';
+import CloudBackupService from '../CloudBackupService';
+import BackupScheduleService from '../BackupScheduleService';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as FileSystem from 'expo-file-system';
 
@@ -26,7 +26,10 @@ jest.mock('@/stores/useAuthStore', () => ({
 }));
 
 describe('BackupService', () => {
-  let service: BackupService;
+  // BackupService exposes only static members — there is no
+  // instance/getInstance() pattern. `service` is bound directly to the
+  // class so the rest of the suite can keep calling `service.method(...)`.
+  let service: typeof BackupService;
   const testUserId = 'test-user-001';
 
   beforeEach(() => {
@@ -37,13 +40,13 @@ describe('BackupService', () => {
     (FileSystem.writeAsStringAsync as jest.Mock).mockResolvedValue(undefined);
     (FileSystem.readAsStringAsync as jest.Mock).mockResolvedValue('{}');
     (FileSystem.deleteAsync as jest.Mock).mockResolvedValue(undefined);
-    service = BackupService.getInstance();
+    service = BackupService;
   });
 
   describe('Initialization', () => {
-    test('getInstance returns singleton instance', () => {
-      const service1 = BackupService.getInstance();
-      const service2 = BackupService.getInstance();
+    test('BackupService is a stable static reference', () => {
+      const service1 = BackupService;
+      const service2 = BackupService;
       expect(service1).toBe(service2);
     });
 
@@ -68,8 +71,8 @@ describe('BackupService', () => {
     test('createLocalBackup includes all data types', async () => {
       const backup = await service.createLocalBackup();
 
-      expect(backup?.metadata).toBeDefined();
-      expect(backup?.data).toBeDefined();
+      expect(backup?.contents).toBeDefined();
+      expect(backup?.checksums).toBeDefined();
     });
 
     test('createLocalBackup creates password encrypted backup', async () => {
@@ -79,11 +82,11 @@ describe('BackupService', () => {
       expect(backup).toBeDefined();
     });
 
-    test('createLocalBackup calculates SHA-256 checksum', async () => {
+    test('createLocalBackup calculates SHA-256 checksums', async () => {
       const backup = await service.createLocalBackup();
 
-      expect(backup?.checksum).toBeDefined();
-      expect(typeof backup?.checksum).toBe('string');
+      expect(backup?.checksums).toBeDefined();
+      expect(typeof backup?.checksums.documents).toBe('string');
     });
 
     test('createLocalBackup stores backup in file system', async () => {
@@ -251,24 +254,23 @@ describe('BackupService', () => {
     test('backup includes metadata', async () => {
       const backup = await service.createLocalBackup();
 
-      expect(backup?.metadata).toBeDefined();
-      expect(backup?.metadata.version).toBeDefined();
-      expect(backup?.metadata.createdAt).toBeDefined();
+      expect(backup?.version).toBeDefined();
+      expect(backup?.createdAt).toBeDefined();
     });
 
     test('backup includes all data categories', async () => {
       const backup = await service.createLocalBackup();
 
-      expect(backup?.data).toBeDefined();
+      expect(backup?.contents).toBeDefined();
     });
 
-    test('checksum ensures data integrity', async () => {
+    test('checksums ensure data integrity', async () => {
       const backup1 = await service.createLocalBackup();
       const backup2 = await service.createLocalBackup();
 
       // Different backups should have different checksums
-      expect(backup1?.checksum).toBeDefined();
-      expect(backup2?.checksum).toBeDefined();
+      expect(backup1?.checksums).toBeDefined();
+      expect(backup2?.checksums).toBeDefined();
     });
   });
 
@@ -341,20 +343,23 @@ describe('BackupService', () => {
 });
 
 describe('CloudBackupService', () => {
-  let service: CloudBackupService;
+  // CloudBackupService exposes only static members — there is no
+  // instance/getInstance() pattern. `service` is bound directly to the
+  // class so the rest of the suite can keep calling `service.method(...)`.
+  let service: typeof CloudBackupService;
   const testUserId = 'test-user-001';
 
   beforeEach(() => {
     jest.clearAllMocks();
     (AsyncStorage.getItem as jest.Mock).mockResolvedValue(null);
     (AsyncStorage.setItem as jest.Mock).mockResolvedValue(undefined);
-    service = CloudBackupService.getInstance();
+    service = CloudBackupService;
   });
 
   describe('Initialization', () => {
-    test('getInstance returns singleton instance', () => {
-      const service1 = CloudBackupService.getInstance();
-      const service2 = CloudBackupService.getInstance();
+    test('CloudBackupService is a stable static reference', () => {
+      const service1 = CloudBackupService;
+      const service2 = CloudBackupService;
       expect(service1).toBe(service2);
     });
 
@@ -438,7 +443,7 @@ describe('CloudBackupService', () => {
       const status = await service.getScheduleStatus();
 
       expect(status).toBeDefined();
-      expect(typeof status.isScheduled).toBe('boolean');
+      expect(typeof status.enabled).toBe('boolean');
     });
   });
 
@@ -486,20 +491,23 @@ describe('CloudBackupService', () => {
 });
 
 describe('BackupScheduleService', () => {
-  let service: BackupScheduleService;
+  // BackupScheduleService exposes only static members — there is no
+  // instance/getInstance() pattern. `service` is bound directly to the
+  // class so the rest of the suite can keep calling `service.method(...)`.
+  let service: typeof BackupScheduleService;
   const testUserId = 'test-user-001';
 
   beforeEach(() => {
     jest.clearAllMocks();
     (AsyncStorage.getItem as jest.Mock).mockResolvedValue(null);
     (AsyncStorage.setItem as jest.Mock).mockResolvedValue(undefined);
-    service = BackupScheduleService.getInstance();
+    service = BackupScheduleService;
   });
 
   describe('Initialization', () => {
-    test('getInstance returns singleton instance', () => {
-      const service1 = BackupScheduleService.getInstance();
-      const service2 = BackupScheduleService.getInstance();
+    test('BackupScheduleService is a stable static reference', () => {
+      const service1 = BackupScheduleService;
+      const service2 = BackupScheduleService;
       expect(service1).toBe(service2);
     });
 
