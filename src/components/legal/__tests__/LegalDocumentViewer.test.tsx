@@ -30,15 +30,12 @@ jest.mock('@/services/legal/DocumentSigningService');
 jest.mock('@/services/legal/DocumentVersioningService');
 jest.mock('@/services/legal/DocumentAnalyticsService');
 jest.mock('@/services/legal/ComplianceReportService');
-jest.mock('react-native', () => ({
-  ...jest.requireActual('react-native'),
-  Share: {
-    share: jest.fn(),
-  },
-  Alert: {
-    alert: jest.fn(),
-  },
-}));
+// Spy on Alert.alert / Share.share only (not a full jest.mock('react-native', ...) —
+// spreading jest.requireActual('react-native') eagerly evaluates every lazy getter on
+// RN's index export, including DevMenu, which throws under jest-expo 54's
+// TurboModuleRegistry since no native DevMenu module exists in the test environment).
+jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+jest.spyOn(Share, 'share').mockResolvedValue({ action: 'sharedAction' } as any);
 
 // Mock useTheme hook
 const mockTheme = {

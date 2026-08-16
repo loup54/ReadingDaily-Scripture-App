@@ -25,12 +25,11 @@ jest.mock('@/hooks/useTheme');
 jest.mock('@/services/legal/ComplianceReportService');
 jest.mock('@/services/legal/DocumentAnalyticsService');
 jest.mock('@/services/legal/DocumentVersioningService');
-jest.mock('react-native', () => ({
-  ...jest.requireActual('react-native'),
-  Alert: {
-    alert: jest.fn(),
-  },
-}));
+// Spy on Alert.alert only (not a full jest.mock('react-native', ...) — spreading
+// jest.requireActual('react-native') eagerly evaluates every lazy getter on RN's
+// index export, including DevMenu, which throws under jest-expo 54's TurboModuleRegistry
+// since no native DevMenu module exists in the test environment).
+jest.spyOn(Alert, 'alert').mockImplementation(() => {});
 
 const mockTheme = {
   colors: {
