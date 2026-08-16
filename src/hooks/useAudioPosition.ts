@@ -4,7 +4,7 @@
  * Emits position updates at regular intervals
  */
 
-import { useEffect, useRef, useCallback } from 'react';
+import React, { useEffect, useRef, useCallback } from 'react';
 import { Audio } from 'expo-av';
 import type { AudioPositionUpdate } from '@/types';
 
