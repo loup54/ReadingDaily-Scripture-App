@@ -119,13 +119,13 @@ export class DailyReminderScheduler {
         }
       }
 
-      logger.info('[DailyReminderScheduler] Scheduling daily reminder for', config.time);
+      logger.info(`[DailyReminderScheduler] Scheduling daily reminder for ${config.time}`);
 
       // Parse time (HH:MM format)
       const [hours, minutes] = config.time.split(':').map(Number);
 
       if (isNaN(hours) || isNaN(minutes) || hours < 0 || hours > 23 || minutes < 0 || minutes > 59) {
-        logger.error('[DailyReminderScheduler] Invalid time format:', config.time);
+        logger.error(`[DailyReminderScheduler] Invalid time format: ${config.time}`);
         return false;
       }
 
@@ -151,11 +151,13 @@ export class DailyReminderScheduler {
         },
       });
 
-      logger.info('[DailyReminderScheduler] ✅ Daily reminder scheduled:', {
-        id: notificationId,
-        time: config.time,
-        sound: config.soundEnabled,
-      });
+      logger.info(
+        `[DailyReminderScheduler] ✅ Daily reminder scheduled: ${JSON.stringify({
+          id: notificationId,
+          time: config.time,
+          sound: config.soundEnabled,
+        })}`
+      );
 
       return true;
     } catch (error) {
@@ -178,7 +180,7 @@ export class DailyReminderScheduler {
       for (const notification of scheduledNotifications) {
         if (notification.content.data?.type === NotificationType.DAILY_REMINDER) {
           await Notifications.cancelScheduledNotificationAsync(notification.identifier);
-          logger.debug('[DailyReminderScheduler] Cancelled notification:', notification.identifier);
+          logger.debug(`[DailyReminderScheduler] Cancelled notification: ${notification.identifier}`);
         }
       }
 

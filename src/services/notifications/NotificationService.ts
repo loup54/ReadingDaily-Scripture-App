@@ -91,11 +91,11 @@ class NotificationService {
       // Check in-memory cache first
       const cached = this.userPreferences.get(userId);
       if (cached) {
-        logger.debug('[NotificationService] Returning cached preferences for', userId);
+        logger.debug(`[NotificationService] Returning cached preferences for ${userId}`);
         return cached;
       }
 
-      logger.debug('[NotificationService] Fetching preferences for', userId);
+      logger.debug(`[NotificationService] Fetching preferences for ${userId}`);
 
       // Try to load from AsyncStorage
       try {
@@ -103,7 +103,7 @@ class NotificationService {
         if (stored) {
           const prefs = JSON.parse(stored) as NotificationPreferences;
           this.userPreferences.set(userId, prefs);
-          logger.info('[NotificationService] Loaded preferences from AsyncStorage for', userId);
+          logger.info(`[NotificationService] Loaded preferences from AsyncStorage for ${userId}`);
           return prefs;
         }
       } catch (error) {
@@ -132,7 +132,7 @@ class NotificationService {
         throw new Error('userId is required');
       }
 
-      logger.info('[NotificationService] Updating preferences for', userId);
+      logger.info(`[NotificationService] Updating preferences for ${userId}`);
 
       const currentPrefs = await this.getUserPreferences(userId);
       const updatedPrefs: NotificationPreferences = {
@@ -150,13 +150,13 @@ class NotificationService {
           `notification_prefs_${userId}`,
           JSON.stringify(updatedPrefs)
         );
-        logger.info('[NotificationService] Preferences persisted to AsyncStorage for', userId);
+        logger.info(`[NotificationService] Preferences persisted to AsyncStorage for ${userId}`);
       } catch (error) {
         logger.error('[NotificationService] Error persisting preferences to AsyncStorage:', error as Error);
         // Don't throw - still update in memory even if storage fails
       }
 
-      logger.info('[NotificationService] Preferences updated for', userId);
+      logger.info(`[NotificationService] Preferences updated for ${userId}`);
     } catch (error) {
       logger.error('[NotificationService] Error updating preferences:', error as Error);
       throw error;
@@ -172,7 +172,7 @@ class NotificationService {
         throw new Error('userId is required in notification');
       }
 
-      logger.info('[NotificationService] Sending notification:', notification.id);
+      logger.info(`[NotificationService] Sending notification: ${notification.id}`);
 
       const prefs = await this.getUserPreferences(notification.userId);
 
@@ -205,11 +205,13 @@ class NotificationService {
       notification.status = 'sent';
       notification.sentAt = Date.now();
 
-      logger.debug('[NotificationService] Sending immediately:', {
-        id: notification.id,
-        type: notification.type,
-        channel: notification.channel,
-      });
+      logger.debug(
+        `[NotificationService] Sending immediately: ${JSON.stringify({
+          id: notification.id,
+          type: notification.type,
+          channel: notification.channel,
+        })}`
+      );
 
       notification.status = 'delivered';
       notification.deliveredAt = Date.now();
@@ -239,10 +241,12 @@ class NotificationService {
         maxRetries: 3,
       };
 
-      logger.debug('[NotificationService] Scheduling notification:', {
-        id: notification.id,
-        scheduledFor: new Date(scheduledFor).toISOString(),
-      });
+      logger.debug(
+        `[NotificationService] Scheduling notification: ${JSON.stringify({
+          id: notification.id,
+          scheduledFor: new Date(scheduledFor).toISOString(),
+        })}`
+      );
 
       this.notificationQueue.set(notification.id, queueItem);
 
@@ -263,12 +267,12 @@ class NotificationService {
   private async processScheduledNotification(notificationId: string): Promise<void> {
     const queueItem = this.notificationQueue.get(notificationId);
     if (!queueItem) {
-      logger.warn('[NotificationService] Scheduled notification not found:', notificationId);
+      logger.warn(`[NotificationService] Scheduled notification not found: ${notificationId}`);
       return;
     }
 
     try {
-      logger.debug('[NotificationService] Processing scheduled notification:', notificationId);
+      logger.debug(`[NotificationService] Processing scheduled notification: ${notificationId}`);
       const success = await this.sendImmediate(queueItem.notification);
 
       if (success) {
@@ -276,13 +280,13 @@ class NotificationService {
       } else {
         queueItem.retries++;
         if (queueItem.retries < queueItem.maxRetries) {
-          logger.debug('[NotificationService] Retrying notification:', notificationId);
+          logger.debug(`[NotificationService] Retrying notification: ${notificationId}`);
           const delayMs = Math.pow(2, queueItem.retries) * 1000;
           setTimeout(() => {
             this.processScheduledNotification(notificationId);
           }, delayMs);
         } else {
-          logger.error('[NotificationService] Max retries exceeded:', notificationId);
+          logger.error(`[NotificationService] Max retries exceeded: ${notificationId}`);
           this.notificationQueue.delete(notificationId);
         }
       }
@@ -300,14 +304,16 @@ class NotificationService {
         throw new Error('userId is required');
       }
 
-      logger.info('[NotificationService] Setting up daily reminder for', userId);
+      logger.info(`[NotificationService] Setting up daily reminder for ${userId}`);
 
       this.dailyReminders.set(userId, reminder);
       reminder.nextScheduledFor = this.calculateNextReminderTime(reminder);
 
-      logger.info('[NotificationService] Daily reminder scheduled for:', new Date(
-        reminder.nextScheduledFor
-      ).toISOString());
+      logger.info(
+        `[NotificationService] Daily reminder scheduled for: ${new Date(
+          reminder.nextScheduledFor
+        ).toISOString()}`
+      );
     } catch (error) {
       logger.error('[NotificationService] Error setting up daily reminder:', error as Error);
       throw error;
@@ -357,7 +363,7 @@ class NotificationService {
    */
   async markAsRead(userId: string, notificationId: string): Promise<void> {
     try {
-      logger.debug('[NotificationService] Marking as read:', notificationId);
+      logger.debug(`[NotificationService] Marking as read: ${notificationId}`);
 
       const history = this.notificationHistory.get(userId) || [];
       const entry = history.find((h) => h.notificationId === notificationId);
@@ -376,7 +382,7 @@ class NotificationService {
    */
   async deleteNotification(userId: string, notificationId: string): Promise<void> {
     try {
-      logger.debug('[NotificationService] Deleting notification:', notificationId);
+      logger.debug(`[NotificationService] Deleting notification: ${notificationId}`);
 
       const history = this.notificationHistory.get(userId) || [];
       const index = history.findIndex((h) => h.notificationId === notificationId);
@@ -386,7 +392,7 @@ class NotificationService {
         this.notificationHistory.set(userId, history);
         logger.debug('[NotificationService] Notification deleted successfully');
       } else {
-        logger.warn('[NotificationService] Notification not found:', notificationId);
+        logger.warn(`[NotificationService] Notification not found: ${notificationId}`);
       }
     } catch (error) {
       logger.error('[NotificationService] Error deleting notification:', error as Error);
@@ -403,10 +409,12 @@ class NotificationService {
     actionId: string
   ): Promise<void> {
     try {
-      logger.debug('[NotificationService] Handling action:', {
-        notificationId,
-        actionId,
-      });
+      logger.debug(
+        `[NotificationService] Handling action: ${JSON.stringify({
+          notificationId,
+          actionId,
+        })}`
+      );
 
       const history = this.notificationHistory.get(userId) || [];
       const entry = history.find((h) => h.notificationId === notificationId);
@@ -422,10 +430,10 @@ class NotificationService {
 
       const handler = this.notificationHandlers.get(actionId);
       if (handler) {
-        logger.debug('[NotificationService] Executing custom action handler:', actionId);
+        logger.debug(`[NotificationService] Executing custom action handler: ${actionId}`);
       }
 
-      logger.debug('[NotificationService] Action handled:', actionId);
+      logger.debug(`[NotificationService] Action handled: ${actionId}`);
     } catch (error) {
       logger.error('[NotificationService] Error handling action:', error as Error);
     }
@@ -435,11 +443,11 @@ class NotificationService {
    * Register custom notification action handler
    */
   onNotificationAction(actionId: string, handler: (notification: PushNotification) => void): () => void {
-    logger.debug('[NotificationService] Registering action handler:', actionId);
+    logger.debug(`[NotificationService] Registering action handler: ${actionId}`);
     this.notificationHandlers.set(actionId, handler);
 
     return () => {
-      logger.debug('[NotificationService] Removing action handler:', actionId);
+      logger.debug(`[NotificationService] Removing action handler: ${actionId}`);
       this.notificationHandlers.delete(actionId);
     };
   }
@@ -506,7 +514,7 @@ class NotificationService {
         throw new Error('userId is required');
       }
 
-      logger.debug('[NotificationService] Getting history for', userId);
+      logger.debug(`[NotificationService] Getting history for ${userId}`);
 
       let history = this.notificationHistory.get(userId) || [];
 
@@ -543,7 +551,7 @@ class NotificationService {
         throw new Error('userId is required');
       }
 
-      logger.debug('[NotificationService] Getting statistics for', userId, 'period:', period);
+      logger.debug(`[NotificationService] Getting statistics for ${userId} period: ${period}`);
 
       const history = await this.getHistory(userId);
 
@@ -610,7 +618,7 @@ class NotificationService {
    */
   async clearHistory(userId: string, beforeDate?: number): Promise<number> {
     try {
-      logger.info('[NotificationService] Clearing history for', userId);
+      logger.info(`[NotificationService] Clearing history for ${userId}`);
 
       let history = this.notificationHistory.get(userId) || [];
       let clearedCount = 0;
@@ -624,7 +632,7 @@ class NotificationService {
         this.notificationHistory.delete(userId);
       }
 
-      logger.info('[NotificationService] Cleared', clearedCount, 'notifications');
+      logger.info(`[NotificationService] Cleared ${clearedCount} notifications`);
       return clearedCount;
     } catch (error) {
       logger.error('[NotificationService] Error clearing history:', error as Error);
@@ -649,7 +657,7 @@ class NotificationService {
    */
   async disableDailyReminder(userId: string): Promise<void> {
     try {
-      logger.debug('[NotificationService] Disabling daily reminder for', userId);
+      logger.debug(`[NotificationService] Disabling daily reminder for ${userId}`);
       const reminder = this.dailyReminders.get(userId);
       if (reminder) {
         reminder.enabled = false;
