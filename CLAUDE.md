@@ -86,9 +86,9 @@ Catholic daily Mass readings with audio playback, word-level highlighting, pronu
 ## Distribution & build process
 
 ### Current versions
-- **iOS:** v1.1.31 build 161 — in Apple review as of 2026-03-26
-- **Android:** versionCode 26 — in Google Play review as of 2026-03-26
-- **OTA updates active** from v1.1.31 onwards (channel: `production`)
+- **iOS:** v1.1.34 build 163 (home-screen widget) — LIVE 2026-08-16, see TODO.md "App Store / Play Store" for the version-string saga behind this release
+- **Android:** versionCode 31 (home-screen widget + API36 + OTA fix) — submitted 2026-08-15, check Play Console for current review/release status before assuming live
+- **OTA updates active** from v1.1.31 onwards (channel: `production`) — check TODO.md for the latest OTA-shipped fixes, this file isn't kept current turn-by-turn
 
 ### For a JS-only fix (instant, no review)
 ```bash
