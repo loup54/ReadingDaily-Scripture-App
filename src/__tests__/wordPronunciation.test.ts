@@ -108,8 +108,9 @@ describe('Word Pronunciation Feature Tests', () => {
       });
 
       test('should handle Chinese variants', () => {
-        expect(getTTSLanguageCode('zh-CN')).toBe('zh-CN');
-        expect(getTTSLanguageCode('zh-TW')).toBe('zh-TW');
+        // Google TTS uses cmn-CN (Mandarin) and yue-HK (Cantonese), not zh-CN/zh-TW
+        expect(getTTSLanguageCode('zh-CN')).toBe('cmn-CN');
+        expect(getTTSLanguageCode('zh-TW')).toBe('yue-HK');
       });
 
       test('should handle Asian languages', () => {
@@ -118,7 +119,8 @@ describe('Word Pronunciation Feature Tests', () => {
       });
 
       test('should handle Middle Eastern/Asian languages', () => {
-        expect(getTTSLanguageCode('ar')).toBe('ar-SA');
+        // Google TTS uses ar-XA for Arabic (not ar-SA)
+        expect(getTTSLanguageCode('ar')).toBe('ar-XA');
         expect(getTTSLanguageCode('hi')).toBe('hi-IN');
         expect(getTTSLanguageCode('vi')).toBe('vi-VN');
         expect(getTTSLanguageCode('th')).toBe('th-TH');
@@ -163,7 +165,7 @@ describe('Word Pronunciation Feature Tests', () => {
       test('should reject stop words', () => {
         const result = validatePronunciation('the', 'es');
         expect(result.canPronounce).toBe(false);
-        expect(result.reason).toContain('stop word');
+        expect(result.reason).toContain('Common English word');
       });
 
       test('should reject unsupported languages', () => {

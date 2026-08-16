@@ -371,11 +371,20 @@ describe('ReadingCalendar Component', () => {
      * Test: Handles 100% consistency
      */
     it('should calculate 100% consistency when all days read', () => {
+      // ReadingCalendar has no prop to pin its displayed month — it always
+      // defaults to the real current month (`new Date()`). Readings must be
+      // generated for whatever month/year the test actually runs in, not a
+      // hardcoded past month, or none of them will match and consistency
+      // will compute as 0%.
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = now.getMonth(); // 0-indexed
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+
       const fullMonth: Record<string, ReadingRecord> = {};
 
-      // Create readings for all days in November 2025
-      for (let day = 1; day <= 30; day++) {
-        const dateKey = `2025-11-${String(day).padStart(2, '0')}`;
+      for (let day = 1; day <= daysInMonth; day++) {
+        const dateKey = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
         fullMonth[dateKey] = mockReading;
       }
 

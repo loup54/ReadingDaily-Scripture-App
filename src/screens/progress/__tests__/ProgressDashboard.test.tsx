@@ -8,6 +8,7 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react-native';
 import { ProgressDashboard } from '../ProgressDashboard';
+import { DashboardSkeleton } from '@/components/common/skeletons';
 import type { ProgressData, Badge, BadgeProgress } from '@/types/progress.types';
 
 /**
@@ -117,9 +118,12 @@ describe('ProgressDashboard Screen', () => {
         refreshBadges: jest.fn(),
       });
 
-      const { getByText } = render(<ProgressDashboard userId="test-user-123" />);
+      // The loading state now renders an animated DashboardSkeleton
+      // (shimmer placeholders) instead of a text-based "Loading..." indicator,
+      // so there's no text to query for — assert the skeleton component itself.
+      const { UNSAFE_getByType } = render(<ProgressDashboard userId="test-user-123" />);
 
-      expect(getByText(/Loading/i)).toBeTruthy();
+      expect(UNSAFE_getByType(DashboardSkeleton)).toBeTruthy();
     });
 
     /**
