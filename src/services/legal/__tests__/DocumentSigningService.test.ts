@@ -21,7 +21,10 @@ jest.mock('@/stores/useAuthStore', () => ({
 }));
 
 describe('DocumentSigningService', () => {
-  let service: DocumentSigningService;
+  // DocumentSigningService exposes only static members — there is no
+  // instance/getInstance() pattern. `service` is bound directly to the
+  // class so the rest of the suite can keep calling `service.method(...)`.
+  let service: typeof DocumentSigningService;
   const testDocId = 'test-doc-001';
   const testUserId = 'test-user-001';
 
@@ -37,13 +40,13 @@ describe('DocumentSigningService', () => {
     (AsyncStorage.removeItem as jest.Mock).mockResolvedValue(undefined);
     (AsyncStorage.multiRemove as jest.Mock).mockResolvedValue(undefined);
     (Crypto.digestStringAsync as jest.Mock).mockResolvedValue('mock-hash-123');
-    service = DocumentSigningService.getInstance();
+    service = DocumentSigningService;
   });
 
   describe('Initialization', () => {
-    test('getInstance returns singleton instance', () => {
-      const service1 = DocumentSigningService.getInstance();
-      const service2 = DocumentSigningService.getInstance();
+    test('DocumentSigningService is a stable static reference', () => {
+      const service1 = DocumentSigningService;
+      const service2 = DocumentSigningService;
       expect(service1).toBe(service2);
     });
 

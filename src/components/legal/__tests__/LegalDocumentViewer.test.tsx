@@ -81,11 +81,14 @@ Code example:
     ],
   };
 
+  // DocumentAnalyticsService exposes only static members (no getInstance) —
+  // the component calls it directly (e.g. `DocumentAnalyticsService.trackDocumentView(...)`),
+  // so `jest.mock(...)` auto-mocks those static methods on the class itself.
+  // `mockAnalyticsService` just aliases them for readability at call sites below.
   const mockAnalyticsService = {
-    trackDocumentView: jest.fn().mockResolvedValue(undefined),
-    trackInteraction: jest.fn().mockResolvedValue(undefined),
-    trackSignatureAttempt: jest.fn().mockResolvedValue(undefined),
-    getInstance: jest.fn(),
+    trackDocumentView: DocumentAnalyticsService.trackDocumentView as jest.Mock,
+    trackInteraction: DocumentAnalyticsService.trackInteraction as jest.Mock,
+    trackSignatureAttempt: DocumentAnalyticsService.trackSignatureAttempt as jest.Mock,
   };
 
   const mockComplianceService = {
@@ -98,7 +101,9 @@ Code example:
 
     // Setup mock implementations
     (ThemeHook.useTheme as jest.Mock).mockReturnValue(mockTheme);
-    (DocumentAnalyticsService.getInstance as jest.Mock).mockReturnValue(mockAnalyticsService);
+    mockAnalyticsService.trackDocumentView.mockResolvedValue(undefined);
+    mockAnalyticsService.trackInteraction.mockResolvedValue(undefined);
+    mockAnalyticsService.trackSignatureAttempt.mockResolvedValue(undefined);
     (ComplianceReportService.getInstance as jest.Mock).mockReturnValue(mockComplianceService);
     (DocumentSigningService.captureSignature as jest.Mock).mockResolvedValue({
       id: 'sig-001',

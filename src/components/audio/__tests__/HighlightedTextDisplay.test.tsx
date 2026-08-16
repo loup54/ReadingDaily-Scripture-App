@@ -42,7 +42,7 @@ describe('HighlightedTextDisplay Component', () => {
     });
 
     it('should render with custom font size', () => {
-      const { container } = render(
+      const { toJSON } = render(
         <HighlightedTextDisplay
           text={mockText}
           words={mockWords}
@@ -52,11 +52,11 @@ describe('HighlightedTextDisplay Component', () => {
       );
 
       // Component should render successfully with custom fontSize
-      expect(container).toBeTruthy();
+      expect(toJSON()).toBeTruthy();
     });
 
     it('should render with custom line height', () => {
-      const { container } = render(
+      const { toJSON } = render(
         <HighlightedTextDisplay
           text={mockText}
           words={mockWords}
@@ -66,7 +66,7 @@ describe('HighlightedTextDisplay Component', () => {
       );
 
       // Component should render successfully with custom lineHeight
-      expect(container).toBeTruthy();
+      expect(toJSON()).toBeTruthy();
     });
   });
 
@@ -107,7 +107,7 @@ describe('HighlightedTextDisplay Component', () => {
     });
 
     it('should handle no current word (index -1)', () => {
-      const { container } = render(
+      const { toJSON } = render(
         <HighlightedTextDisplay
           text={mockText}
           words={mockWords}
@@ -116,11 +116,11 @@ describe('HighlightedTextDisplay Component', () => {
       );
 
       // Should render without highlighting
-      expect(container).toBeTruthy();
+      expect(toJSON()).toBeTruthy();
     });
 
     it('should handle word index at boundary (last word)', () => {
-      const { container } = render(
+      const { toJSON } = render(
         <HighlightedTextDisplay
           text={mockText}
           words={mockWords}
@@ -129,13 +129,13 @@ describe('HighlightedTextDisplay Component', () => {
       );
 
       // Should highlight last word
-      expect(container).toBeTruthy();
+      expect(toJSON()).toBeTruthy();
     });
   });
 
   describe('Fade Out Effect', () => {
     it('should apply fade out effect when enabled', () => {
-      const { container } = render(
+      const { toJSON } = render(
         <HighlightedTextDisplay
           text={mockText}
           words={mockWords}
@@ -145,11 +145,11 @@ describe('HighlightedTextDisplay Component', () => {
       );
 
       // Component should apply fade effect
-      expect(container).toBeTruthy();
+      expect(toJSON()).toBeTruthy();
     });
 
     it('should not apply fade out when disabled', () => {
-      const { container } = render(
+      const { toJSON } = render(
         <HighlightedTextDisplay
           text={mockText}
           words={mockWords}
@@ -159,13 +159,13 @@ describe('HighlightedTextDisplay Component', () => {
       );
 
       // Component should render without fade
-      expect(container).toBeTruthy();
+      expect(toJSON()).toBeTruthy();
     });
   });
 
   describe('Color Configuration', () => {
     it('should apply custom highlight color', () => {
-      const { container } = render(
+      const { toJSON } = render(
         <HighlightedTextDisplay
           text={mockText}
           words={mockWords}
@@ -178,11 +178,11 @@ describe('HighlightedTextDisplay Component', () => {
       );
 
       // Component should use custom colors
-      expect(container).toBeTruthy();
+      expect(toJSON()).toBeTruthy();
     });
 
     it('should apply theme colors', () => {
-      const { container } = render(
+      const { toJSON } = render(
         <HighlightedTextDisplay
           text={mockText}
           words={mockWords}
@@ -195,13 +195,13 @@ describe('HighlightedTextDisplay Component', () => {
       );
 
       // Component should apply theme
-      expect(container).toBeTruthy();
+      expect(toJSON()).toBeTruthy();
     });
   });
 
   describe('Debug Mode', () => {
     it('should show word boundaries in debug mode', () => {
-      const { container } = render(
+      const { toJSON } = render(
         <HighlightedTextDisplay
           text={mockText}
           words={mockWords}
@@ -211,11 +211,11 @@ describe('HighlightedTextDisplay Component', () => {
       );
 
       // Component should render with debug info
-      expect(container).toBeTruthy();
+      expect(toJSON()).toBeTruthy();
     });
 
     it('should hide word boundaries when debug disabled', () => {
-      const { container } = render(
+      const { toJSON } = render(
         <HighlightedTextDisplay
           text={mockText}
           words={mockWords}
@@ -225,7 +225,7 @@ describe('HighlightedTextDisplay Component', () => {
       );
 
       // Component should render without debug info
-      expect(container).toBeTruthy();
+      expect(toJSON()).toBeTruthy();
     });
   });
 
@@ -246,7 +246,7 @@ describe('HighlightedTextDisplay Component', () => {
       }
 
       const start = performance.now();
-      const { container } = render(
+      const { toJSON } = render(
         <HighlightedTextDisplay
           text={text}
           words={largeWords}
@@ -255,7 +255,7 @@ describe('HighlightedTextDisplay Component', () => {
       );
       const duration = performance.now() - start;
 
-      expect(container).toBeTruthy();
+      expect(toJSON()).toBeTruthy();
       expect(duration).toBeLessThan(500); // Should render in reasonable time
     });
 
@@ -289,7 +289,7 @@ describe('HighlightedTextDisplay Component', () => {
 describe('CompactHighlightedTextDisplay Component', () => {
   describe('Context Window Behavior', () => {
     it('should show context window around current word', () => {
-      const { container } = render(
+      const { toJSON } = render(
         <CompactHighlightedTextDisplay
           text={mockText}
           words={mockWords}
@@ -299,11 +299,11 @@ describe('CompactHighlightedTextDisplay Component', () => {
       );
 
       // Should show current word and context
-      expect(container).toBeTruthy();
+      expect(toJSON()).toBeTruthy();
     });
 
     it('should handle context window at start', () => {
-      const { container } = render(
+      const { toJSON } = render(
         <CompactHighlightedTextDisplay
           text={mockText}
           words={mockWords}
@@ -313,11 +313,11 @@ describe('CompactHighlightedTextDisplay Component', () => {
       );
 
       // Should not error with insufficient context
-      expect(container).toBeTruthy();
+      expect(toJSON()).toBeTruthy();
     });
 
     it('should handle context window at end', () => {
-      const { container } = render(
+      const { toJSON } = render(
         <CompactHighlightedTextDisplay
           text={mockText}
           words={mockWords}
@@ -327,7 +327,7 @@ describe('CompactHighlightedTextDisplay Component', () => {
       );
 
       // Should not error at end of text
-      expect(container).toBeTruthy();
+      expect(toJSON()).toBeTruthy();
     });
 
     it('should adjust window size dynamically', () => {
@@ -372,7 +372,7 @@ describe('CompactHighlightedTextDisplay Component', () => {
       }
 
       const compactStart = performance.now();
-      const { container: compactContainer } = render(
+      const { toJSON: compactToJSON } = render(
         <CompactHighlightedTextDisplay
           text={text}
           words={largeWords}
@@ -383,7 +383,7 @@ describe('CompactHighlightedTextDisplay Component', () => {
       const compactDuration = performance.now() - compactStart;
 
       const fullStart = performance.now();
-      const { container: fullContainer } = render(
+      const { toJSON: fullToJSON } = render(
         <HighlightedTextDisplay
           text={text}
           words={largeWords}
@@ -392,8 +392,8 @@ describe('CompactHighlightedTextDisplay Component', () => {
       );
       const fullDuration = performance.now() - fullStart;
 
-      expect(compactContainer).toBeTruthy();
-      expect(fullContainer).toBeTruthy();
+      expect(compactToJSON()).toBeTruthy();
+      expect(fullToJSON()).toBeTruthy();
       expect(compactDuration).toBeLessThan(fullDuration * 2);
     });
   });

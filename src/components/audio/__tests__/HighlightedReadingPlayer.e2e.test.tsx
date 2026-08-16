@@ -58,7 +58,7 @@ describe('HighlightedReadingPlayer E2E Tests', () => {
     });
 
     it('should render text display once loaded', async () => {
-      const { container } = render(
+      const { toJSON } = render(
         <HighlightedReadingPlayer
           readingId="gospel_2025-11-11"
           readingType="gospel"
@@ -69,12 +69,12 @@ describe('HighlightedReadingPlayer E2E Tests', () => {
       );
 
       await waitFor(() => {
-        expect(container).toBeTruthy();
+        expect(toJSON()).toBeTruthy();
       });
     });
 
     it('should render all controls (play, rewind, forward)', () => {
-      const { getAllByA11yRole } = render(
+      const { getAllByRole } = render(
         <HighlightedReadingPlayer
           readingId="gospel_2025-11-11"
           readingType="gospel"
@@ -89,7 +89,7 @@ describe('HighlightedReadingPlayer E2E Tests', () => {
     });
 
     it('should display progress bar', () => {
-      const { container } = render(
+      const { toJSON } = render(
         <HighlightedReadingPlayer
           readingId="gospel_2025-11-11"
           readingType="gospel"
@@ -100,13 +100,13 @@ describe('HighlightedReadingPlayer E2E Tests', () => {
       );
 
       // Progress bar should be present
-      expect(container).toBeTruthy();
+      expect(toJSON()).toBeTruthy();
     });
   });
 
   describe('Play/Pause Functionality', () => {
     it('should start in paused state', () => {
-      const { container } = render(
+      const { toJSON } = render(
         <HighlightedReadingPlayer
           readingId="gospel_2025-11-11"
           readingType="gospel"
@@ -117,11 +117,11 @@ describe('HighlightedReadingPlayer E2E Tests', () => {
       );
 
       // Component loaded, not playing initially
-      expect(container).toBeTruthy();
+      expect(toJSON()).toBeTruthy();
     });
 
     it('should toggle play/pause on button press', async () => {
-      const { getAllByA11yRole, getByTestId } = render(
+      const { getAllByRole, getByTestId } = render(
         <HighlightedReadingPlayer
           readingId="gospel_2025-11-11"
           readingType="gospel"
@@ -136,7 +136,7 @@ describe('HighlightedReadingPlayer E2E Tests', () => {
     });
 
     it('should show correct play/pause icon based on state', () => {
-      const { container } = render(
+      const { toJSON } = render(
         <HighlightedReadingPlayer
           readingId="gospel_2025-11-11"
           readingType="gospel"
@@ -147,13 +147,13 @@ describe('HighlightedReadingPlayer E2E Tests', () => {
       );
 
       // Icon should reflect current playback state
-      expect(container).toBeTruthy();
+      expect(toJSON()).toBeTruthy();
     });
   });
 
   describe('Seeking Behavior', () => {
     it('should seek when progress bar is tapped', async () => {
-      const { container } = render(
+      const { toJSON } = render(
         <HighlightedReadingPlayer
           readingId="gospel_2025-11-11"
           readingType="gospel"
@@ -164,11 +164,11 @@ describe('HighlightedReadingPlayer E2E Tests', () => {
       );
 
       // Component should handle seek
-      expect(container).toBeTruthy();
+      expect(toJSON()).toBeTruthy();
     });
 
     it('should update highlighting on seek', async () => {
-      const { container } = render(
+      const { toJSON } = render(
         <HighlightedReadingPlayer
           readingId="gospel_2025-11-11"
           readingType="gospel"
@@ -179,11 +179,11 @@ describe('HighlightedReadingPlayer E2E Tests', () => {
       );
 
       // Seek and verify highlighting updates
-      expect(container).toBeTruthy();
+      expect(toJSON()).toBeTruthy();
     });
 
     it('should clamp seek to valid range', async () => {
-      const { container } = render(
+      const { toJSON } = render(
         <HighlightedReadingPlayer
           readingId="gospel_2025-11-11"
           readingType="gospel"
@@ -194,11 +194,11 @@ describe('HighlightedReadingPlayer E2E Tests', () => {
       );
 
       // Attempt to seek beyond bounds
-      expect(container).toBeTruthy();
+      expect(toJSON()).toBeTruthy();
     });
 
     it('should display correct time values', () => {
-      const { container } = render(
+      const { toJSON } = render(
         <HighlightedReadingPlayer
           readingId="gospel_2025-11-11"
           readingType="gospel"
@@ -209,13 +209,13 @@ describe('HighlightedReadingPlayer E2E Tests', () => {
       );
 
       // Time should show MM:SS format
-      expect(container).toBeTruthy();
+      expect(toJSON()).toBeTruthy();
     });
   });
 
   describe('Rewind/Forward Controls', () => {
     it('should rewind by 10 seconds', async () => {
-      const { container } = render(
+      const { toJSON } = render(
         <HighlightedReadingPlayer
           readingId="gospel_2025-11-11"
           readingType="gospel"
@@ -226,11 +226,11 @@ describe('HighlightedReadingPlayer E2E Tests', () => {
       );
 
       // Verify rewind button exists and is functional
-      expect(container).toBeTruthy();
+      expect(toJSON()).toBeTruthy();
     });
 
     it('should forward by 10 seconds', async () => {
-      const { container } = render(
+      const { toJSON } = render(
         <HighlightedReadingPlayer
           readingId="gospel_2025-11-11"
           readingType="gospel"
@@ -241,11 +241,11 @@ describe('HighlightedReadingPlayer E2E Tests', () => {
       );
 
       // Verify forward button exists and is functional
-      expect(container).toBeTruthy();
+      expect(toJSON()).toBeTruthy();
     });
 
     it('should clamp rewind to start', async () => {
-      const { container } = render(
+      const { toJSON } = render(
         <HighlightedReadingPlayer
           readingId="gospel_2025-11-11"
           readingType="gospel"
@@ -256,11 +256,11 @@ describe('HighlightedReadingPlayer E2E Tests', () => {
       );
 
       // Multiple rewind should not go below 0
-      expect(container).toBeTruthy();
+      expect(toJSON()).toBeTruthy();
     });
 
     it('should clamp forward to end', async () => {
-      const { container } = render(
+      const { toJSON } = render(
         <HighlightedReadingPlayer
           readingId="gospel_2025-11-11"
           readingType="gospel"
@@ -271,13 +271,13 @@ describe('HighlightedReadingPlayer E2E Tests', () => {
       );
 
       // Multiple forward should not exceed duration
-      expect(container).toBeTruthy();
+      expect(toJSON()).toBeTruthy();
     });
   });
 
   describe('Highlighting Synchronization', () => {
     it('should highlight words as audio progresses', async () => {
-      const { container } = render(
+      const { toJSON } = render(
         <HighlightedReadingPlayer
           readingId="gospel_2025-11-11"
           readingType="gospel"
@@ -289,11 +289,11 @@ describe('HighlightedReadingPlayer E2E Tests', () => {
 
       // Simulate audio position updates
       // Highlighting should follow
-      expect(container).toBeTruthy();
+      expect(toJSON()).toBeTruthy();
     });
 
     it('should use correct highlight color', () => {
-      const { container } = render(
+      const { toJSON } = render(
         <HighlightedReadingPlayer
           readingId="gospel_2025-11-11"
           readingType="gospel"
@@ -304,11 +304,11 @@ describe('HighlightedReadingPlayer E2E Tests', () => {
       );
 
       // Color should be from app theme
-      expect(container).toBeTruthy();
+      expect(toJSON()).toBeTruthy();
     });
 
     it('should display fade effect on previous words', () => {
-      const { container } = render(
+      const { toJSON } = render(
         <HighlightedReadingPlayer
           readingId="gospel_2025-11-11"
           readingType="gospel"
@@ -319,13 +319,13 @@ describe('HighlightedReadingPlayer E2E Tests', () => {
       );
 
       // Previous words should have reduced opacity
-      expect(container).toBeTruthy();
+      expect(toJSON()).toBeTruthy();
     });
   });
 
   describe('Display Modes', () => {
     it('should render full text mode by default', () => {
-      const { container } = render(
+      const { toJSON } = render(
         <HighlightedReadingPlayer
           readingId="gospel_2025-11-11"
           readingType="gospel"
@@ -337,11 +337,11 @@ describe('HighlightedReadingPlayer E2E Tests', () => {
       );
 
       // Full text should be visible
-      expect(container).toBeTruthy();
+      expect(toJSON()).toBeTruthy();
     });
 
     it('should render compact mode when requested', () => {
-      const { container } = render(
+      const { toJSON } = render(
         <HighlightedReadingPlayer
           readingId="gospel_2025-11-11"
           readingType="gospel"
@@ -354,11 +354,11 @@ describe('HighlightedReadingPlayer E2E Tests', () => {
       );
 
       // Only context window should be visible
-      expect(container).toBeTruthy();
+      expect(toJSON()).toBeTruthy();
     });
 
     it('should customize context window size', () => {
-      const { container } = render(
+      const { toJSON } = render(
         <HighlightedReadingPlayer
           readingId="gospel_2025-11-11"
           readingType="gospel"
@@ -371,13 +371,13 @@ describe('HighlightedReadingPlayer E2E Tests', () => {
       );
 
       // Larger context window should be visible
-      expect(container).toBeTruthy();
+      expect(toJSON()).toBeTruthy();
     });
   });
 
   describe('Error Handling', () => {
     it('should display error when audio URL is invalid', async () => {
-      const { container } = render(
+      const { toJSON } = render(
         <HighlightedReadingPlayer
           readingId="gospel_2025-11-11"
           readingType="gospel"
@@ -388,7 +388,7 @@ describe('HighlightedReadingPlayer E2E Tests', () => {
       );
 
       // Error message should be shown
-      expect(container).toBeTruthy();
+      expect(toJSON()).toBeTruthy();
     });
 
     it('should display error when timing data is missing', async () => {
@@ -397,7 +397,7 @@ describe('HighlightedReadingPlayer E2E Tests', () => {
         words: [],
       };
 
-      const { container } = render(
+      const { toJSON } = render(
         <HighlightedReadingPlayer
           readingId="gospel_2025-11-11"
           readingType="gospel"
@@ -408,11 +408,11 @@ describe('HighlightedReadingPlayer E2E Tests', () => {
       );
 
       // Should handle gracefully
-      expect(container).toBeTruthy();
+      expect(toJSON()).toBeTruthy();
     });
 
     it('should recover from errors', async () => {
-      const { container, rerender } = render(
+      const { toJSON, rerender } = render(
         <HighlightedReadingPlayer
           readingId="gospel_2025-11-11"
           readingType="gospel"
@@ -433,13 +433,13 @@ describe('HighlightedReadingPlayer E2E Tests', () => {
         />
       );
 
-      expect(container).toBeTruthy();
+      expect(toJSON()).toBeTruthy();
     });
   });
 
   describe('Debug Mode', () => {
     it('should show debug panel when enabled', () => {
-      const { container } = render(
+      const { toJSON } = render(
         <HighlightedReadingPlayer
           readingId="gospel_2025-11-11"
           readingType="gospel"
@@ -451,11 +451,11 @@ describe('HighlightedReadingPlayer E2E Tests', () => {
       );
 
       // Debug info should be visible
-      expect(container).toBeTruthy();
+      expect(toJSON()).toBeTruthy();
     });
 
     it('should hide debug panel by default', () => {
-      const { container } = render(
+      const { toJSON } = render(
         <HighlightedReadingPlayer
           readingId="gospel_2025-11-11"
           readingType="gospel"
@@ -467,11 +467,11 @@ describe('HighlightedReadingPlayer E2E Tests', () => {
       );
 
       // Debug info should not be visible
-      expect(container).toBeTruthy();
+      expect(toJSON()).toBeTruthy();
     });
 
     it('should display current word index in debug mode', () => {
-      const { container } = render(
+      const { toJSON } = render(
         <HighlightedReadingPlayer
           readingId="gospel_2025-11-11"
           readingType="gospel"
@@ -483,7 +483,7 @@ describe('HighlightedReadingPlayer E2E Tests', () => {
       );
 
       // Should show X/Y word format
-      expect(container).toBeTruthy();
+      expect(toJSON()).toBeTruthy();
     });
   });
 
@@ -491,7 +491,7 @@ describe('HighlightedReadingPlayer E2E Tests', () => {
     it('should call onComplete when reading finishes', async () => {
       const onComplete = jest.fn();
 
-      const { container } = render(
+      const { toJSON } = render(
         <HighlightedReadingPlayer
           readingId="gospel_2025-11-11"
           readingType="gospel"
@@ -504,13 +504,13 @@ describe('HighlightedReadingPlayer E2E Tests', () => {
 
       // Simulate reaching end of audio
       // onComplete should be called
-      expect(container).toBeTruthy();
+      expect(toJSON()).toBeTruthy();
     });
 
     it('should not call onComplete during playback', () => {
       const onComplete = jest.fn();
 
-      const { container } = render(
+      const { toJSON } = render(
         <HighlightedReadingPlayer
           readingId="gospel_2025-11-11"
           readingType="gospel"
@@ -530,7 +530,7 @@ describe('HighlightedReadingPlayer E2E Tests', () => {
     it('should render without lag', async () => {
       const start = performance.now();
 
-      const { container } = render(
+      const { toJSON } = render(
         <HighlightedReadingPlayer
           readingId="gospel_2025-11-11"
           readingType="gospel"
@@ -543,11 +543,11 @@ describe('HighlightedReadingPlayer E2E Tests', () => {
       const duration = performance.now() - start;
 
       expect(duration).toBeLessThan(1000); // Should render in <1s
-      expect(container).toBeTruthy();
+      expect(toJSON()).toBeTruthy();
     });
 
     it('should maintain 60fps during highlighting updates', () => {
-      const { container } = render(
+      const { toJSON } = render(
         <HighlightedReadingPlayer
           readingId="gospel_2025-11-11"
           readingType="gospel"
@@ -566,11 +566,11 @@ describe('HighlightedReadingPlayer E2E Tests', () => {
 
       // 100 updates in <1.67s = 60 fps
       expect(duration).toBeLessThan(1666);
-      expect(container).toBeTruthy();
+      expect(toJSON()).toBeTruthy();
     });
 
     it('should handle rapid control presses', () => {
-      const { container } = render(
+      const { toJSON } = render(
         <HighlightedReadingPlayer
           readingId="gospel_2025-11-11"
           readingType="gospel"
@@ -582,7 +582,7 @@ describe('HighlightedReadingPlayer E2E Tests', () => {
 
       // Simulate rapid button presses
       // Should not crash or lag
-      expect(container).toBeTruthy();
+      expect(toJSON()).toBeTruthy();
     });
   });
 
