@@ -26,8 +26,6 @@ import { OfflineNotificationService } from '@/services/offline/OfflineNotificati
 import { useTheme } from '@/hooks/useTheme';
 import { toastConfig } from '@/services/notifications/ToastService';
 import { DevelopmentAuthHelper } from '@/services/auth/DevelopmentAuthHelper';
-// Temporarily disabled - requires @react-native-firebase/messaging package
-// import { FirebaseCloudMessagingService } from '@/services/notifications/FirebaseCloudMessagingService';
 import { ModalRenderer } from '@/components/ui/ModalRenderer';
 import { ErrorBoundary } from '@/components/common';
 
@@ -96,20 +94,6 @@ export default function RootLayout() {
     }
   }, [isInitialized, initializeAuthState]);
 
-
-  // Set up deep linking handler for notifications
-  useEffect(() => {
-    console.log('[RootLayout] 🔗 Registering deep linking handler for notifications');
-
-    // Register the navigation handler with FCM service
-    // This enables notifications to route to specific screens/passages
-    // Temporarily disabled - requires @react-native-firebase/messaging package
-    // const fcmService = FirebaseCloudMessagingService.getInstance();
-    // fcmService.setNavigationHandler((deepLink) => {
-    //   console.log(`[RootLayout] 🔗 Navigating to deep link: ${deepLink}`);
-    //   router.push(deepLink);
-    // });
-  }, []);
 
   // Set up notification response handler for when user taps a notification
   useEffect(() => {
