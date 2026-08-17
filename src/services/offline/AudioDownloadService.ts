@@ -97,9 +97,9 @@ export class AudioDownloadService {
 
           // Download audio for each section
           const sections = [
-            { key: 'gospel', text: reading.gospel?.text },
-            { key: 'firstReading', text: reading.firstReading?.text },
-            { key: 'psalm', text: reading.psalm?.text },
+            { key: 'gospel', text: reading.gospel?.content },
+            { key: 'firstReading', text: reading.firstReading?.content },
+            { key: 'psalm', text: reading.psalm?.content },
           ];
 
           for (const section of sections) {
