@@ -8,13 +8,13 @@
  */
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { DeviceFingerprint } from '../types/trial.types';
+import { DeviceFingerprint } from '../../types/trial.types';
 import {
   generateDeviceFingerprint,
   compareFingerprints,
   detectSuspiciousActivity,
   calculateSimilarity,
-} from '../utils/device-fingerprint';
+} from '../../utils/device-fingerprint';
 
 interface FraudRecord {
   email: string;

@@ -26,6 +26,7 @@ export interface PaymentIntent {
   currency: string;
   status: PaymentStatus;
   clientSecret?: string; // Stripe
+  metadata?: { checkoutUrl?: string }; // Stripe - checkout session URL to redirect to
   createdAt: number;
 }
 

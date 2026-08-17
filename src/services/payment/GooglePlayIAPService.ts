@@ -14,6 +14,8 @@ import {
   PaymentResult,
   RestoreResult,
   PurchaseRecord,
+  CancellationResult,
+  SubscriptionStatus,
 } from '../../types/payment.types';
 import { Platform } from 'react-native';
 import * as RNIap from 'react-native-iap';
@@ -254,7 +256,7 @@ export class GooglePlayIAPService implements IPaymentService {
             productId: purchase.productId,
             provider: this.provider,
             transactionId: purchase.transactionId || 'unknown',
-            receipt: purchase.transactionReceipt,
+            receipt: purchase.purchaseToken || '',
             purchaseDate: purchase.transactionDate || Date.now(),
             deviceFingerprint,
             validated: true, // TODO: Validate with server
@@ -330,6 +332,80 @@ export class GooglePlayIAPService implements IPaymentService {
     } catch (error) {
       console.error('[GooglePlayIAPService] Cleanup failed:', error);
     }
+  }
+
+  // Phase 7: Subscription management methods
+
+  /**
+   * Cancel a subscription
+   * Note: Google Play subscriptions are managed by the user through the Play Store app
+   * This method cannot directly cancel subscriptions - it only reflects the user's action
+   */
+  async cancelSubscription(subscriptionId: string): Promise<CancellationResult> {
+    console.log('[GooglePlayIAPService] Subscription cancellation initiated:', subscriptionId);
+
+    // Google Play doesn't provide a programmatic way to cancel subscriptions
+    // Users must manage subscriptions through the Play Store app
+    // This is a platform limitation, not an error
+
+    return {
+      success: false,
+      subscriptionId,
+      error: 'Subscriptions must be managed through the Play Store app. Go to Play Store > Menu > Payments & subscriptions > Subscriptions.',
+    };
+  }
+
+  /**
+   * Get subscription status
+   * Queries via Firebase Cloud Function validation with Google Play
+   */
+  async getSubscriptionStatus(subscriptionId: string): Promise<SubscriptionStatus> {
+    console.log('[GooglePlayIAPService] Getting subscription status:', subscriptionId);
+
+    try {
+      const validateGoogleSubscription = httpsCallable(
+        this.functions,
+        'validateGoogleSubscription'
+      );
+
+      const result = await validateGoogleSubscription({ subscriptionId });
+      const data = result.data as {
+        isActive: boolean;
+        expiryDate?: number;
+        autoRenewEnabled?: boolean;
+      };
+
+      return {
+        isActive: data.isActive,
+        expiryDate: data.expiryDate,
+        willRenew: data.isActive && data.autoRenewEnabled !== false,
+        autoRenewEnabled: data.autoRenewEnabled !== false,
+      };
+    } catch (error) {
+      console.error('[GooglePlayIAPService] Get status failed:', error);
+      return {
+        isActive: false,
+        willRenew: false,
+        autoRenewEnabled: false,
+      };
+    }
+  }
+
+  /**
+   * Update payment method for subscription
+   * Opens Play Store where user can manage payment method
+   */
+  async updatePaymentMethod(subscriptionId: string): Promise<PaymentResult> {
+    console.log('[GooglePlayIAPService] Update payment method for subscription:', subscriptionId);
+
+    // Google Play doesn't provide a direct API to change payment methods
+    // Users must manage this through the Play Store app
+    return {
+      success: false,
+      provider: this.provider,
+      error: 'Payment methods must be updated through the Play Store app. Go to Play Store > Menu > Payments & subscriptions > Payment methods.',
+      timestamp: Date.now(),
+    };
   }
 
   /**
