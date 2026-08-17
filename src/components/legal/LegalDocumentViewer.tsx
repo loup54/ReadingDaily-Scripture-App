@@ -267,12 +267,27 @@ export const LegalDocumentViewer: React.FC<LegalDocumentViewerProps> = ({
       const match = line.match(/^(#{1,6})\s+(.+)$/);
 
       if (match) {
+        const level = match[1].length;
+        const title = match[2];
+
+        // The document's own top-level title is already shown in the
+        // header above — a bare "# <Title>" line at the top of the
+        // content (a normal authoring convention) was otherwise parsed
+        // as a real section, producing a spurious near-empty duplicate
+        // matching the header title and inflating the section count.
+        if (
+          parsed.length === 0 &&
+          !currentSection.title &&
+          level === 1 &&
+          title.trim().toLowerCase() === document.title.trim().toLowerCase()
+        ) {
+          continue;
+        }
+
         if (currentSection.title) {
           parsed.push(currentSection);
         }
 
-        const level = match[1].length;
-        const title = match[2];
         currentSection = {
           title,
           level,
@@ -383,7 +398,12 @@ export const LegalDocumentViewer: React.FC<LegalDocumentViewerProps> = ({
     <View style={[styles.container, { backgroundColor: colors.background.primary }]}>
       {/* Header */}
       <View style={[styles.header, { backgroundColor: colors.background.card, borderColor: colors.ui.border }]}>
-        <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+        <TouchableOpacity
+          onPress={onClose}
+          style={styles.closeButton}
+          accessibilityRole="button"
+          accessibilityLabel="Close"
+        >
           <Ionicons name="close" size={24} color={colors.text.primary} />
         </TouchableOpacity>
 
@@ -396,7 +416,12 @@ export const LegalDocumentViewer: React.FC<LegalDocumentViewerProps> = ({
           </Text>
         </View>
 
-        <TouchableOpacity onPress={handleShare} style={styles.shareButton}>
+        <TouchableOpacity
+          onPress={handleShare}
+          style={styles.shareButton}
+          accessibilityRole="button"
+          accessibilityLabel="Share"
+        >
           <Ionicons name="share-social" size={22} color={colors.primary.blue} />
         </TouchableOpacity>
       </View>
@@ -410,16 +435,24 @@ export const LegalDocumentViewer: React.FC<LegalDocumentViewerProps> = ({
           placeholderTextColor={colors.text.tertiary}
           value={searchQuery}
           onChangeText={setSearchQuery}
+          accessibilityLabel="Search document"
         />
         {searchQuery.length > 0 && (
-          <TouchableOpacity onPress={() => setSearchQuery('')}>
+          <TouchableOpacity
+            onPress={() => setSearchQuery('')}
+            accessibilityRole="button"
+            accessibilityLabel="Clear search"
+          >
             <Ionicons name="close-circle" size={18} color={colors.text.secondary} />
           </TouchableOpacity>
         )}
       </View>
 
       {/* Expand/Collapse Controls */}
-      <View style={[styles.controlsContainer, { backgroundColor: colors.background.secondary }]}>
+      <View
+        testID="sectionControlsBar"
+        style={[styles.controlsContainer, { backgroundColor: colors.background.secondary }]}
+      >
         <TouchableOpacity onPress={expandAll} style={styles.controlButton}>
           <Ionicons name="expand" size={16} color={colors.primary.blue} />
           <Text style={[styles.controlText, { color: colors.primary.blue }]}>Expand All</Text>
@@ -529,6 +562,7 @@ export const LegalDocumentViewer: React.FC<LegalDocumentViewerProps> = ({
 
         {/* Metadata Footer */}
         <View
+          testID="metadataFooter"
           style={[
             styles.metadataFooter,
             { backgroundColor: colors.background.card, borderColor: colors.ui.border },
