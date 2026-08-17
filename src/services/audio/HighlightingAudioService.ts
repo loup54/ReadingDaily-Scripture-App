@@ -10,7 +10,7 @@
  * - Error handling and cleanup
  */
 
-import { Audio } from 'expo-av';
+import { Audio, AVPlaybackStatus, InterruptionModeIOS, InterruptionModeAndroid } from 'expo-av';
 import { audioHighlightingService } from './AudioHighlightingService';
 
 /**
@@ -104,8 +104,8 @@ export class HighlightingAudioService {
       // Set audio mode
       await Audio.setAudioModeAsync({
         allowsRecordingIOS: false,
-        interruptionModeIOS: Audio.INTERRUPTION_MODE_IOS_DO_NOT_MIX,
-        interruptionModeAndroid: Audio.INTERRUPTION_MODE_ANDROID_DO_NOT_MIX,
+        interruptionModeIOS: InterruptionModeIOS.DoNotMix,
+        interruptionModeAndroid: InterruptionModeAndroid.DoNotMix,
         shouldDuckAndroid: true,
         staysActiveInBackground: true,
         playThroughEarpieceAndroid: false,
@@ -311,9 +311,9 @@ export class HighlightingAudioService {
   /**
    * Handle sound status updates from expo-av
    */
-  private onSoundStatusUpdate(status: Audio.AVPlaybackStatus): void {
-    if (!status.isLoaded) {
-      this.status.error = status.error?.message || 'Unknown error';
+  private onSoundStatusUpdate(status: AVPlaybackStatus): void {
+    if (status.isLoaded === false) {
+      this.status.error = status.error || 'Unknown error';
       return;
     }
 
