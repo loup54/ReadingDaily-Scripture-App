@@ -635,7 +635,7 @@ export const ComplianceAnalyticsScreen: React.FC = () => {
 
         {/* Timeline Tab */}
         {state.activeTab === 'timeline' && (
-          state.report && state.report.timeline && state.report.timeline.length > 0 ? (
+          state.report && (state.report.acceptanceTimeline.length > 0 || state.report.signatureTimeline.length > 0) ? (
           <>
             <View style={dynamicStyles.card}>
               <Text style={{ fontSize: 16, fontWeight: '600', color: colors.text.primary, marginBottom: 16 }}>Acceptance Timeline</Text>
@@ -720,7 +720,7 @@ export const ComplianceAnalyticsScreen: React.FC = () => {
                 </View>
                 <View style={dynamicStyles.statRow}>
                   <Text style={dynamicStyles.statLabel}>Success Rate</Text>
-                  <Text style={dynamicStyles.statValue}>{Math.round(state.signatureStats.successRate * 100)}%</Text>
+                  <Text style={dynamicStyles.statValue}>{Math.round(state.signatureStats.successRate)}%</Text>
                 </View>
                 <View style={[dynamicStyles.statRow, { borderBottomWidth: 0 }]}>
                   <Text style={dynamicStyles.statLabel}>Avg Time to Sign</Text>
