@@ -103,12 +103,16 @@ const BackupCard: React.FC<{
           <TouchableOpacity
             style={[styles.actionButton, { backgroundColor: colors.primary.blue }]}
             onPress={onRestore}
+            accessibilityRole="button"
+            accessibilityLabel="Restore backup"
           >
             <Ionicons name="download-outline" size={16} color="#FFFFFF" />
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.actionButton, { backgroundColor: Colors.accent.red + '40' }]}
             onPress={onDelete}
+            accessibilityRole="button"
+            accessibilityLabel="Delete backup"
           >
             <Ionicons name="trash-outline" size={16} color={Colors.accent.red} />
           </TouchableOpacity>
@@ -346,7 +350,7 @@ export const BackupExportScreen: React.FC<{ onBack?: () => void }> = ({ onBack }
       {/* Header */}
       <View style={[styles.header, { borderColor: colors.ui.border }]}>
         {onBack && (
-          <TouchableOpacity onPress={onBack}>
+          <TouchableOpacity onPress={onBack} accessibilityRole="button" accessibilityLabel="Back">
             <Ionicons name="chevron-back" size={28} color={colors.text.primary} />
           </TouchableOpacity>
         )}
@@ -616,6 +620,7 @@ export const BackupExportScreen: React.FC<{ onBack?: () => void }> = ({ onBack }
               secureTextEntry
               value={password}
               onChangeText={setPassword}
+              accessibilityLabel="Password"
             />
 
             <TextInput
