@@ -76,9 +76,12 @@ export const PronunciationPractice: React.FC<PronunciationPracticeProps> = ({
         durationSeconds,
         overallScore: result.score,
         accuracy: result.comparison?.accuracy || 0,
-        fluency: result.comparison?.fluency || 0,
-        completeness: result.comparison?.completeness || 0,
-        prosody: result.comparison?.prosody || 0,
+        // Basic word-match comparison (speechToTextService) doesn't produce
+        // fluency/completeness/prosody scores - those come from Azure's
+        // richer pronunciation assessment, not used on this screen's path.
+        fluency: 0,
+        completeness: 0,
+        prosody: 0,
         wordCount,
         wordsCorrect: Math.round((result.score / 100) * wordCount),
         subscriptionTier: currentTier,
