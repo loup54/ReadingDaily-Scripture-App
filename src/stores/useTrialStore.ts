@@ -27,6 +27,7 @@ import {
 import { ENV } from '../config/env';
 import { PaymentServiceFactory } from '../services/payment';
 import { IPaymentService } from '../services/payment/IPaymentService';
+import { subscriptionCancellationService } from '../services/subscription/SubscriptionCancellationService';
 import { analyticsService } from '../services/analytics/AnalyticsService';
 
 // Development bypass: Skip trial/paywall when SKIP_TRIAL is enabled
@@ -398,11 +399,6 @@ export const useTrialStore = create<TrialStoreState>()(
           }
 
           console.log('🔄 Processing subscription cancellation via backend');
-
-          // Import cancellation service
-          const { subscriptionCancellationService } = await import(
-            '@/services/subscription/SubscriptionCancellationService'
-          );
 
           // Call backend Firebase Cloud Function
           const response = await subscriptionCancellationService.cancelSubscription({
