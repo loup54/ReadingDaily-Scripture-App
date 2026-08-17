@@ -57,13 +57,14 @@ jest.mock('@/stores/progressStore', () => ({
 
 describe('ProgressDashboard Screen', () => {
   const mockProgressData: ProgressData = {
-    userId: 'test-user-123',
     streaks: {
       currentStreak: 5,
       longestStreak: 10,
       lastReadingDate: new Date('2025-11-08'),
       totalReadings: 15,
       totalDays: 12,
+      joinedDate: new Date('2025-10-01'),
+      lastUpdated: new Date('2025-11-08'),
     },
     badges: [
       {
@@ -88,12 +89,49 @@ describe('ProgressDashboard Screen', () => {
       },
     ],
     readings: {
-      '2025-11-01': { duration: 300, readingType: 'full' },
-      '2025-11-02': { duration: 300, readingType: 'full' },
-      '2025-11-05': { duration: 300, readingType: 'full' },
-      '2025-11-08': { duration: 300, readingType: 'full' },
+      '2025-11-01': {
+        date: '2025-11-01',
+        readingType: 'full',
+        timestamp: new Date('2025-11-01'),
+        readingCount: 3,
+        audioUsed: false,
+        pronunciationUsed: false,
+        duration: 300,
+      },
+      '2025-11-02': {
+        date: '2025-11-02',
+        readingType: 'full',
+        timestamp: new Date('2025-11-02'),
+        readingCount: 3,
+        audioUsed: false,
+        pronunciationUsed: false,
+        duration: 300,
+      },
+      '2025-11-05': {
+        date: '2025-11-05',
+        readingType: 'full',
+        timestamp: new Date('2025-11-05'),
+        readingCount: 3,
+        audioUsed: false,
+        pronunciationUsed: false,
+        duration: 300,
+      },
+      '2025-11-08': {
+        date: '2025-11-08',
+        readingType: 'full',
+        timestamp: new Date('2025-11-08'),
+        readingCount: 3,
+        audioUsed: false,
+        pronunciationUsed: false,
+        duration: 300,
+      },
     },
-    lastUpdated: new Date('2025-11-08'),
+    stats: {
+      totalReadings: 15,
+      uniqueDaysRead: 12,
+      currentMonthReadings: 4,
+      consistency: 80,
+    },
   };
 
   describe('Rendering', () => {

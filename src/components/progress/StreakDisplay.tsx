@@ -12,6 +12,7 @@ import {
   Text,
   StyleSheet,
   Animated,
+  StyleProp,
   ViewStyle,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -40,7 +41,7 @@ export interface StreakDisplayProps {
   /**
    * Optional style override
    */
-  style?: ViewStyle;
+  style?: StyleProp<ViewStyle>;
 
   /**
    * Callback when streak is pressed

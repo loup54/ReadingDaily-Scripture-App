@@ -268,8 +268,8 @@ export const ProgressDashboard: React.FC<ProgressDashboardProps> = ({
               ]}
             >
               <Text style={[styles.avatarText, { color: colors.text.white }]}>
-                {user?.displayName
-                  ? user.displayName
+                {user?.fullName
+                  ? user.fullName
                       .split(' ')
                       .map((n) => n[0])
                       .join('')
@@ -284,7 +284,7 @@ export const ProgressDashboard: React.FC<ProgressDashboardProps> = ({
                 Welcome back!
               </Text>
               <Text style={[styles.headerTitle, { color: colors.text.primary }]}>
-                {user?.displayName ? `${user.displayName}'s Progress` : 'Your Progress'}
+                {user?.fullName ? `${user.fullName}'s Progress` : 'Your Progress'}
               </Text>
             </View>
           </View>
