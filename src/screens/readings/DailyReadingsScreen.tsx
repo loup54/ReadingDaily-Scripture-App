@@ -64,6 +64,8 @@ export const DailyReadingsScreen: React.FC<DailyReadingsScreenProps> = ({
   const { liturgical } = useTheme();
   const { loading } = useReadingStore();
   const { settings: appSettings, addDiscoveredFeature, hasDiscoveredFeature } = useSettingsStore();
+  const { user } = useAuthStore();
+  const userId = user?.id;
   const [isReadingCached, setIsReadingCached] = useState(false);
   const [showOfflineMessage, setShowOfflineMessage] = useState(false);
   const [showPronunciationModal, setShowPronunciationModal] = useState(false);
@@ -146,7 +148,6 @@ export const DailyReadingsScreen: React.FC<DailyReadingsScreenProps> = ({
   const { colors } = useTheme();
   const { isActive, hasPurchased } = useTrialStore();
   const { settings } = useSettingsStore();
-  const { userId } = useAuthStore();
   // Word-level audio highlighting is disabled by default
   // Timing data is generated daily by Cloud Function; users can enable in Settings once available
   const enableAudioHighlighting = settings.audio.enableAudioHighlighting;
@@ -231,6 +232,7 @@ export const DailyReadingsScreen: React.FC<DailyReadingsScreenProps> = ({
             <IconButton
               icon="settings-outline"
               onPress={onSettingsPress}
+              accessibilityLabel="Settings"
               variant="default"
               size="md"
               color={colors.text.white}
@@ -264,10 +266,12 @@ export const DailyReadingsScreen: React.FC<DailyReadingsScreenProps> = ({
               {/* Offline Message (if viewing cached reading offline) */}
               {showOfflineMessage && isReadingCached && (
                 <OfflineMessageBanner
+                  visible
+                  title="Offline"
                   message="📦 You're viewing a cached reading offline"
                   type="info"
                   autoDismiss={true}
-                  dismissDuration={5000}
+                  autoDismissDelay={5000}
                 />
               )}
 
