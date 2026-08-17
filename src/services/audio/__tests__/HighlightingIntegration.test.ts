@@ -95,6 +95,14 @@ describe('Audio Highlighting System - Integration Tests', () => {
     service.setDataProvider(provider as any);
   });
 
+  // getInstance() returns the same singleton across every test in this file.
+  // startHighlighting() no-ops on re-entry when called again with the same
+  // activeReadingId (every test here uses 'test_john_1_1'), which silently
+  // skipped re-init and leaked state/callbacks between tests.
+  afterEach(() => {
+    service.stopHighlighting();
+  });
+
   describe('Service Initialization & Data Loading', () => {
     it('should load timing data from provider', async () => {
       await service.startHighlighting({
@@ -102,10 +110,13 @@ describe('Audio Highlighting System - Integration Tests', () => {
         readingType: 'gospel',
       });
 
+      // HighlightingState has no totalWords/isLoading fields (checked
+      // src/types/highlighting.types.ts) — word count lives on getMetrics(),
+      // and there's no loading flag: by the time startHighlighting()'s
+      // promise resolves, loading is already complete.
+      expect(service.getMetrics().wordCount).toBe(50);
       const state = service.getCurrentState();
-      expect(state.totalWords).toBe(50);
       expect(state.durationMs).toBeGreaterThan(0);
-      expect(state.isLoading).toBe(false);
     });
 
     it('should initialize with correct state', async () => {
@@ -120,19 +131,24 @@ describe('Audio Highlighting System - Integration Tests', () => {
       expect(state.currentPositionMs).toBe(0);
     });
 
-    it('should emit state change on initialization', async () => {
-      const stateChanges: any[] = [];
-
-      service.onStateChange((state) => {
-        stateChanges.push(state);
-      });
-
+    it('should emit state change on a playback action', async () => {
+      // startHighlighting() itself never emits a state change — position
+      // updates are driven entirely by explicit calls (updateAudioPosition,
+      // pauseHighlighting, etc; see startPositionTracking()'s comment in
+      // AudioHighlightingService.ts, there's no polling interval). Emission
+      // is real, just not on bare init — exercise it via pauseHighlighting().
       await service.startHighlighting({
         readingId: 'test_john_1_1',
         readingType: 'gospel',
       });
 
-      // Should have emitted at least one state change
+      const stateChanges: any[] = [];
+      service.onStateChange((state) => {
+        stateChanges.push(state);
+      });
+
+      service.pauseHighlighting();
+
       expect(stateChanges.length).toBeGreaterThan(0);
     });
   });
@@ -555,7 +571,7 @@ describe('Audio Highlighting System - Integration Tests', () => {
 
       const state = service.getCurrentState();
       expect(state.isPlaying).toBe(false);
-      expect(state.totalWords).toBe(0);
+      expect(service.getMetrics().wordCount).toBe(0);
     });
 
     it('should allow restart after cleanup', async () => {
@@ -572,8 +588,7 @@ describe('Audio Highlighting System - Integration Tests', () => {
         readingType: 'gospel',
       });
 
-      const state = service.getCurrentState();
-      expect(state.totalWords).toBe(50);
+      expect(service.getMetrics().wordCount).toBe(50);
     });
   });
 });

@@ -55,6 +55,15 @@ describe('AudioHighlightingService', () => {
     service.setDataProvider(new MockTimingDataProvider() as any);
   });
 
+  // getInstance() returns the same singleton across every test in this file.
+  // startHighlighting() has a re-entry guard that no-ops when called again
+  // with the same activeReadingId (every test here uses 'test_gospel'),
+  // which silently skipped re-init and leaked state/callbacks between tests.
+  // stopHighlighting() clears activeReadingId so the next test's start is real.
+  afterEach(() => {
+    service.stopHighlighting();
+  });
+
   describe('Binary Search Word Lookup', () => {
     it('should find word at exact start position', async () => {
       await service.startHighlighting({
