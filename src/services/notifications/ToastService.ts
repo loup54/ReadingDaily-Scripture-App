@@ -239,15 +239,10 @@ export class ToastService {
       position: config.position || 'top',
       text1: config.text1,
       text2: config.text2,
-      duration: config.duration || this.DEFAULT_DURATION,
+      visibilityTime: config.duration || this.DEFAULT_DURATION,
       autoHide: true,
       topOffset: 60,
       bottomOffset: 40,
-      style: {
-        backgroundColor: typeColors.bg,
-        borderLeftWidth: 4,
-        borderLeftColor: typeColors.border,
-      },
       text1Style: {
         fontSize: 16,
         fontWeight: '600',
@@ -274,7 +269,7 @@ export class ToastService {
    * Hide all toasts
    */
   static hideAll() {
-    Toast.hideAll();
+    Toast.hide();
   }
 }
 
