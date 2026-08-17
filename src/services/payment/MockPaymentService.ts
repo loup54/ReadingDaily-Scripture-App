@@ -91,7 +91,7 @@ export class MockPaymentService implements IPaymentService {
 
     const intentId = await Crypto.digestStringAsync(
       Crypto.CryptoDigestAlgorithm.SHA256,
-      `${productId}-${Date.now()}`
+      `${productId}-${Date.now()}-${Math.random()}`
     );
 
     return {
@@ -107,6 +107,11 @@ export class MockPaymentService implements IPaymentService {
 
   async purchase(productId: string): Promise<PaymentResult> {
     console.log('[MockPaymentService] Processing purchase:', productId);
+
+    const product = this.products.find((p) => p.id === productId);
+    if (!product) {
+      throw new Error(`Product not found: ${productId}`);
+    }
 
     // Simulate network delay
     await new Promise((resolve) => setTimeout(resolve, 1500));
@@ -147,8 +152,7 @@ export class MockPaymentService implements IPaymentService {
     );
 
     // NEW - Phase 7: Handle subscription purchases
-    const product = this.products.find((p) => p.id === productId);
-    if (product?.type === 'subscription') {
+    if (product.type === 'subscription') {
       // Generate subscription ID
       const subscriptionId = await Crypto.digestStringAsync(
         Crypto.CryptoDigestAlgorithm.SHA256,
