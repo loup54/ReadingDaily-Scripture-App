@@ -35,11 +35,17 @@ class BiometricServiceClass {
       const types = await LocalAuthentication.supportedAuthenticationTypesAsync();
       const biometricTypes: ('fingerprint' | 'faceRecognition' | 'iris')[] = [];
 
-      // Map LocalAuthentication types to our types
-      // types include 1 (fingerprint), 2 (face), 3 (iris)
-      if (types & 1) biometricTypes.push('fingerprint');
-      if (types & 2) biometricTypes.push('faceRecognition');
-      if (types & 3) biometricTypes.push('iris');
+      // types is an array of AuthenticationType enum values (1=fingerprint, 2=face, 3=iris),
+      // not a bitmask
+      if (types.includes(LocalAuthentication.AuthenticationType.FINGERPRINT)) {
+        biometricTypes.push('fingerprint');
+      }
+      if (types.includes(LocalAuthentication.AuthenticationType.FACIAL_RECOGNITION)) {
+        biometricTypes.push('faceRecognition');
+      }
+      if (types.includes(LocalAuthentication.AuthenticationType.IRIS)) {
+        biometricTypes.push('iris');
+      }
 
       // Device is considered secure if it has compatible hardware and enrolled biometrics
       const isDeviceSecure = compatible && enrolled;
@@ -132,7 +138,7 @@ class BiometricServiceClass {
 
       const authenticated = await LocalAuthentication.authenticateAsync({
         disableDeviceFallback: false, // Allow PIN/password as fallback
-        reason: 'Authenticate to access your account',
+        promptMessage: 'Authenticate to access your account',
         fallbackLabel: 'Use passcode', // iOS fallback label
         requireConfirmation: true, // Require user confirmation
       });
