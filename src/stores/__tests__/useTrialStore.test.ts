@@ -7,6 +7,57 @@
 
 import { useTrialStore } from '../useTrialStore';
 import { TIER_FEATURES } from '@/types/subscription.types';
+import { IPaymentService } from '@/services/payment/IPaymentService';
+
+// upgradeToBasic/purchaseLifetimeAccess/restorePurchase auto-init a payment
+// service if state.paymentService is null via PaymentServiceFactory.create(),
+// which under jest's default Platform.OS ('ios') and no expo-constants mock
+// falls through to a real, native-module-backed AppleIAPService that fails
+// to initialize in this environment. Injecting a working mock directly into
+// store state sidesteps the factory entirely.
+const mockPaymentService: IPaymentService = {
+  provider: 'mock',
+  initialize: jest.fn().mockResolvedValue(undefined),
+  isAvailable: jest.fn().mockResolvedValue(true),
+  getProducts: jest.fn().mockResolvedValue([]),
+  createPaymentIntent: jest.fn(),
+  purchase: jest.fn().mockResolvedValue({
+    success: true,
+    provider: 'mock',
+    transactionId: 'tx-mock-001',
+    subscriptionId: 'sub-mock-001',
+    receipt: 'receipt-mock-001',
+    timestamp: Date.now(),
+  }),
+  restorePurchases: jest.fn().mockResolvedValue({ success: true, purchases: [] }),
+  validateReceipt: jest.fn().mockResolvedValue(true),
+  cleanup: jest.fn().mockResolvedValue(undefined),
+  cancelSubscription: jest.fn().mockResolvedValue({ success: true }),
+  getSubscriptionStatus: jest.fn().mockResolvedValue({
+    isActive: true,
+    willRenew: true,
+    autoRenewEnabled: true,
+  }),
+  updatePaymentMethod: jest.fn().mockResolvedValue({
+    success: true,
+    provider: 'mock',
+    timestamp: Date.now(),
+  }),
+};
+
+// cancelSubscription (the store action) doesn't go through paymentService at
+// all -- it calls a real Firebase Cloud Function via
+// subscriptionCancellationService, which requires a real authenticated user
+// and network. Mocked to succeed the way a real backend cancellation would.
+jest.mock('@/services/subscription/SubscriptionCancellationService', () => ({
+  subscriptionCancellationService: {
+    cancelSubscription: jest.fn().mockResolvedValue({
+      success: true,
+      message: 'Subscription cancelled',
+      cancellationDate: Date.now(),
+    }),
+  },
+}));
 
 describe('useTrialStore - Subscription Management', () => {
   beforeEach(() => {
@@ -18,15 +69,16 @@ describe('useTrialStore - Subscription Management', () => {
       autoRenewEnabled: false,
       dailyPracticeMinutesUsed: 0,
       lastPracticeResetDate: Date.now(),
+      paymentService: mockPaymentService,
     });
+    jest.clearAllMocks();
   });
 
   // ==================== FEATURE GATING TESTS ====================
 
   describe('Feature Gating - getSubscriptionFeatures()', () => {
     it('should return free tier features', () => {
-      const state = useTrialStore.getState();
-      const features = state.getSubscriptionFeatures();
+      const features = useTrialStore.getState().getSubscriptionFeatures();
 
       expect(features.tier).toBe('free');
       expect(features.fullFeedback).toBe(false);
@@ -39,10 +91,9 @@ describe('useTrialStore - Subscription Management', () => {
     });
 
     it('should return basic tier features when upgraded', () => {
-      const state = useTrialStore.getState();
-      state.currentTier = 'basic';
+      useTrialStore.setState({ currentTier: 'basic' });
 
-      const features = state.getSubscriptionFeatures();
+      const features = useTrialStore.getState().getSubscriptionFeatures();
       expect(features.tier).toBe('basic');
       expect(features.fullFeedback).toBe(true);
       expect(features.wordLevelAnalysis).toBe(true);
@@ -54,14 +105,12 @@ describe('useTrialStore - Subscription Management', () => {
     });
 
     it('should match TIER_FEATURES definition', () => {
-      const state = useTrialStore.getState();
-
-      state.currentTier = 'free';
-      const freeFeatures = state.getSubscriptionFeatures();
+      useTrialStore.setState({ currentTier: 'free' });
+      const freeFeatures = useTrialStore.getState().getSubscriptionFeatures();
       expect(freeFeatures).toEqual(TIER_FEATURES.free);
 
-      state.currentTier = 'basic';
-      const basicFeatures = state.getSubscriptionFeatures();
+      useTrialStore.setState({ currentTier: 'basic' });
+      const basicFeatures = useTrialStore.getState().getSubscriptionFeatures();
       expect(basicFeatures).toEqual(TIER_FEATURES.basic);
     });
   });
@@ -70,114 +119,102 @@ describe('useTrialStore - Subscription Management', () => {
 
   describe('Daily Limit - addPracticeMinutes()', () => {
     it('should add practice minutes', () => {
-      const state = useTrialStore.getState();
-      state.addPracticeMinutes(5);
+      useTrialStore.getState().addPracticeMinutes(5);
 
-      expect(state.dailyPracticeMinutesUsed).toBe(5);
+      expect(useTrialStore.getState().dailyPracticeMinutesUsed).toBe(5);
     });
 
     it('should accumulate practice minutes', () => {
-      const state = useTrialStore.getState();
-      state.addPracticeMinutes(3);
-      state.addPracticeMinutes(4);
+      useTrialStore.getState().addPracticeMinutes(3);
+      useTrialStore.getState().addPracticeMinutes(4);
 
-      expect(state.dailyPracticeMinutesUsed).toBe(7);
+      expect(useTrialStore.getState().dailyPracticeMinutesUsed).toBe(7);
     });
 
     it('should cap free tier at 10 minutes', () => {
-      const state = useTrialStore.getState();
-      state.currentTier = 'free';
+      useTrialStore.setState({ currentTier: 'free' });
 
-      state.addPracticeMinutes(5);
-      state.addPracticeMinutes(5);
-      state.addPracticeMinutes(5); // Should be capped
+      useTrialStore.getState().addPracticeMinutes(5);
+      useTrialStore.getState().addPracticeMinutes(5);
+      useTrialStore.getState().addPracticeMinutes(5); // Should be capped
 
-      expect(state.dailyPracticeMinutesUsed).toBeLessThanOrEqual(10);
+      expect(useTrialStore.getState().dailyPracticeMinutesUsed).toBeLessThanOrEqual(10);
     });
 
     it('should allow unlimited for basic tier', () => {
-      const state = useTrialStore.getState();
-      state.currentTier = 'basic';
+      useTrialStore.setState({ currentTier: 'basic' });
 
       for (let i = 0; i < 100; i++) {
-        state.addPracticeMinutes(1);
+        useTrialStore.getState().addPracticeMinutes(1);
       }
 
-      expect(state.dailyPracticeMinutesUsed).toBe(100);
+      expect(useTrialStore.getState().dailyPracticeMinutesUsed).toBe(100);
     });
   });
 
   describe('Daily Limit - isDailyLimitReached()', () => {
     it('should return false when under limit', () => {
-      const state = useTrialStore.getState();
-      state.currentTier = 'free';
-      state.addPracticeMinutes(5);
+      useTrialStore.setState({ currentTier: 'free' });
+      useTrialStore.getState().addPracticeMinutes(5);
 
-      expect(state.isDailyLimitReached()).toBe(false);
+      expect(useTrialStore.getState().isDailyLimitReached()).toBe(false);
     });
 
     it('should return true when at limit', () => {
-      const state = useTrialStore.getState();
-      state.currentTier = 'free';
-      state.addPracticeMinutes(10);
+      useTrialStore.setState({ currentTier: 'free' });
+      useTrialStore.getState().addPracticeMinutes(10);
 
-      expect(state.isDailyLimitReached()).toBe(true);
+      expect(useTrialStore.getState().isDailyLimitReached()).toBe(true);
     });
 
     it('should return false for basic tier regardless of usage', () => {
-      const state = useTrialStore.getState();
-      state.currentTier = 'basic';
-      state.addPracticeMinutes(100);
+      useTrialStore.setState({ currentTier: 'basic' });
+      useTrialStore.getState().addPracticeMinutes(100);
 
-      expect(state.isDailyLimitReached()).toBe(false);
+      expect(useTrialStore.getState().isDailyLimitReached()).toBe(false);
     });
   });
 
   describe('Daily Limit - getRemainingDailyMinutes()', () => {
     it('should calculate remaining minutes for free tier', () => {
-      const state = useTrialStore.getState();
-      state.currentTier = 'free';
-      state.addPracticeMinutes(3);
+      useTrialStore.setState({ currentTier: 'free' });
+      useTrialStore.getState().addPracticeMinutes(3);
 
-      const remaining = state.getRemainingDailyMinutes();
+      const remaining = useTrialStore.getState().getRemainingDailyMinutes();
       expect(remaining).toBe(7); // 10 - 3
     });
 
     it('should return 0 when limit reached', () => {
-      const state = useTrialStore.getState();
-      state.currentTier = 'free';
-      state.addPracticeMinutes(10);
+      useTrialStore.setState({ currentTier: 'free' });
+      useTrialStore.getState().addPracticeMinutes(10);
 
-      const remaining = state.getRemainingDailyMinutes();
+      const remaining = useTrialStore.getState().getRemainingDailyMinutes();
       expect(remaining).toBe(0);
     });
 
     it('should return Infinity for basic tier', () => {
-      const state = useTrialStore.getState();
-      state.currentTier = 'basic';
-      state.addPracticeMinutes(5);
+      useTrialStore.setState({ currentTier: 'basic' });
+      useTrialStore.getState().addPracticeMinutes(5);
 
-      const remaining = state.getRemainingDailyMinutes();
+      const remaining = useTrialStore.getState().getRemainingDailyMinutes();
       expect(remaining).toBe(Infinity);
     });
   });
 
   describe('Daily Limit - resetDailyCounter()', () => {
     it('should reset daily usage counter', () => {
-      const state = useTrialStore.getState();
-      state.addPracticeMinutes(10);
-      expect(state.dailyPracticeMinutesUsed).toBe(10);
+      useTrialStore.getState().addPracticeMinutes(10);
+      expect(useTrialStore.getState().dailyPracticeMinutesUsed).toBe(10);
 
-      state.resetDailyCounter();
-      expect(state.dailyPracticeMinutesUsed).toBe(0);
+      useTrialStore.getState().resetDailyCounter();
+      expect(useTrialStore.getState().dailyPracticeMinutesUsed).toBe(0);
     });
 
     it('should update last reset date', () => {
-      const state = useTrialStore.getState();
-      const oldDate = state.lastPracticeResetDate;
+      const oldDate = useTrialStore.getState().lastPracticeResetDate;
 
-      state.resetDailyCounter();
-      const newDate = state.lastPracticeResetDate;
+      useTrialStore.getState().resetDailyCounter();
+      const newDate = useTrialStore.getState().lastPracticeResetDate;
 
       expect(newDate).toBeGreaterThanOrEqual(oldDate);
     });
@@ -187,89 +224,77 @@ describe('useTrialStore - Subscription Management', () => {
 
   describe('Subscription - upgradeToBasic()', () => {
     it('should upgrade tier to basic', async () => {
-      const state = useTrialStore.getState();
-      expect(state.currentTier).toBe('free');
+      expect(useTrialStore.getState().currentTier).toBe('free');
 
-      const success = await state.upgradeToBasic('basic_monthly_subscription');
+      const result = await useTrialStore.getState().upgradeToBasic('basic_monthly_subscription');
 
-      expect(success).toBe(true);
-      expect(state.currentTier).toBe('basic');
+      expect(result.success).toBe(true);
+      expect(useTrialStore.getState().currentTier).toBe('basic');
     });
 
     it('should update subscription status', async () => {
-      const state = useTrialStore.getState();
-      await state.upgradeToBasic('basic_monthly_subscription');
+      await useTrialStore.getState().upgradeToBasic('basic_monthly_subscription');
 
-      expect(state.subscriptionStatus).toBe('active');
-      expect(state.autoRenewEnabled).toBe(true);
+      expect(useTrialStore.getState().subscriptionStatus).toBe('active');
+      expect(useTrialStore.getState().autoRenewEnabled).toBe(true);
     });
 
-    it('should set subscription end date', async () => {
-      const state = useTrialStore.getState();
-      const beforeUpgrade = Date.now();
+    it('should call the payment service with the subscription product id', async () => {
+      await useTrialStore.getState().upgradeToBasic('basic_monthly_subscription');
 
-      await state.upgradeToBasic('basic_monthly_subscription');
-
-      expect(state.subscriptionEndDate).toBeDefined();
-      expect(state.subscriptionEndDate!).toBeGreaterThan(beforeUpgrade);
+      expect(mockPaymentService.purchase).toHaveBeenCalledWith('basic_monthly_subscription');
     });
 
     it('should handle upgrade failure gracefully', async () => {
-      const state = useTrialStore.getState();
+      (mockPaymentService.purchase as jest.Mock).mockResolvedValueOnce({
+        success: false,
+        provider: 'mock',
+        error: 'Card declined',
+        timestamp: Date.now(),
+      });
 
-      // This would fail if payment service is unavailable
-      // For now, mock assumes it succeeds
-      const success = await state.upgradeToBasic('basic_monthly_subscription');
-      expect(typeof success).toBe('boolean');
+      const result = await useTrialStore.getState().upgradeToBasic('basic_monthly_subscription');
+
+      expect(result.success).toBe(false);
+      expect(result.error).toBe('Card declined');
+      expect(useTrialStore.getState().currentTier).toBe('free');
     });
   });
 
   describe('Subscription - cancelSubscription()', () => {
     it('should cancel subscription', async () => {
-      const state = useTrialStore.getState();
-
       // First upgrade
-      await state.upgradeToBasic('basic_monthly_subscription');
-      expect(state.currentTier).toBe('basic');
+      await useTrialStore.getState().upgradeToBasic('basic_monthly_subscription');
+      expect(useTrialStore.getState().currentTier).toBe('basic');
 
       // Then cancel
-      const success = await state.cancelSubscription();
+      const success = await useTrialStore.getState().cancelSubscription();
 
       expect(success).toBe(true);
-      expect(state.currentTier).toBe('free');
+      expect(useTrialStore.getState().currentTier).toBe('free');
     });
 
     it('should update subscription status to cancelled', async () => {
-      const state = useTrialStore.getState();
+      await useTrialStore.getState().upgradeToBasic('basic_monthly_subscription');
+      await useTrialStore.getState().cancelSubscription();
 
-      // First upgrade
-      await state.upgradeToBasic('basic_monthly_subscription');
-
-      // Then cancel
-      await state.cancelSubscription();
-
-      expect(state.subscriptionStatus).toBe('cancelled');
+      expect(useTrialStore.getState().subscriptionStatus).toBe('cancelled');
     });
 
     it('should disable auto-renew', async () => {
-      const state = useTrialStore.getState();
+      await useTrialStore.getState().upgradeToBasic('basic_monthly_subscription');
+      expect(useTrialStore.getState().autoRenewEnabled).toBe(true);
 
-      // First upgrade
-      await state.upgradeToBasic('basic_monthly_subscription');
-      expect(state.autoRenewEnabled).toBe(true);
+      await useTrialStore.getState().cancelSubscription();
 
-      // Then cancel
-      await state.cancelSubscription();
-
-      expect(state.autoRenewEnabled).toBe(false);
+      expect(useTrialStore.getState().autoRenewEnabled).toBe(false);
     });
 
     it('should fail gracefully if not subscribed', async () => {
-      const state = useTrialStore.getState();
-      expect(state.currentTier).toBe('free');
+      expect(useTrialStore.getState().currentTier).toBe('free');
 
-      const success = await state.cancelSubscription();
-      expect(typeof success).toBe('boolean');
+      const success = await useTrialStore.getState().cancelSubscription();
+      expect(success).toBe(false);
     });
   });
 
@@ -277,26 +302,23 @@ describe('useTrialStore - Subscription Management', () => {
 
   describe('Persistence - AsyncStorage Integration', () => {
     it('should persist subscription tier', async () => {
-      const state = useTrialStore.getState();
-      state.currentTier = 'basic';
+      useTrialStore.setState({ currentTier: 'basic' });
 
       // In real scenario, store would be reloaded from AsyncStorage
       // This test verifies the state is set correctly
-      expect(state.currentTier).toBe('basic');
+      expect(useTrialStore.getState().currentTier).toBe('basic');
     });
 
     it('should persist subscription status', async () => {
-      const state = useTrialStore.getState();
-      state.subscriptionStatus = 'active';
+      useTrialStore.setState({ subscriptionStatus: 'active' });
 
-      expect(state.subscriptionStatus).toBe('active');
+      expect(useTrialStore.getState().subscriptionStatus).toBe('active');
     });
 
     it('should persist daily usage', async () => {
-      const state = useTrialStore.getState();
-      state.addPracticeMinutes(5);
+      useTrialStore.getState().addPracticeMinutes(5);
 
-      expect(state.dailyPracticeMinutesUsed).toBe(5);
+      expect(useTrialStore.getState().dailyPracticeMinutesUsed).toBe(5);
     });
   });
 
@@ -304,37 +326,33 @@ describe('useTrialStore - Subscription Management', () => {
 
   describe('Edge Cases', () => {
     it('should handle decimal practice minutes', () => {
-      const state = useTrialStore.getState();
-      state.addPracticeMinutes(1.5);
+      useTrialStore.getState().addPracticeMinutes(1.5);
 
-      expect(state.dailyPracticeMinutesUsed).toBeCloseTo(1.5, 1);
+      expect(useTrialStore.getState().dailyPracticeMinutesUsed).toBeCloseTo(1.5, 1);
     });
 
     it('should handle zero minutes', () => {
-      const state = useTrialStore.getState();
-      state.addPracticeMinutes(0);
+      useTrialStore.getState().addPracticeMinutes(0);
 
-      expect(state.dailyPracticeMinutesUsed).toBe(0);
+      expect(useTrialStore.getState().dailyPracticeMinutesUsed).toBe(0);
     });
 
     it('should handle negative minutes (should not happen, but safe)', () => {
-      const state = useTrialStore.getState();
-      state.dailyPracticeMinutesUsed = 5;
-      state.addPracticeMinutes(-2); // Should not go below 0
+      useTrialStore.setState({ dailyPracticeMinutesUsed: 5 });
+      useTrialStore.getState().addPracticeMinutes(-2); // Should not go below 0
 
-      expect(state.dailyPracticeMinutesUsed).toBeGreaterThanOrEqual(0);
+      expect(useTrialStore.getState().dailyPracticeMinutesUsed).toBeGreaterThanOrEqual(0);
     });
 
     it('should handle multiple resets', () => {
-      const state = useTrialStore.getState();
-      state.addPracticeMinutes(5);
+      useTrialStore.getState().addPracticeMinutes(5);
 
-      state.resetDailyCounter();
-      expect(state.dailyPracticeMinutesUsed).toBe(0);
+      useTrialStore.getState().resetDailyCounter();
+      expect(useTrialStore.getState().dailyPracticeMinutesUsed).toBe(0);
 
-      state.addPracticeMinutes(3);
-      state.resetDailyCounter();
-      expect(state.dailyPracticeMinutesUsed).toBe(0);
+      useTrialStore.getState().addPracticeMinutes(3);
+      useTrialStore.getState().resetDailyCounter();
+      expect(useTrialStore.getState().dailyPracticeMinutesUsed).toBe(0);
     });
   });
 
@@ -342,33 +360,29 @@ describe('useTrialStore - Subscription Management', () => {
 
   describe('State Consistency', () => {
     it('should maintain consistent tier features', () => {
-      const state = useTrialStore.getState();
-      state.currentTier = 'free';
+      useTrialStore.setState({ currentTier: 'free' });
 
-      const features = state.getSubscriptionFeatures();
+      const features = useTrialStore.getState().getSubscriptionFeatures();
       expect(features.tier).toBe('free');
       expect(features).toEqual(TIER_FEATURES['free']);
     });
 
     it('should sync features with tier changes', () => {
-      const state = useTrialStore.getState();
-
-      state.currentTier = 'free';
-      let features = state.getSubscriptionFeatures();
+      useTrialStore.setState({ currentTier: 'free' });
+      let features = useTrialStore.getState().getSubscriptionFeatures();
       expect(features.fullFeedback).toBe(false);
 
-      state.currentTier = 'basic';
-      features = state.getSubscriptionFeatures();
+      useTrialStore.setState({ currentTier: 'basic' });
+      features = useTrialStore.getState().getSubscriptionFeatures();
       expect(features.fullFeedback).toBe(true);
     });
 
     it('should maintain daily limit accuracy', () => {
-      const state = useTrialStore.getState();
-      state.currentTier = 'free';
+      useTrialStore.setState({ currentTier: 'free' });
 
       for (let i = 1; i <= 10; i++) {
-        state.addPracticeMinutes(1);
-        const remaining = state.getRemainingDailyMinutes();
+        useTrialStore.getState().addPracticeMinutes(1);
+        const remaining = useTrialStore.getState().getRemainingDailyMinutes();
         expect(remaining).toBe(10 - i);
       }
     });
