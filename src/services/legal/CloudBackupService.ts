@@ -27,7 +27,7 @@ import {
   getDoc,
   Timestamp,
 } from 'firebase/firestore';
-import * as FileSystem from 'expo-file-system';
+import * as FileSystem from 'expo-file-system/legacy';
 import * as Crypto from 'expo-crypto';
 
 /**
@@ -199,7 +199,7 @@ class CloudBackupService {
       // Save to local file
       const timestamp = new Date().toISOString();
       const fileName = `backup-cloud-${timestamp.replace(/[:.]/g, '-')}.json`;
-      const localPath = `${FileSystem.DocumentDirectory}legal-backups/${fileName}`;
+      const localPath = `${FileSystem.documentDirectory}legal-backups/${fileName}`;
 
       await FileSystem.writeAsStringAsync(localPath, content);
 

@@ -9,11 +9,11 @@ import BackupService from '../BackupService';
 import CloudBackupService from '../CloudBackupService';
 import BackupScheduleService from '../BackupScheduleService';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import * as FileSystem from 'expo-file-system';
+import * as FileSystem from 'expo-file-system/legacy';
 
 // Mock dependencies
 jest.mock('@react-native-async-storage/async-storage');
-jest.mock('expo-file-system');
+jest.mock('expo-file-system/legacy');
 jest.mock('@/config/firebase', () => ({
   db: null,
 }));
@@ -40,6 +40,8 @@ describe('BackupService', () => {
     (FileSystem.writeAsStringAsync as jest.Mock).mockResolvedValue(undefined);
     (FileSystem.readAsStringAsync as jest.Mock).mockResolvedValue('{}');
     (FileSystem.deleteAsync as jest.Mock).mockResolvedValue(undefined);
+    (FileSystem.getInfoAsync as jest.Mock).mockResolvedValue({ exists: true, size: 1024, uri: 'file://backup.json', isDirectory: false });
+    (FileSystem.makeDirectoryAsync as jest.Mock).mockResolvedValue(undefined);
     service = BackupService;
   });
 
@@ -234,6 +236,7 @@ describe('BackupService', () => {
 
     test('getBackupSize calculates file size', async () => {
       (FileSystem.getInfoAsync as jest.Mock).mockResolvedValueOnce({
+        exists: true,
         size: 5242880, // 5MB
       });
 

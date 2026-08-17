@@ -10,7 +10,7 @@
  */
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import * as FileSystem from 'expo-file-system';
+import * as FileSystem from 'expo-file-system/legacy';
 import { useAuthStore } from '@/stores/useAuthStore';
 import LegalDocumentService, { LegalDocument } from './LegalDocumentService';
 import DocumentVersioningService, { DocumentAcceptance } from './DocumentVersioningService';
@@ -58,7 +58,12 @@ export interface BackupMetadata {
   signatureCount: number;
   acceptanceCount: number;
   totalSize: number;
-  checksums: Record<string, string>;
+  checksums: {
+    documents: string;
+    signatures: string;
+    acceptances: string;
+    metadata: string;
+  };
 }
 
 /**
@@ -73,7 +78,7 @@ export interface BackupVerification {
 }
 
 class BackupService {
-  private static readonly BACKUPS_DIR = `${FileSystem.DocumentDirectory}legal-backups/`;
+  private static readonly BACKUPS_DIR = `${FileSystem.documentDirectory}legal-backups/`;
   private static readonly BACKUP_METADATA_KEY = '@legal_backup_metadata';
   private static readonly BACKUPS_INDEX_KEY = '@legal_backups_index';
 
@@ -124,7 +129,7 @@ class BackupService {
         signatureCount: signatures.length,
         acceptanceCount: acceptances.length,
         totalSize: 0,
-        checksums: {},
+        checksums: { documents: '', signatures: '', acceptances: '', metadata: '' },
       };
 
       // Calculate checksums
@@ -166,7 +171,7 @@ class BackupService {
 
       // Get file size
       const fileInfo = await FileSystem.getInfoAsync(backupPath);
-      const size = fileInfo.size || 0;
+      const size = fileInfo.exists ? fileInfo.size : 0;
 
       const backup: BackupFile = {
         id: backupId,
@@ -401,7 +406,7 @@ class BackupService {
   static async getBackupSize(backupPath: string): Promise<number> {
     try {
       const fileInfo = await FileSystem.getInfoAsync(backupPath);
-      return fileInfo.size || 0;
+      return fileInfo.exists ? fileInfo.size : 0;
     } catch (error) {
       console.error('[BackupService] Failed to get backup size:', error);
       return 0;

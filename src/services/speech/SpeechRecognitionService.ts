@@ -7,7 +7,7 @@
  */
 
 import { Audio, AVPlaybackStatus } from 'expo-av';
-import * as FileSystem from 'expo-file-system';
+import * as FileSystem from 'expo-file-system/legacy';
 import { Directory, File } from 'expo-file-system';
 
 export interface RecordingState {
@@ -387,8 +387,7 @@ export class SpeechRecognitionService {
 
       // Create directory if it doesn't exist
       const dir = new Directory(directory);
-      const exists = await dir.exists();
-      if (!exists) {
+      if (!dir.exists) {
         await FileSystem.makeDirectoryAsync(directory, { intermediates: true });
       }
 
@@ -435,8 +434,7 @@ export class SpeechRecognitionService {
       const directory = `${FileSystem.documentDirectory}recordings/`;
 
       const dir = new Directory(directory);
-      const exists = await dir.exists();
-      if (!exists) {
+      if (!dir.exists) {
         return [];
       }
 
