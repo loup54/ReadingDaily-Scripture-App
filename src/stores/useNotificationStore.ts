@@ -22,6 +22,7 @@ import {
   NotificationStats,
   DailyReminder,
   NotificationFilter,
+  NotificationActionType,
 } from '@/types/notifications.types';
 import { notificationService } from '@/services/notifications/NotificationService';
 
@@ -233,7 +234,7 @@ export const useNotificationStore = create<NotificationStoreState>((set, get) =>
         h.notificationId === notificationId
           ? {
               ...h,
-              actionTaken: { actionId, actionType: 'custom', timestamp: Date.now() },
+              actionTaken: { actionId, actionType: NotificationActionType.CUSTOM, timestamp: Date.now() },
             }
           : h
       );

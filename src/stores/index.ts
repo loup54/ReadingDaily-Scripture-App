@@ -18,5 +18,5 @@ export { useReadingStore } from './useReadingStore';
 export { useAuthStore } from './useAuthStore';
 export { usePracticeStore } from './usePracticeStore';
 export { useOfflineStore } from './useOfflineStore';
-export { progressStore } from './progressStore';
+export { useProgressStore } from './progressStore';
 export { useTranslationStore } from './useTranslationStore';

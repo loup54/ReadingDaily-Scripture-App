@@ -103,7 +103,7 @@ export const useAuthStore = create<AuthStoreState>((set, get) => {
                   // Keep user authenticated despite network error - will retry next time
                   set({
                     user,
-                    token: user.refreshToken || '', // Use refresh token as fallback
+                    token: get().token || '', // Keep existing token rather than clearing it
                     state: 'authenticated',
                     isInitialized: true,
                     error: null,

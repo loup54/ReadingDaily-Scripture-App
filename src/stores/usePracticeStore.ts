@@ -318,6 +318,7 @@ export const usePracticeStore = create<PracticeStoreState>((set, get) => ({
         sentenceId: get().currentSession?.sentences[get().currentSession.currentIndex].id || '',
         audioUri,
         result,
+        referenceText,
         timestamp: Date.now(),
       };
 
