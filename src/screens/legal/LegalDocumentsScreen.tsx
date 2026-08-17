@@ -90,7 +90,7 @@ const DocumentCard: React.FC<DocumentCardProps> = ({
                 {
                   backgroundColor: hasSigned
                     ? Colors.accent.green + '20'
-                    : Colors.accent.yellow + '20',
+                    : Colors.accent.orange + '20',
                 },
               ]}
             >
@@ -382,7 +382,7 @@ export const LegalDocumentsScreen: React.FC<LegalDocumentsScreenProps> = ({
       {/* Storage Info */}
       {storageStats && (
         <View style={[styles.storageCard, { backgroundColor: colors.background.card }]}>
-          <Ionicons name="storage" size={16} color={colors.primary.blue} />
+          <Ionicons name="server-outline" size={16} color={colors.primary.blue} />
           <Text style={[styles.storageText, { color: colors.text.secondary }]}>
             {documents.length} documents • {(storageStats.totalSize / 1024).toFixed(1)} KB
           </Text>
@@ -521,7 +521,7 @@ export const LegalDocumentsScreen: React.FC<LegalDocumentsScreenProps> = ({
 // Helper functions
 function getCategoryColor(category: string): string {
   const colors: Record<string, string> = {
-    privacy: Colors.accent.blue || '#2196F3',
+    privacy: Colors.primary.blue || '#2196F3',
     legal: Colors.accent.red || '#F44336',
     compliance: Colors.accent.green || '#4CAF50',
     help: Colors.primary.blue || '#5B6FE8',
