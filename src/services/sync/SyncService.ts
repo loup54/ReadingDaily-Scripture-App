@@ -204,7 +204,7 @@ export class SyncService {
 
             if (action.retry_count < SYNC_CONFIG.maxRetries) {
               // Queue for retry
-              await databaseService.incrementRetryCount(action.id);
+              await databaseService.incrementRetryCount(action.id, String(error));
               console.log(
                 '[SyncService] Queued',
                 action.entity_type,
@@ -288,7 +288,7 @@ export class SyncService {
   async getSyncStats(): Promise<SyncStats> {
     try {
       const pendingCount = await databaseService.getPendingCount?.();
-      const metadata = await databaseService.getSyncMetadata?.();
+      const metadata = await databaseService.getSyncMetadata?.('last_sync');
 
       return {
         totalPending: pendingCount || 0,
