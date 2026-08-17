@@ -130,7 +130,7 @@ export const RedeemGiftScreen: React.FC<RedeemGiftScreenProps> = ({
     } catch (error: any) {
       console.error('Redemption error:', error);
 
-      let errorMessage = GiftRedemptionErrors.UNKNOWN_ERROR;
+      let errorMessage: string = GiftRedemptionErrors.UNKNOWN_ERROR;
 
       if (error.code === 'functions/not-found') {
         errorMessage = 'Gift redemption service is temporarily unavailable.';
@@ -165,7 +165,7 @@ export const RedeemGiftScreen: React.FC<RedeemGiftScreenProps> = ({
       >
         {/* Header with back button */}
         <View style={styles.header}>
-          <IconButton icon="chevron-back" onPress={onBack} />
+          <IconButton icon="chevron-back" onPress={onBack} accessibilityLabel="Back" />
           <Text style={[styles.title, { color: colors.text.primary }]}>Redeem Gift</Text>
           <View style={{ width: 40 }} />
         </View>
@@ -229,9 +229,10 @@ export const RedeemGiftScreen: React.FC<RedeemGiftScreenProps> = ({
                 {displayCode && (
                   <IconButton
                     icon={validated ? 'checkmark-circle' : 'close-circle'}
-                    size={20}
+                    size="sm"
                     color={validated ? colors.ui.success : colors.ui.error}
                     onPress={handleClear}
+                    accessibilityLabel={validated ? 'Code valid' : 'Clear code'}
                   />
                 )}
               </View>
