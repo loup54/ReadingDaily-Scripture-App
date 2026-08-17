@@ -13,7 +13,8 @@ import { NotificationType } from '@/types/notifications.types';
 // Configure notification handler
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
-    shouldShowAlert: true,
+    shouldShowBanner: true,
+    shouldShowList: true,
     shouldPlaySound: true,
     shouldSetBadge: true,
   }),
@@ -145,9 +146,9 @@ export class DailyReminderScheduler {
           badge: 1,
         },
         trigger: {
+          type: Notifications.SchedulableTriggerInputTypes.DAILY,
           hour: hours,
           minute: minutes,
-          repeats: true,
         },
       });
 
