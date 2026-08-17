@@ -65,9 +65,9 @@ export const ReadingBrowserScreen: React.FC<ReadingBrowserScreenProps> = ({ onBa
 
       // Calculate reading stats
       if (reading) {
-        const gospel = reading.gospel?.text || '';
-        const firstReading = reading.firstReading?.text || '';
-        const psalm = reading.psalm?.text || '';
+        const gospel = reading.gospel?.content || '';
+        const firstReading = reading.firstReading?.content || '';
+        const psalm = reading.psalm?.content || '';
         const totalText = gospel + firstReading + psalm;
         const wordCount = totalText.split(/\s+/).filter((w) => w.length > 0).length;
         const estimatedReadingTime = Math.ceil(wordCount / 200); // 200 words per minute
