@@ -7,6 +7,7 @@ import {
   View,
   ViewStyle,
   TextStyle,
+  StyleProp,
   Animated,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -27,8 +28,8 @@ export interface ButtonProps {
   loading?: boolean;
   fullWidth?: boolean;
   icon?: React.ReactNode;
-  style?: ViewStyle;
-  textStyle?: TextStyle;
+  style?: StyleProp<ViewStyle>;
+  textStyle?: StyleProp<TextStyle>;
   testID?: string;
   // Accessibility props
   accessibilityLabel?: string;
