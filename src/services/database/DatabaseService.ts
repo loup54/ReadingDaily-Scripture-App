@@ -11,7 +11,20 @@
  */
 
 import * as SQLite from 'expo-sqlite';
-import { PracticeSession } from '@/types/practice.types';
+
+/**
+ * Local practice_sessions table row shape — distinct from the app-level
+ * `PracticeSession` type (readingId/sentences/attempts/etc), which is a
+ * different shape that happens to share a name.
+ */
+export interface PracticeSessionRecord {
+  id: string;
+  user_id: string;
+  reading_id: string;
+  recordingUri?: string;
+  result?: any;
+  timestamp?: number;
+}
 
 export interface SyncQueueItem {
   id: string;
@@ -43,7 +56,7 @@ export interface SyncMetadata {
 }
 
 export class DatabaseService {
-  private db: SQLite.Database | null = null;
+  private db: SQLite.SQLiteDatabase | null = null;
   private isInitialized = false;
 
   /**
@@ -178,9 +191,7 @@ export class DatabaseService {
   /**
    * Save practice session locally
    */
-  async savePracticeSession(
-    session: Partial<PracticeSession> & { id: string; user_id: string; reading_id: string }
-  ): Promise<void> {
+  async savePracticeSession(session: PracticeSessionRecord): Promise<void> {
     if (!this.db) throw new Error('Database not initialized');
 
     try {
@@ -209,7 +220,7 @@ export class DatabaseService {
   /**
    * Get all unsynced practice sessions
    */
-  async getUnsyncedSessions(): Promise<PracticeSession[]> {
+  async getUnsyncedSessions(): Promise<PracticeSessionRecord[]> {
     if (!this.db) throw new Error('Database not initialized');
 
     try {
@@ -268,7 +279,7 @@ export class DatabaseService {
   /**
    * Get practice sessions for user
    */
-  async getUserSessions(userId: string, limit = 50): Promise<PracticeSession[]> {
+  async getUserSessions(userId: string, limit = 50): Promise<PracticeSessionRecord[]> {
     if (!this.db) throw new Error('Database not initialized');
 
     try {
