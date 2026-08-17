@@ -39,7 +39,7 @@ import { QuietHoursSettings } from '@/components/notifications/QuietHoursSetting
 export function NotificationSettingsScreen() {
   const router = useRouter();
   const user = useAuthStore((state) => state.user);
-  const userId = user?.uid || '';
+  const userId = user?.id || '';
 
   // Store hooks
   const preferences = useNotificationPreferences();
@@ -115,11 +115,10 @@ export function NotificationSettingsScreen() {
               pushNotificationsEnabled: true,
               inAppNotificationsEnabled: true,
               emailNotificationsEnabled: false,
-              dailyRemindersEnabled: true,
-              achievementNotificationsEnabled: true,
-              performanceInsightNotificationsEnabled: true,
+              dailyReminderEnabled: true,
+              achievementNotifications: true,
+              performanceInsights: true,
               quietHoursEnabled: false,
-              notificationSoundEnabled: true,
             };
             setLocalPrefs(defaults);
             setHasChanges(true);
@@ -247,12 +246,12 @@ export function NotificationSettingsScreen() {
               </Text>
             </View>
             <Switch
-              value={localPrefs?.dailyRemindersEnabled ?? true}
+              value={localPrefs?.dailyReminderEnabled ?? true}
               onValueChange={(value) =>
-                handleTogglePreference('dailyRemindersEnabled', value)
+                handleTogglePreference('dailyReminderEnabled', value)
               }
               trackColor={{ false: '#E0E0E0', true: '#81C784' }}
-              thumbColor={localPrefs?.dailyRemindersEnabled ? '#4CAF50' : '#f4f3f4'}
+              thumbColor={localPrefs?.dailyReminderEnabled ? '#4CAF50' : '#f4f3f4'}
             />
           </View>
 
@@ -265,12 +264,12 @@ export function NotificationSettingsScreen() {
               </Text>
             </View>
             <Switch
-              value={localPrefs?.achievementNotificationsEnabled ?? true}
+              value={localPrefs?.achievementNotifications ?? true}
               onValueChange={(value) =>
-                handleTogglePreference('achievementNotificationsEnabled', value)
+                handleTogglePreference('achievementNotifications', value)
               }
               trackColor={{ false: '#E0E0E0', true: '#81C784' }}
-              thumbColor={localPrefs?.achievementNotificationsEnabled ? '#4CAF50' : '#f4f3f4'}
+              thumbColor={localPrefs?.achievementNotifications ? '#4CAF50' : '#f4f3f4'}
             />
           </View>
 
@@ -283,13 +282,13 @@ export function NotificationSettingsScreen() {
               </Text>
             </View>
             <Switch
-              value={localPrefs?.performanceInsightNotificationsEnabled ?? true}
+              value={localPrefs?.performanceInsights ?? true}
               onValueChange={(value) =>
-                handleTogglePreference('performanceInsightNotificationsEnabled', value)
+                handleTogglePreference('performanceInsights', value)
               }
               trackColor={{ false: '#E0E0E0', true: '#81C784' }}
               thumbColor={
-                localPrefs?.performanceInsightNotificationsEnabled
+                localPrefs?.performanceInsights
                   ? '#4CAF50'
                   : '#f4f3f4'
               }
@@ -298,7 +297,7 @@ export function NotificationSettingsScreen() {
         </View>
 
         {/* Daily Reminder Picker */}
-        {localPrefs?.dailyRemindersEnabled && (
+        {localPrefs?.dailyReminderEnabled && (
           <DailyReminderPicker
             reminder={dailyReminder}
             onReminderChange={(reminder) => {
@@ -333,25 +332,6 @@ export function NotificationSettingsScreen() {
           }}
         />
 
-        {/* Notification Sound */}
-        <View style={styles.section}>
-          <View style={styles.settingItem}>
-            <View style={styles.settingContent}>
-              <Text style={styles.settingLabel}>Notification Sound</Text>
-              <Text style={styles.settingDescription}>
-                Play sound for notifications
-              </Text>
-            </View>
-            <Switch
-              value={localPrefs?.notificationSoundEnabled ?? true}
-              onValueChange={(value) =>
-                handleTogglePreference('notificationSoundEnabled', value)
-              }
-              trackColor={{ false: '#E0E0E0', true: '#81C784' }}
-              thumbColor={localPrefs?.notificationSoundEnabled ? '#4CAF50' : '#f4f3f4'}
-            />
-          </View>
-        </View>
 
         {/* Action Buttons */}
         <View style={styles.actionSection}>
