@@ -19,6 +19,7 @@ import { db } from '@/config/firebase';
 import { collection, query, where, getDocs, addDoc, Timestamp } from 'firebase/firestore';
 import DocumentVersioningService from './DocumentVersioningService';
 import DocumentAnalyticsService from './DocumentAnalyticsService';
+import LegalDocumentService from './LegalDocumentService';
 import { logger } from '@/services/logging/LoggerService';
 
 /**
@@ -235,8 +236,8 @@ export class ComplianceReportService {
       const reportId = generateId();
 
       // Get all user acceptances
-      const acceptances = await DocumentVersioningService.getUserAcceptances(userId);
-      const documents = await DocumentVersioningService.getAllDocuments();
+      const acceptances = await DocumentVersioningService.getAcceptanceHistory();
+      const documents = await LegalDocumentService.getAllDocuments();
 
       // Get analytics
       const viewStats = await DocumentAnalyticsService.getUserViewStats();
@@ -259,10 +260,10 @@ export class ComplianceReportService {
         return {
           documentId: doc.id,
           title: doc.title,
-          required: doc.required || false,
+          required: doc.requiresAcceptance || false,
           accepted: !!acceptance,
           acceptedAt: acceptance?.acceptedAt,
-          version: acceptance?.version || doc.currentVersion,
+          version: acceptance?.version || doc.version,
           signed: acceptance?.signatureId ? true : false,
           signedAt: acceptance?.signedAt,
           viewCount: engagement?.viewCount || 0,
@@ -372,8 +373,8 @@ export class ComplianceReportService {
    */
   async getAcceptanceTimeline(userId: string): Promise<AcceptanceEvent[]> {
     try {
-      const acceptances = await DocumentVersioningService.getUserAcceptances(userId);
-      const documents = await DocumentVersioningService.getAllDocuments();
+      const acceptances = await DocumentVersioningService.getAcceptanceHistory();
+      const documents = await LegalDocumentService.getAllDocuments();
 
       return acceptances
         .sort((a, b) => (b.acceptedAt || 0) - (a.acceptedAt || 0))
@@ -399,8 +400,8 @@ export class ComplianceReportService {
    */
   async getSignatureTimeline(userId: string): Promise<SignatureEvent[]> {
     try {
-      const acceptances = await DocumentVersioningService.getUserAcceptances(userId);
-      const documents = await DocumentVersioningService.getAllDocuments();
+      const acceptances = await DocumentVersioningService.getAcceptanceHistory();
+      const documents = await LegalDocumentService.getAllDocuments();
 
       return acceptances
         .filter(a => a.signedAt)
@@ -411,7 +412,10 @@ export class ComplianceReportService {
             documentId: acceptance.documentId,
             title: doc?.title || 'Unknown Document',
             signedAt: acceptance.signedAt || 0,
-            type: (acceptance.signatureType as 'sketch' | 'typed') || 'typed',
+            // Sketch-drawn signatures were removed from the UI (typed-name-only is
+            // current design, see SignatureModal.tsx) -- DocumentAcceptance doesn't
+            // carry a signatureType field at all.
+            type: 'typed' as const,
             verified: true,
           };
         });
@@ -465,8 +469,8 @@ export class ComplianceReportService {
    */
   async verifyAcceptancesValid(userId: string): Promise<AcceptanceVerification> {
     try {
-      const acceptances = await DocumentVersioningService.getUserAcceptances(userId);
-      const documents = await DocumentVersioningService.getAllDocuments();
+      const acceptances = await DocumentVersioningService.getAcceptanceHistory();
+      const documents = await LegalDocumentService.getAllDocuments();
 
       const issuesFound: string[] = [];
       let validCount = 0;
@@ -494,9 +498,9 @@ export class ComplianceReportService {
         }
 
         // Check if acceptance version matches document
-        if (acceptance.version !== doc.currentVersion) {
+        if (acceptance.version !== doc.version) {
           invalidCount++;
-          issuesFound.push(`${doc.title} acceptance version mismatch (accepted v${acceptance.version}, current v${doc.currentVersion})`);
+          issuesFound.push(`${doc.title} acceptance version mismatch (accepted v${acceptance.version}, current v${doc.version})`);
           continue;
         }
 
