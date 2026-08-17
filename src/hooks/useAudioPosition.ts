@@ -185,8 +185,8 @@ export function useAudioPlaybackState(
         const status = await soundRef.current.getStatusAsync();
 
         setState({
-          isPlaying: status.isPlaying,
-          durationMs: status.durationMillis || 0,
+          isPlaying: status.isLoaded ? status.isPlaying : false,
+          durationMs: status.isLoaded ? status.durationMillis || 0 : 0,
           isLoaded: status.isLoaded,
         });
       } catch (error) {
