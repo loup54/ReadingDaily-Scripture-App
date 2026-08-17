@@ -304,13 +304,14 @@
 - Reading screen UI simplification (v1.1.32) directly informs widget layout decisions
 
 ### Next version — Metadata (must be done with next store build, cannot edit while version is live)
-- [ ] Fix keyword typo: `lectionbary` → `lectionary` — greyed out while live, fix with next store build
-- [ ] Replace keywords with ESL-bridging set (98 chars): `ESL,pronunciation,Catholic,Mass,liturgy,listening,language,Bible,devotion,catechism,fluency,prayer`
-- [ ] Add Tagalog keywords for Philippines market: `katoliko, dasal, misa, ebanghelyo, filipinos`
-- [ ] Update subtitle from "Practice Reading Scripture" → "English Practice with Scripture" (makes ESL angle explicit)
-- [ ] Update Description with full rewrite (liturgical seasons, Grace, Lectio Divina framing, ESL angle)
-- [ ] Update What's New: describe Project Vespers features — liturgical colours, 3-tab layout, Grace, Offered state
-- [ ] New screenshots showing: Easter gold header + "Week 1 of Easter" label, 3-tab bar, Offered overlay (✦ OFFERED), Profile hub screen — 4 shots ready, upload to 6.1" slot
+Copy drafted and approved 2026-08-18 — see `APP_STORE_COPY_DRAFT.md`. Original plan below (keyword typo fix, 3-tab/Offered What's New, Easter/3-tab/Offered screenshot content) was based on stale assumptions about what's actually shipped — corrected during drafting, see the Project Vespers status correction above. Still blocked on an actual next store build to paste any of this in (App Store Connect/Play Console, not something I can do from here).
+- ~~Fix keyword typo: `lectionbary` → `lectionary`~~ — moot, superseded by the full keyword replacement below (new set never had the typo).
+- [x] Keywords — ESL-bridging set drafted & approved: `ESL,pronunciation,Catholic,Mass,liturgy,listening,language,Bible,devotion,catechism,fluency,prayer` (98/100 chars, verified)
+- [x] Tagalog keywords drafted & approved: `katoliko,dasal,misa,ebanghelyo,filipinos` (40/100 chars) — needs a Filipino (`tl`) locale entry in App Store Connect first, keywords are per-locale
+- [x] Subtitle drafted & approved: `English Practice · Scripture` (28 chars — TODO's original suggestion was 31, 1 over Apple's 30-char limit)
+- [x] Description — full rewrite drafted & approved for both stores (see `APP_STORE_COPY_DRAFT.md`)
+- ~~Update What's New: describe Project Vespers features — 3-tab layout, Offered state~~ — moot on two counts: (1) Vespers shipped via OTA, never needed store-release What's New text, and the most recent real release already has its own copy already submitted; (2) 3-tab/Offered aren't actually live anyway, see status correction above.
+- [x] Screenshots — taken 2026-08-18, both iOS (App Store Connect, 6.1" slot) and Android (Play Console) confirmed by user. Content is real shipped screens, not the stale Easter/3-tab/Offered list originally planned.
 
 ### Project Vespers — status corrected 2026-08-18, was wrongly marked COMPLETE
 Checked the actual running code while drafting App Store copy (needed real screenshots) — 2 of the 4 phases below were never live despite being marked done.
