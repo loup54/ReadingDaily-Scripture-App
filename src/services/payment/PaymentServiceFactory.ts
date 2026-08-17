@@ -11,7 +11,6 @@ import { MockPaymentService } from './MockPaymentService';
 import { StripePaymentService } from './StripePaymentService';
 // Don't import native modules at top level - they crash in Expo Go
 // import { AppleIAPService } from './AppleIAPService';
-// import { GooglePlayService } from './GooglePlayService';
 
 export class PaymentServiceFactory {
   /**
