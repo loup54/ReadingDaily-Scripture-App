@@ -108,7 +108,7 @@ export function useOptimisticBookmark(
     setError(null);
 
     await optimisticUpdate(
-      setIsBookmarked,
+      (state: boolean) => setIsBookmarked(state),
       () => isBookmarked,
       // Optimistic update: toggle immediately
       (state) => !state,

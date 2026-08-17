@@ -118,7 +118,7 @@ export function useOptimisticRating(
       const isClearingRating = newRating === 0;
 
       await optimisticUpdate(
-        setRatingState,
+        (state: RatingValue) => setRatingState(state),
         () => rating,
         // Optimistic update: set immediately
         () => newRating,
