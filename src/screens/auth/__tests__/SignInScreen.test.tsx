@@ -91,7 +91,7 @@ describe('SignInScreen', () => {
     );
 
     const emailInput = getByTestId('email-input');
-    const passwordInput = getByTestID('password-input');
+    const passwordInput = getByTestId('password-input');
     const signInButton = getByTestId('sign-in-button');
 
     fireEvent.changeText(emailInput, 'test@example.com');
