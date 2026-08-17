@@ -229,19 +229,20 @@ export class AudioPlaybackService {
 
       try {
         const status = await this.sound.getStatusAsync();
-        console.log('[AudioPlaybackService] Poll status:', {
-          isLoaded: status.isLoaded,
-          isPlaying: status.isPlaying,
-          positionMillis: status.positionMillis,
-          durationMillis: status.durationMillis,
-        });
 
         if (status.isLoaded) {
+          console.log('[AudioPlaybackService] Poll status:', {
+            isLoaded: status.isLoaded,
+            isPlaying: status.isPlaying,
+            positionMillis: status.positionMillis,
+            durationMillis: status.durationMillis,
+          });
+
           this.onPlaybackStatusUpdate(status);
         }
 
-        // If audio stopped and we're not in a playing state, stop polling
-        if (!status.isPlaying && !this.state.isPlaying) {
+        // If audio stopped (or failed to load) and we're not in a playing state, stop polling
+        if (!(status.isLoaded && status.isPlaying) && !this.state.isPlaying) {
           clearInterval(this.pollTimer!);
           this.pollTimer = null;
           console.log('[AudioPlaybackService] Stopping playback polling');
