@@ -312,11 +312,12 @@
 - [ ] Update What's New: describe Project Vespers features — liturgical colours, 3-tab layout, Grace, Offered state
 - [ ] New screenshots showing: Easter gold header + "Week 1 of Easter" label, 3-tab bar, Offered overlay (✦ OFFERED), Profile hub screen — 4 shots ready, upload to 6.1" slot
 
-### Project Vespers — COMPLETE (all via OTA, no store builds)
-- [x] Phase 1: Liturgical colour themes — deployed 2026-04-06
-- [x] Phase 2: Tab bar simplified 5→3 (Readings · Practice · Profile) — deployed 2026-04-06
-- [x] Phase 3: Grace — no streak anxiety, welcoming return state — deployed 2026-04-06
-- [x] Phase 4: Offered — post-audio quiet hold, "Stay with a verse?" — deployed 2026-04-06
+### Project Vespers — status corrected 2026-08-18, was wrongly marked COMPLETE
+Checked the actual running code while drafting App Store copy (needed real screenshots) — 2 of the 4 phases below were never live despite being marked done.
+- [x] Phase 1: Liturgical colour themes — deployed 2026-04-06, **verified live 2026-08-18** (wired through `useTheme.ts` app-wide)
+- [ ] ~~Phase 2: Tab bar simplified 5→3 (Readings · Practice · Profile) — deployed 2026-04-06~~ — **not actually live.** Real tracked `app/(tabs)/_layout.tsx` still has 5 tabs (Readings, Practice, Progress, Notifications, Settings). Either never shipped or shipped and got reverted at some point; no git history points to which.
+- [x] Phase 3: Grace — no streak anxiety, welcoming return state — deployed 2026-04-06, **verified live 2026-08-18** (no `StreakDisplay` on the reading screen)
+- [ ] ~~Phase 4: Offered — post-audio quiet hold, "Stay with a verse?" — deployed 2026-04-06~~ — **not actually live.** `src/components/reading/OfferedOverlay.tsx` is untracked (zero commit history) with zero references anywhere in `DailyReadingsScreen.tsx` — it's leftover WIP from the 2026-08-17 stash-pop incident (this session, pre-existing `pricing/IAP/trial WIP` stash from 2026-08-14), not shipped code.
 
 ### Security (quarterly review due 2026-06-24)
 - [x] Firestore rules — reviewed 2026-07-01: lasallian_reactions write rule tightened to field validation only
