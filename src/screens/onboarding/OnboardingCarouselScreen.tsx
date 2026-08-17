@@ -30,7 +30,7 @@ interface OnboardingSlide {
   icon: keyof typeof Ionicons.glyphMap;
   title: string;
   description: string;
-  gradient: string[];
+  gradient: readonly [string, string, ...string[]];
 }
 
 const ONBOARDING_SLIDES: OnboardingSlide[] = [
@@ -262,7 +262,6 @@ const styles = StyleSheet.create({
   paginationDot: {
     height: 8,
     borderRadius: 4,
-    transition: 'all 0.3s ease',
   },
   buttonContainer: {
     flexDirection: 'row',
