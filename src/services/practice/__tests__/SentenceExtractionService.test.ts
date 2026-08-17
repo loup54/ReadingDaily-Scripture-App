@@ -10,13 +10,16 @@ describe('SentenceExtractionService', () => {
   const mockReading: Reading = {
     id: 'test-1',
     type: 'gospel',
+    title: 'Test Gospel Reading',
     reference: 'John 3:16',
     content: 'For God so loved the world that he gave his only Son. Everyone who believes in him may have eternal life. This is a very short sentence. This sentence has exactly five words in it. This is a medium length sentence with several words.',
     audioUrl: '',
-    translation: 'NIV',
+    date: new Date('2026-01-01'),
   };
 
   const mockReadings: DailyReadings = {
+    id: 'test-readings',
+    date: new Date('2026-01-01'),
     gospel: mockReading,
     firstReading: {
       ...mockReading,
@@ -211,6 +214,8 @@ describe('SentenceExtractionService', () => {
       };
 
       const readings: DailyReadings = {
+        id: 'test-readings',
+        date: new Date('2026-01-01'),
         gospel: shortReading,
         firstReading: mockReadings.firstReading,
         psalm: mockReadings.psalm,
@@ -229,6 +234,8 @@ describe('SentenceExtractionService', () => {
       };
 
       const readings: DailyReadings = {
+        id: 'test-readings',
+        date: new Date('2026-01-01'),
         gospel: complexReading,
         firstReading: mockReadings.firstReading,
         psalm: mockReadings.psalm,
@@ -256,6 +263,8 @@ describe('SentenceExtractionService', () => {
       };
 
       const readings: DailyReadings = {
+        id: 'test-readings',
+        date: new Date('2026-01-01'),
         gospel: punctuatedReading,
         firstReading: mockReadings.firstReading,
         psalm: mockReadings.psalm,
@@ -290,6 +299,8 @@ describe('SentenceExtractionService', () => {
   describe('Edge cases', () => {
     it('should handle readings with no valid sentences', () => {
       const emptyReadings: DailyReadings = {
+        id: 'test-readings',
+        date: new Date('2026-01-01'),
         gospel: { ...mockReading, content: 'A. B. C.' }, // Too short
         firstReading: { ...mockReading, content: 'D. E.' },
         psalm: { ...mockReading, content: 'F.' },
@@ -303,6 +314,8 @@ describe('SentenceExtractionService', () => {
 
     it('should handle readings with only long sentences', () => {
       const longReadings: DailyReadings = {
+        id: 'test-readings',
+        date: new Date('2026-01-01'),
         gospel: {
           ...mockReading,
           content: 'This is an extremely long sentence that goes on and on with more than twenty five words which should be filtered out by the word count validation logic.',
@@ -324,6 +337,8 @@ describe('SentenceExtractionService', () => {
       };
 
       const readings: DailyReadings = {
+        id: 'test-readings',
+        date: new Date('2026-01-01'),
         gospel: specialReading,
         firstReading: mockReadings.firstReading,
         psalm: mockReadings.psalm,
