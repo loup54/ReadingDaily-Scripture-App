@@ -314,21 +314,26 @@ export class MockPaymentService implements IPaymentService {
   /**
    * Update payment method (mock: just returns success)
    */
-  async updatePaymentMethod(
-    subscriptionId: string
-  ): Promise<{ success: boolean; error?: string }> {
+  async updatePaymentMethod(subscriptionId: string): Promise<PaymentResult> {
     console.log('[MockPaymentService] Updating payment method:', subscriptionId);
 
     const subscription = this.activeSubscriptions.get(subscriptionId);
     if (!subscription) {
       return {
         success: false,
+        provider: this.provider,
         error: 'Subscription not found',
+        timestamp: Date.now(),
       };
     }
 
     // In mock, just return success
-    return { success: true };
+    return {
+      success: true,
+      provider: this.provider,
+      subscriptionId,
+      timestamp: Date.now(),
+    };
   }
 
   /**
