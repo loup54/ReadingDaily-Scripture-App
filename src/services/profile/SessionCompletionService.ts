@@ -61,7 +61,7 @@ export type OnAchievementUnlockedCallback = (event: AchievementUnlockedEvent) =>
  * Singleton pattern for consistency across app
  */
 class SessionCompletionService {
-  private isProcessing = false;
+  private _isProcessing = false;
   private achievementCallbacks: Set<OnAchievementUnlockedCallback> = new Set();
 
   /**
@@ -70,7 +70,7 @@ class SessionCompletionService {
    */
   async handleSessionCompletion(sessionData: PracticeSessionData): Promise<SessionCompletionResult> {
     try {
-      if (this.isProcessing) {
+      if (this._isProcessing) {
         console.warn('[SessionCompletionService] Session already processing, skipping');
         return {
           success: false,
@@ -82,7 +82,7 @@ class SessionCompletionService {
         };
       }
 
-      this.isProcessing = true;
+      this._isProcessing = true;
       console.log('[SessionCompletionService] Processing session completion for', sessionData.userId);
 
       const result: SessionCompletionResult = {
@@ -115,7 +115,7 @@ class SessionCompletionService {
         return result;
       }
     } finally {
-      this.isProcessing = false;
+      this._isProcessing = false;
     }
   }
 
@@ -300,7 +300,7 @@ class SessionCompletionService {
    * Check if currently processing
    */
   isProcessing(): boolean {
-    return this.isProcessing;
+    return this._isProcessing;
   }
 }
 
