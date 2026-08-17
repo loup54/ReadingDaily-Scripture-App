@@ -6,7 +6,7 @@
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ReadingDownloadService } from '@/services/offline/ReadingDownloadService';
-import { CacheService } from '@/services/cache/CacheService';
+import { cacheService } from '@/services/cache/CacheService';
 
 export interface StorageQuota {
   used: number; // bytes
@@ -289,7 +289,7 @@ export class StorageQuotaService {
   static async cleanupAllCache(): Promise<number> {
     try {
       const sizeBefore = await this.getTotalStorageUsed();
-      await CacheService.clearAllCache();
+      await cacheService.clearCache();
       const sizeAfter = await this.getTotalStorageUsed();
       const freed = Math.max(0, sizeBefore - sizeAfter);
 

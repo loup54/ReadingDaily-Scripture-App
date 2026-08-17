@@ -7,6 +7,7 @@ import { initializeApp } from 'firebase/app';
 import { getFirestore } from 'firebase/firestore';
 import { initializeAuth, getReactNativePersistence } from 'firebase/auth';
 import { getStorage } from 'firebase/storage';
+import { getFunctions } from 'firebase/functions';
 import { getAnalytics, isSupported } from 'firebase/analytics';
 import ReactNativeAsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -53,6 +54,7 @@ export const auth = app
     })
   : null as any;
 export const storage = app ? getStorage(app) : null as any;
+export const functions = app ? getFunctions(app) : null as any;
 
 // Initialize Analytics (only if supported)
 let analytics: any = null;

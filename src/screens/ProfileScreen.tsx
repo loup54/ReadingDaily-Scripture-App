@@ -29,7 +29,7 @@ import {
   Modal,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuthStore } from '@/stores/useAuthStore';
 import { useProfileStore } from '@/stores/useProfileStore';
 import { ProfileSkeleton } from '@/components/common/skeletons';
 import { EmptyState } from '@/components/common';
@@ -43,7 +43,7 @@ import { ProgressDashboard } from '@/screens/progress/ProgressDashboard';
  * ProfileScreen component
  */
 const ProfileScreen: React.FC = () => {
-  const { user } = useAuth();
+  const { user } = useAuthStore();
   const [refreshing, setRefreshing] = useState(false);
   const [showProgressDashboard, setShowProgressDashboard] = useState(false);
 

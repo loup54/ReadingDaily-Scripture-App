@@ -300,7 +300,7 @@ export type TimingDataStorageType = 'firestore' | 'localStorage' | 'memory';
  * Highlighting provider interface (for DI pattern)
  */
 export interface IHighlightingProvider {
-  getTimingData(readingId: string, readingType: string): Promise<SentenceTimingData | null>;
+  getTimingData(readingId: string, readingType: string, date?: Date): Promise<SentenceTimingData | null>;
   saveTimingData(data: SentenceTimingData): Promise<void>;
   getCachedTimingData(cacheKey: string): Promise<CachedHighlightingData | null>;
   clearCache(): Promise<void>;

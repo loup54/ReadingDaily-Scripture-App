@@ -314,11 +314,13 @@ export default function RootLayout() {
           isDownloading: false,
           isSyncing: false,
           downloadProgress: {
-            step: 'idle',
+            step: 'readings',
             percentage: 0,
             currentItem: '',
             itemsCompleted: 0,
             itemsTotal: 0,
+            elapsedMs: 0,
+            estimatedRemainingMs: 0,
           },
         });
 

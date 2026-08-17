@@ -121,6 +121,10 @@ class ProfileService {
       const updatedProfile: UserProfile = {
         ...currentProfile,
         ...updates,
+        preferences: {
+          ...currentProfile.preferences,
+          ...updates.preferences,
+        },
         updatedAt: Date.now(),
       };
 

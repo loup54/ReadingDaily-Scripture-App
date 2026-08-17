@@ -18,7 +18,7 @@
 import { SentenceTimingData, WordTiming, FirestoreWordTimingDocument } from '@/types';
 import { db } from '@/config/firebase';
 import { collection, doc, setDoc, getDoc } from 'firebase/firestore';
-import { AsyncStorage } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 /**
  * Configuration for Azure Speech Services

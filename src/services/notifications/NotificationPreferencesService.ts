@@ -5,9 +5,21 @@
  * Handles opt-in/opt-out for renewal notifications
  */
 
-import { auth } from '../../config/firebase';
-import * as admin from 'firebase-admin';
-import * as messaging from 'firebase/messaging';
+import { auth, db } from '../../config/firebase';
+import {
+  doc,
+  getDoc,
+  updateDoc,
+  collection,
+  query,
+  where,
+  orderBy,
+  limit as firestoreLimit,
+  getDocs,
+  arrayUnion,
+  arrayRemove,
+  Timestamp,
+} from 'firebase/firestore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export interface NotificationPreferences {
@@ -66,10 +78,10 @@ class NotificationPreferencesServiceClass {
 
       // Save device token to Firestore
       try {
-        const userRef = admin.firestore().collection('users').doc(user.id);
-        await userRef.update({
-          deviceTokens: admin.firestore.FieldValue.arrayUnion(token),
-          lastTokenRegistrationAt: admin.firestore.Timestamp.now(),
+        const userRef = doc(db, 'users', user.uid);
+        await updateDoc(userRef, {
+          deviceTokens: arrayUnion(token),
+          lastTokenRegistrationAt: Timestamp.now(),
         });
 
         // Cache locally
@@ -98,8 +110,8 @@ class NotificationPreferencesServiceClass {
       }
 
       // Try to get from Firestore first
-      const userDoc = await admin.firestore().collection('users').doc(user.id).get();
-      if (userDoc.exists) {
+      const userDoc = await getDoc(doc(db, 'users', user.uid));
+      if (userDoc.exists()) {
         const data = userDoc.data();
         const firestorePrefs = data?.notificationPreferences;
 
@@ -136,14 +148,10 @@ class NotificationPreferencesServiceClass {
       const updatedPrefs = { ...currentPrefs, ...preferences };
 
       // Update in Firestore
-      await admin
-        .firestore()
-        .collection('users')
-        .doc(user.id)
-        .update({
-          notificationPreferences: updatedPrefs,
-          preferencesUpdatedAt: admin.firestore.Timestamp.now(),
-        });
+      await updateDoc(doc(db, 'users', user.uid), {
+        notificationPreferences: updatedPrefs,
+        preferencesUpdatedAt: Timestamp.now(),
+      });
 
       // Update local cache
       await AsyncStorage.setItem(this.PREFERENCES_KEY, JSON.stringify(updatedPrefs));
@@ -228,13 +236,9 @@ class NotificationPreferencesServiceClass {
       }
 
       // Remove from Firestore
-      await admin
-        .firestore()
-        .collection('users')
-        .doc(user.id)
-        .update({
-          deviceTokens: admin.firestore.FieldValue.arrayRemove(token),
-        });
+      await updateDoc(doc(db, 'users', user.uid), {
+        deviceTokens: arrayRemove(token),
+      });
 
       // Clear local cache
       await AsyncStorage.removeItem(this.DEVICE_TOKEN_KEY);
@@ -257,18 +261,16 @@ class NotificationPreferencesServiceClass {
         return [];
       }
 
-      const snapshot = await admin
-        .firestore()
-        .collection('users')
-        .doc(user.id)
-        .collection('notificationHistory')
-        .orderBy('sentAt', 'desc')
-        .limit(limit)
-        .get();
+      const historyQuery = query(
+        collection(db, 'users', user.uid, 'notificationHistory'),
+        orderBy('sentAt', 'desc'),
+        firestoreLimit(limit)
+      );
+      const snapshot = await getDocs(historyQuery);
 
-      return snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
+      return snapshot.docs.map((docSnap) => ({
+        id: docSnap.id,
+        ...docSnap.data(),
       }));
     } catch (error) {
       console.error('[NotificationPreferencesService] Error fetching notification history:', error);
@@ -286,15 +288,10 @@ class NotificationPreferencesServiceClass {
         return false;
       }
 
-      await admin
-        .firestore()
-        .collection('users')
-        .doc(user.id)
-        .collection('notificationHistory')
-        .doc(notificationId)
-        .update({
-          readAt: admin.firestore.Timestamp.now(),
-        });
+      await updateDoc(
+        doc(db, 'users', user.uid, 'notificationHistory', notificationId),
+        { readAt: Timestamp.now() }
+      );
 
       return true;
     } catch (error) {
@@ -313,13 +310,11 @@ class NotificationPreferencesServiceClass {
         return 0;
       }
 
-      const snapshot = await admin
-        .firestore()
-        .collection('users')
-        .doc(user.id)
-        .collection('notificationHistory')
-        .where('readAt', '==', null)
-        .get();
+      const unreadQuery = query(
+        collection(db, 'users', user.uid, 'notificationHistory'),
+        where('readAt', '==', null)
+      );
+      const snapshot = await getDocs(unreadQuery);
 
       return snapshot.size;
     } catch (error) {

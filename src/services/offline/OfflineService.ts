@@ -357,7 +357,7 @@ export class OfflineService {
       const failedSyncs = syncService.getFailedSyncs?.() || [];
 
       // Get sync metadata
-      const metadata = await databaseService.getSyncMetadata?.();
+      const metadata = await databaseService.getSyncMetadata?.('last_sync');
 
       // Determine offline features
       const features = this.determineOfflineFeatures(isOnline, pendingCount);

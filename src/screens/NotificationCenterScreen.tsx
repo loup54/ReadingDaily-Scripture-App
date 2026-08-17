@@ -35,6 +35,7 @@ import {
   useMarkNotificationAsRead,
   useNotificationStore,
   useDeleteNotification,
+  UnreadSummary,
 } from '@/stores/useNotificationStore';
 import { NotificationHistory, NotificationType } from '@/types/notifications.types';
 import { createTestNotifications } from '@/debug/createTestNotifications';
@@ -200,10 +201,11 @@ export function NotificationCenterScreen({ showHeader = true }: NotificationCent
       // This bypasses the service to quickly populate UI for QA testing
       const store = useNotificationStore.getState();
       const unreadCount = mockHistory.filter((h) => !h.readAt).length;
-      const unreadSummary: { [key: string]: number } = {};
+      const byType: { [key: string]: number } = {};
       mockHistory.forEach((h) => {
-        unreadSummary[h.notificationType] = (unreadSummary[h.notificationType] || 0) + 1;
+        byType[h.notificationType] = (byType[h.notificationType] || 0) + 1;
       });
+      const unreadSummary: UnreadSummary = { totalUnread: unreadCount, byType };
 
       useNotificationStore.setState({
         notificationHistory: mockHistory,

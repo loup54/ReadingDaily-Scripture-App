@@ -8,7 +8,7 @@
  * Created: November 8, 2025
  */
 
-import { Badge } from '@/src/types/progress.types';
+import { Badge } from '@/types/progress.types';
 
 /**
  * All available badges in the system
