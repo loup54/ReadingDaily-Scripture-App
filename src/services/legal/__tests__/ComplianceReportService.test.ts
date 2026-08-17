@@ -14,27 +14,42 @@ jest.mock('@react-native-async-storage/async-storage');
 jest.mock('@/config/firebase', () => ({
   db: null,
 }));
+// DocumentVersioningService, DocumentAnalyticsService, and LegalDocumentService
+// are all static-only, default-exported classes (no getInstance) — the old
+// `{ServiceName: {getInstance: () => ({...})}}` wrapper shape doesn't match
+// what ComplianceReportService.ts actually imports and calls
+// (DocumentVersioningService.getAcceptanceHistory(), LegalDocumentService.getAllDocuments(),
+// DocumentAnalyticsService.getUserViewStats()/getEngagementMetrics() — all static).
 jest.mock('../DocumentVersioningService', () => ({
-  DocumentVersioningService: {
-    getInstance: jest.fn(() => ({
-      getUserAcceptances: jest.fn().mockResolvedValue([]),
-      getAllDocuments: jest.fn().mockResolvedValue([]),
-    })),
+  __esModule: true,
+  default: {
+    getAcceptanceHistory: jest.fn().mockResolvedValue([]),
+  },
+}));
+jest.mock('../LegalDocumentService', () => ({
+  __esModule: true,
+  default: {
+    getAllDocuments: jest.fn().mockResolvedValue([]),
   },
 }));
 jest.mock('../DocumentAnalyticsService', () => ({
-  DocumentAnalyticsService: {
-    getInstance: jest.fn(() => ({
-      getUserViewStats: jest.fn().mockResolvedValue({
-        totalDocumentsViewed: 0,
-        totalViewCount: 0,
-        averageViewDuration: 0,
-      }),
-      getEngagementMetrics: jest.fn().mockResolvedValue({
-        viewCount: 0,
-        engagementScore: 0,
-      }),
-    })),
+  __esModule: true,
+  default: {
+    getUserViewStats: jest.fn().mockResolvedValue({
+      totalDocumentsViewed: 0,
+      totalViewCount: 0,
+      averageViewDuration: 0,
+      viewsByDocument: {},
+      viewDurationByDocument: {},
+    }),
+    getEngagementMetrics: jest.fn().mockResolvedValue({
+      documentId: '',
+      viewCount: 0,
+      totalViewTime: 0,
+      interactionCount: 0,
+      engagementScore: 0,
+      interactionsByType: {},
+    }),
   },
 }));
 
@@ -413,14 +428,18 @@ describe('ComplianceReportService', () => {
       expect(AsyncStorage.multiRemove).toHaveBeenCalled();
     });
 
-    test('clearComplianceData handles errors gracefully', async () => {
+    test('clearComplianceData rethrows storage errors', async () => {
+      // Unlike most services in this file, clearComplianceData deliberately
+      // rethrows on failure (see src/services/legal/ComplianceReportService.ts)
+      // rather than swallowing it -- a silent failure to clear a user's data
+      // on account deletion would be worse than a visible error.
       (AsyncStorage.multiRemove as jest.Mock).mockRejectedValueOnce(
         new Error('Deletion error')
       );
 
       await expect(
         service.clearComplianceData(testUserId)
-      ).resolves.not.toThrow();
+      ).rejects.toThrow('Deletion error');
     });
 
     test('getUserReports retrieves stored reports', async () => {
@@ -512,6 +531,13 @@ describe('ComplianceReportService', () => {
 
   describe('Data Integrity', () => {
     test('audit trail events are marked as immutable', async () => {
+      // jest.clearAllMocks() (beforeEach) clears call history but not queued
+      // mockResolvedValueOnce() implementations from earlier tests in this
+      // file that went unconsumed -- mockReset() clears the queue too, so
+      // this test doesn't inherit a leaked one-time value and misread
+      // logAuditEvent's getItem call as something other than "no existing events".
+      (AsyncStorage.getItem as jest.Mock).mockReset().mockResolvedValue(null);
+
       await service.logAuditEvent({
         action: 'view',
         documentId: 'doc-001',
