@@ -78,7 +78,19 @@
     - `should switch between tabs` asserted `screen.getByText('Backup Status')` synchronously right after `render()`, racing `loadBackupData()`'s `useEffect` — switched to `findByText`, matching every other test in the file.
     `tsc --noEmit`: 5 pre-existing errors in touched files (2 in the test file's `mockBackup`/`mockCloudBackup` fixtures, 3 in `BackupExportScreen.tsx` itself — icon-name string typing, missing `Typography.h4`), all confirmed via `git diff` to sit outside every hunk this fix touched — not chased, out of scope.
   - This closes out every file identified in this session's test-suite triage — `TODO.md`'s "Type-check debt" section items 9-54 (2026-08-15 through 2026-08-17) are now fully resolved except the pre-existing, project-wide `tsc --noEmit` error count noted throughout (never re-baselined after the jest-expo migration; next session should run a fresh count rather than trust the old per-file breakdown).
-  - Remaining ~369 `tsc --noEmit` errors: mostly `src/screens/legal/`, `src/screens/subscription/`, `src/services/payment/` — no fresh per-file breakdown done today beyond what's in item 9 above; next session should re-run `npx tsc --noEmit` and bucket fresh rather than assume the old file list is still accurate.
+  - **Fresh `tsc --noEmit` baseline, 2026-08-17 (post test-suite triage):** **265 errors across 95 files.** The old "~369, mostly legal/subscription/payment" estimate was stale — confirmed by this fresh run, which surfaces a different top-of-list entirely (untouched by anything in this session's triage, all pre-existing, not investigated further today):
+    - `src/services/payment/GooglePlayService.ts` — 19
+    - `src/screens/settings/SettingsScreen.tsx` — 16
+    - `src/services/content/index.ts` — 11
+    - `src/screens/NotificationSettingsScreen.tsx` — 10
+    - `src/services/practice/__tests__/SentenceExtractionService.test.ts` — 8
+    - `src/services/cache/CacheService.ts` — 8
+    - `src/services/readings/ReadingService.ts` — 6
+    - `src/screens/subscription/RedeemGiftScreen.tsx` — 6
+    - `src/screens/SettingsScreen.tsx` — 6
+    - `src/stores/useTrialStore.ts` — 5 (same 5 pre-existing errors named in item 43 above — `PaymentProvider` union widening, `CancellationRequest` shape, missing `practiceSessionCount` — still unresolved, still confirmed unrelated to any store logic touched this session)
+    - Remaining ~86 files with 1-5 errors each, long tail — see `/tmp/tsc-fresh.log` for the full list (not committed, regenerate with `npx tsc --noEmit` if needed)
+    None of the 4 files fixed in today's test-suite triage (`DocumentVersioningService.test.ts`, `IntegrationTests.test.ts`, `LegalDocumentViewer.tsx`+test, `BackupExportScreen.tsx`+test) appear in this list — confirmed 0 type errors in all four, before and after. Next session: this is a real, substantial type-check debt pile (`GooglePlayService.ts` and the two `SettingsScreen.tsx` files alone are 41 of the 265) — worth its own triage pass rather than folding into future test-fixing sessions.
 
 ### App Store / Play Store
 - [x] Android target API level 36 (Android 16) — bumped `android/gradle.properties` + `app.config.js` 2026-07-22, verified release build succeeds. Google Play deadline Aug 31 2026.
