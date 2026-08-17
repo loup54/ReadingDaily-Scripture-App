@@ -45,11 +45,21 @@ const mockTheme = {
 describe('BackupExportScreen', () => {
   const mockBackup: BackupFile = {
     id: 'backup-001',
+    userId: 'user-001',
     fileUri: '/path/to/backup.zip',
     createdAt: Date.now(),
+    version: '1.0.0',
+    appVersion: '1.0.0',
     size: 2621440, // 2.5 MB
+    compressedSize: 1703936,
     verified: true,
     encrypted: false,
+    checksums: {
+      documents: 'mock-documents-checksum',
+      signatures: 'mock-signatures-checksum',
+      acceptances: 'mock-acceptances-checksum',
+      metadata: 'mock-metadata-checksum',
+    },
     contents: {
       documentCount: 3,
       acceptanceCount: 2,
@@ -58,18 +68,11 @@ describe('BackupExportScreen', () => {
   };
 
   const mockCloudBackup: CloudBackup = {
-    id: 'backup-001',
+    ...mockBackup,
     cloudId: 'cloud-001',
-    userId: 'user-001',
-    createdAt: Date.now(),
-    size: 2621440,
-    verified: true,
-    encrypted: false,
-    contents: {
-      documentCount: 3,
-      acceptanceCount: 2,
-      signatureCount: 2,
-    },
+    storageUrl: 'https://storage.example.com/backup-001.zip',
+    uploadedAt: Date.now(),
+    downloadCount: 0,
   };
 
   beforeEach(() => {
