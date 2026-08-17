@@ -8,6 +8,36 @@ import { render, fireEvent, waitFor } from '@testing-library/react-native';
 import { HighlightedReadingPlayer } from '../HighlightedReadingPlayer';
 import { SentenceTimingData } from '@/types';
 
+// useWordHighlighting calls the real audioHighlightingService singleton on mount
+// (startHighlighting), which falls through to a real, unmocked Firestore lookup
+// for the test's readingId. That async call outlives the test that triggered it
+// and later crashes with "XMLHttpRequest is not defined" (no such global in the
+// jest env), landing on whatever test happens to be running when it fires.
+// This component drives its rendering from the `timingData` prop, not from the
+// service's real state, so a no-op mock changes no test's assertions.
+jest.mock('@/services/audio/AudioHighlightingService', () => ({
+  audioHighlightingService: {
+    startHighlighting: jest.fn().mockResolvedValue(undefined),
+    stopHighlighting: jest.fn(),
+    updateAudioPosition: jest.fn(),
+    pauseHighlighting: jest.fn(),
+    resumeHighlighting: jest.fn(),
+    seekToPosition: jest.fn(),
+    getCurrentState: jest.fn(() => ({
+      currentPositionMs: 0,
+      currentWordIndex: -1,
+      isPlaying: false,
+      durationMs: 0,
+      updatedAt: 0,
+    })),
+    onStateChange: jest.fn(() => () => {}),
+    getMetrics: jest.fn(() => ({})),
+    getTimingData: jest.fn(() => null),
+    setDataProvider: jest.fn(),
+    destroy: jest.fn(),
+  },
+}));
+
 /**
  * Mock timing data for E2E testing
  */
