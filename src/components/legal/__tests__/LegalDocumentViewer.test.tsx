@@ -81,11 +81,11 @@ Code example:
     lastUpdated: '2024-01-15',
     effectiveDate: '2024-01-01',
     contactEmail: 'legal@example.com',
-    sections: [
-      { id: 'intro', title: 'Introduction', level: 2 },
-      { id: 'warranty', title: 'Warranty', level: 2 },
-      { id: 'liability', title: 'Liability', level: 2 },
-    ],
+    sections: ['Introduction', 'Warranty', 'Liability'],
+    filename: 'terms-of-service.md',
+    contentLength: 500,
+    category: 'legal',
+    requiresAcceptance: true,
   };
 
   // DocumentAnalyticsService exposes only static members (no getInstance) —
