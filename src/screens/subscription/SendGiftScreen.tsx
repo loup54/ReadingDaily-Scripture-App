@@ -177,7 +177,7 @@ export const SendGiftScreen: React.FC<SendGiftScreenProps> = ({
           style={styles.headerGradient}
         >
           <View style={styles.header}>
-            <IconButton icon="chevron-back" onPress={onBack} color={colors.text.white} />
+            <IconButton icon="chevron-back" onPress={onBack} accessibilityLabel="Back" color={colors.text.white} />
             <Text style={[styles.title, { color: colors.text.white }]}>Send a Gift</Text>
             <View style={{ width: 40 }} />
           </View>
@@ -691,7 +691,7 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.md,
   },
   badgeText: {
-    color: Colors.white,
+    color: Colors.text.white,
     fontSize: FontSizes.xs,
     fontWeight: FontWeights.bold,
   },
