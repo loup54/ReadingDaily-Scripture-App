@@ -14,9 +14,9 @@ import {
   setDoc,
   getDoc,
   Timestamp,
-  FirebaseError,
 } from 'firebase/firestore';
-import { getFunctions, httpsCallable, HttpsCallableError } from 'firebase/functions';
+import { getFunctions, httpsCallable, FunctionsError } from 'firebase/functions';
+import { FirebaseError } from '@firebase/util';
 
 export interface SyncError {
   type: 'network' | 'auth' | 'data' | 'quota' | 'unknown';
@@ -38,7 +38,7 @@ export class FirebaseSyncService {
     try {
       const user = useAuthStore.getState().user;
 
-      if (!user?.uid) {
+      if (!user?.id) {
         return {
           success: false,
           error: {
@@ -75,7 +75,7 @@ export class FirebaseSyncService {
     try {
       const user = useAuthStore.getState().user;
 
-      if (!user?.uid) {
+      if (!user?.id) {
         return {
           success: false,
           error: {
@@ -118,7 +118,7 @@ export class FirebaseSyncService {
     try {
       const user = useAuthStore.getState().user;
 
-      if (!user?.uid) {
+      if (!user?.id) {
         return {
           success: false,
           error: {
@@ -238,7 +238,7 @@ export class FirebaseSyncService {
       );
     }
 
-    if (error instanceof HttpsCallableError) {
+    if (error instanceof FunctionsError) {
       return error.code === 'unauthenticated' || error.code === 'permission-denied';
     }
 
@@ -257,7 +257,7 @@ export class FirebaseSyncService {
       );
     }
 
-    if (error instanceof HttpsCallableError) {
+    if (error instanceof FunctionsError) {
       return error.code === 'unavailable' || error.code === 'deadline-exceeded';
     }
 
@@ -285,7 +285,7 @@ export class FirebaseSyncService {
       );
     }
 
-    if (error instanceof HttpsCallableError) {
+    if (error instanceof FunctionsError) {
       return error.code === 'resource-exhausted';
     }
 
@@ -304,7 +304,7 @@ export class FirebaseSyncService {
       );
     }
 
-    if (error instanceof HttpsCallableError) {
+    if (error instanceof FunctionsError) {
       return error.code === 'invalid-argument' || error.code === 'failed-precondition';
     }
 
