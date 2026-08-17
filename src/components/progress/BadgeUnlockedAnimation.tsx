@@ -161,7 +161,7 @@ export const BadgeUnlockedAnimation: React.FC<
   /**
    * Get gradient colors based on badge category
    */
-  const getGradientColors = (): string[] => {
+  const getGradientColors = (): readonly [string, string] => {
     switch (badge.category) {
       case 'frequency':
         return ['#3B82F6', '#1D4ED8']; // Blue
@@ -308,7 +308,7 @@ export const BadgeUnlockedAnimation: React.FC<
           {/* Dismiss instruction */}
           <View style={styles.dismissContainer}>
             <Ionicons
-              name="finger-outline"
+              name="hand-left-outline"
               size={16}
               color="rgba(255, 255, 255, 0.7)"
             />
