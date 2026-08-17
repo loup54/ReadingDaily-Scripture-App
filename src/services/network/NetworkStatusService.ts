@@ -19,6 +19,22 @@ export interface NetworkState {
 
 type NetworkChangeListener = (state: NetworkState) => void;
 
+// expo-network reports NetworkStateType values in uppercase (e.g. "WIFI"),
+// but this app's NetworkType union is lowercase - map explicitly rather
+// than casting (a blind cast means every === 'wifi' comparison downstream
+// silently always fails).
+const NETWORK_TYPE_MAP: Record<string, NetworkType> = {
+  NONE: 'none',
+  UNKNOWN: 'unknown',
+  CELLULAR: 'cellular',
+  WIFI: 'wifi',
+  BLUETOOTH: 'bluetooth',
+  ETHERNET: 'ethernet',
+  WIMAX: 'other',
+  VPN: 'vpn',
+  OTHER: 'other',
+};
+
 /**
  * Service for monitoring network connectivity status
  * Provides methods to check current status and subscribe to changes
@@ -51,7 +67,7 @@ export class NetworkStatusService {
         await this.updateNetworkState();
       });
 
-      this.unsubscribe = () => subscription.unsubscribe();
+      this.unsubscribe = () => subscription.remove();
 
       console.log('[NetworkStatusService] ✅ Network monitor initialized');
     } catch (error) {
@@ -70,7 +86,7 @@ export class NetworkStatusService {
       const networkState: NetworkState = {
         status: state.isConnected ? 'online' : 'offline',
         isConnected: state.isConnected ?? false,
-        type: (state.type as NetworkType) ?? 'unknown',
+        type: (state.type ? NETWORK_TYPE_MAP[state.type] : undefined) ?? 'unknown',
         ipAddress,
         isInternetReachable: state.isInternetReachable,
       };
