@@ -310,7 +310,7 @@ export class ReadingService {
     try {
       const readings = (bundledReadings as any).readings || {};
 
-      for (const [dateStr, reading] of Object.entries(readings as any)) {
+      for (const [dateStr, reading] of Object.entries(readings as any) as [string, any][]) {
         const date = new Date(dateStr);
 
         // Check gospel
