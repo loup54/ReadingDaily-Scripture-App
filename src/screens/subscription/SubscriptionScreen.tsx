@@ -38,7 +38,6 @@ export const SubscriptionScreen: React.FC<SubscriptionScreenProps> = ({
     isActive,
     hasExpired,
     remainingMinutes,
-    lifetimePrice,
     purchaseLifetimeAccess,
     restorePurchase,
     startTrial,
@@ -334,6 +333,7 @@ export const SubscriptionScreen: React.FC<SubscriptionScreenProps> = ({
             <IconButton
               icon="chevron-back"
               onPress={onBack}
+              accessibilityLabel="Back"
               variant="default"
               size="md"
               color={colors.text.white}
