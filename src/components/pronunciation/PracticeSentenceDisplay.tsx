@@ -181,6 +181,7 @@ export const PracticeSentenceDisplay: React.FC<PracticeSentenceDisplayProps> = (
             <IconButton
               icon={recordingState === 'recording' ? 'stop-circle' : 'mic'}
               onPress={recordingState === 'recording' ? onStopRecording : onStartRecording}
+              accessibilityLabel={recordingState === 'recording' ? 'Stop recording' : 'Start recording'}
               size="sm"
               variant="filled"
               backgroundColor={
@@ -291,6 +292,7 @@ export const PracticeSentenceDisplay: React.FC<PracticeSentenceDisplayProps> = (
             <IconButton
               icon={recordingState === 'recording' ? 'stop-circle' : 'mic'}
               onPress={recordingState === 'recording' ? onStopRecording : onStartRecording}
+              accessibilityLabel={recordingState === 'recording' ? 'Stop recording' : 'Start recording'}
               size="sm"
               variant="filled"
               backgroundColor={
