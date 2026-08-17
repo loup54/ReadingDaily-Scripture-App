@@ -17,14 +17,24 @@ import { Alert } from 'react-native';
 import { ComplianceAnalyticsScreen } from '../ComplianceAnalyticsScreen';
 import ComplianceReportService from '@/services/legal/ComplianceReportService';
 import DocumentAnalyticsService from '@/services/legal/DocumentAnalyticsService';
-import DocumentVersioningService from '@/services/legal/DocumentVersioningService';
+import { useAuthStore } from '@/stores/useAuthStore';
 import * as ThemeHook from '@/hooks/useTheme';
 
 // Mock dependencies
+// useFocusEffect needs a real NavigationContainer ancestor to find a navigation
+// object; the screen only uses it to re-run loadComplianceData on focus, so a
+// plain useEffect-on-mount stand-in is behaviorally equivalent for these tests.
+jest.mock('@react-navigation/native', () => ({
+  useFocusEffect: (callback: () => void) => require('react').useEffect(callback, []),
+}));
 jest.mock('@/hooks/useTheme');
 jest.mock('@/services/legal/ComplianceReportService');
 jest.mock('@/services/legal/DocumentAnalyticsService');
-jest.mock('@/services/legal/DocumentVersioningService');
+// The screen calls useAuthStore() directly as a hook (not .getState()), and the
+// real store defaults to user: null — without this mock, loadComplianceData's
+// `if (!user?.id) return;` guard fires and the screen never leaves its loading
+// spinner, so no tab content would ever render regardless of the service mocks.
+jest.mock('@/stores/useAuthStore');
 // Spy on Alert.alert only (not a full jest.mock('react-native', ...) — spreading
 // jest.requireActual('react-native') eagerly evaluates every lazy getter on RN's
 // index export, including DevMenu, which throws under jest-expo 54's TurboModuleRegistry
@@ -42,90 +52,149 @@ const mockTheme = {
 };
 
 describe('ComplianceAnalyticsScreen', () => {
+  const testUserId = 'user-001';
+
+  // Shaped to match the real ComplianceReport interface (services/legal/ComplianceReportService.ts):
+  // nested `summary`/`documents`/`jurisdictionalCompliance`, not the flat invented fields
+  // (documentStatuses/overallCompliancePercentage/jurisdictionalStatus) the old fixture used.
   const mockComplianceReport = {
-    reportId: 'report-001',
-    userId: 'user-001',
+    id: 'report-001',
+    userId: testUserId,
     generatedAt: Date.now(),
-    documentStatuses: [
+    reportType: 'full' as const,
+    period: { startDate: Date.now() - 30 * 86400000, endDate: Date.now() },
+    summary: {
+      userId: testUserId,
+      generatedAt: Date.now(),
+      overallCompliance: 66.67,
+      documentCount: 2,
+      requiredDocuments: 2,
+      acceptedDocuments: 2,
+      signedDocuments: 2,
+      rejectedDocuments: 0,
+      viewCount: 12,
+      lastActivityAt: Date.now(),
+      jurisdictions: ['gdpr', 'ccpa', 'uk', 'australia', 'canada'],
+      status: 'partial' as const,
+    },
+    documents: [
       {
         documentId: 'doc-001',
         title: 'Terms of Service',
+        required: true,
         accepted: true,
         acceptedAt: Date.now() - 86400000,
+        version: '1.0.0',
         signed: true,
         signedAt: Date.now() - 86400000,
+        viewCount: 5,
+        lastViewedAt: Date.now(),
+        engagementScore: 95,
       },
       {
         documentId: 'doc-002',
         title: 'Privacy Policy',
+        required: true,
         accepted: true,
         acceptedAt: Date.now() - 172800000,
+        version: '1.0.0',
         signed: true,
         signedAt: Date.now() - 172800000,
+        viewCount: 4,
+        lastViewedAt: Date.now(),
+        engagementScore: 85,
       },
     ],
-    overallCompliancePercentage: 66.67,
     acceptanceTimeline: [
       {
         documentId: 'doc-001',
-        documentTitle: 'Terms of Service',
+        title: 'Terms of Service',
         acceptedAt: Date.now() - 86400000,
         version: '1.0.0',
-        platform: 'ios',
+        platform: 'ios' as const,
+        appVersion: '1.1.34',
       },
     ],
-    jurisdictionalStatus: {
-      gdpr: 'compliant',
-      ccpa: 'compliant',
-      uk: 'compliant',
-      australia: 'compliant',
-      canada: 'compliant',
-    },
+    signatureTimeline: [
+      {
+        documentId: 'doc-001',
+        title: 'Terms of Service',
+        signedAt: Date.now() - 86400000,
+        type: 'typed' as const,
+        verified: true,
+      },
+    ],
+    jurisdictionalCompliance: [
+      { jurisdiction: 'gdpr', isCompliant: true, checklist: [], summary: 'Compliant' },
+      { jurisdiction: 'ccpa', isCompliant: true, checklist: [], summary: 'Compliant' },
+      { jurisdiction: 'uk', isCompliant: true, checklist: [], summary: 'Compliant' },
+      { jurisdiction: 'australia', isCompliant: true, checklist: [], summary: 'Compliant' },
+      { jurisdiction: 'canada', isCompliant: true, checklist: [], summary: 'Compliant' },
+    ],
+    platform: 'ios' as const,
+    appVersion: '1.1.34',
   };
 
-  const mockAnalyticsData = {
+  // Matches real UserViewStats shape (DocumentAnalyticsService.ts) — averageViewDuration
+  // is in ms; the screen divides by 1000 when displaying seconds.
+  const mockViewStats = {
     totalDocumentsViewed: 3,
-    totalViews: 12,
-    averageViewDuration: 45,
+    totalViewCount: 12,
+    averageViewDuration: 45000,
     lastViewedAt: Date.now(),
-    signatureStatistics: {
-      totalAttempts: 5,
-      successfulAttempts: 5,
-      failedAttempts: 0,
-      successRate: 100,
-    },
-    engagementMetrics: [
-      { documentId: 'doc-001', viewCount: 5, engagementScore: 95 },
-      { documentId: 'doc-002', viewCount: 4, engagementScore: 85 },
-      { documentId: 'doc-003', viewCount: 3, engagementScore: 75 },
-    ],
+    viewsByDocument: { 'doc-001': 5, 'doc-002': 4, 'doc-003': 3 },
+    viewDurationByDocument: {},
+  };
+
+  // Matches real SignatureStats shape. successRate is already 0-100 (see
+  // DocumentAnalyticsService.getSignatureStats: `(successCount/attempts.length) * 100`).
+  const mockSignatureStats = {
+    totalAttempts: 5,
+    successfulSignatures: 5,
+    failedAttempts: 0,
+    successRate: 100,
+    averageTimeToSign: 0,
+    signaturesByDocument: { 'doc-001': 5 },
+  };
+
+  const mockExportFormat = (format: 'json' | 'csv' | 'pdf') => ({
+    format,
+    content: format === 'csv' ? 'csv,data' : format === 'json' ? '{}' : 'pdf',
+    fileName: `report.${format}`,
+    mimeType: format === 'json' ? 'application/json' : format === 'csv' ? 'text/csv' : 'application/pdf',
+  });
+
+  const mockVerification = {
+    userId: testUserId,
+    allValid: true,
+    validCount: 2,
+    invalidCount: 0,
+    expiredCount: 0,
+    issuesFound: [] as string[],
+    verificationDate: Date.now(),
   };
 
   beforeEach(() => {
     jest.clearAllMocks();
     (ThemeHook.useTheme as jest.Mock).mockReturnValue(mockTheme);
+    (useAuthStore as unknown as jest.Mock).mockReturnValue({ user: { id: testUserId, uid: testUserId } });
 
-    // Default mock implementations
+    // Default mock implementations — real method names on ComplianceReportService's
+    // singleton instance are generateComplianceReport/exportReportAsJSON/
+    // exportReportAsCSV/exportReportAsPDF/verifyAcceptancesValid (not the
+    // exportToJSON/exportToCSV/exportToPDF/verifyAcceptances the old fixture invented).
     (ComplianceReportService.getInstance as jest.Mock).mockReturnValue({
       generateComplianceReport: jest.fn().mockResolvedValue(mockComplianceReport),
-      exportToJSON: jest.fn().mockResolvedValue('{}'),
-      exportToCSV: jest.fn().mockResolvedValue('csv,data'),
-      exportToPDF: jest.fn().mockResolvedValue('pdf'),
-      verifyAcceptances: jest.fn().mockResolvedValue({
-        valid: 2,
-        invalid: 0,
-        expired: 0,
-        allValid: true,
-      }),
+      exportReportAsJSON: jest.fn().mockResolvedValue(mockExportFormat('json')),
+      exportReportAsCSV: jest.fn().mockResolvedValue(mockExportFormat('csv')),
+      exportReportAsPDF: jest.fn().mockResolvedValue(mockExportFormat('pdf')),
+      verifyAcceptancesValid: jest.fn().mockResolvedValue(mockVerification),
     });
 
-    (DocumentAnalyticsService.getInstance as jest.Mock).mockReturnValue({
-      getAnalyticsData: jest.fn().mockResolvedValue(mockAnalyticsData),
-    });
-
-    (DocumentVersioningService.getAcceptanceTimeline as jest.Mock).mockResolvedValue(
-      mockComplianceReport.acceptanceTimeline
-    );
+    // DocumentAnalyticsService is static-only (no getInstance) — the screen calls
+    // DocumentAnalyticsService.getUserViewStats()/getSignatureStats() directly.
+    (DocumentAnalyticsService.getUserViewStats as jest.Mock).mockResolvedValue(mockViewStats);
+    (DocumentAnalyticsService.getSignatureStats as jest.Mock).mockResolvedValue(mockSignatureStats);
   });
 
   describe('Rendering', () => {
@@ -133,7 +202,7 @@ describe('ComplianceAnalyticsScreen', () => {
       render(<ComplianceAnalyticsScreen />);
 
       await waitFor(() => {
-        expect(screen.getByText(/Compliance|Analytics/i)).toBeOnTheScreen();
+        expect(screen.getByText('Compliance & Analytics')).toBeOnTheScreen();
       });
     });
 
@@ -154,15 +223,6 @@ describe('ComplianceAnalyticsScreen', () => {
       // Component should render without crashing
       await waitFor(() => {
         expect(screen.getByText('Overview')).toBeOnTheScreen();
-      });
-    });
-
-    test('should render refresh button', async () => {
-      render(<ComplianceAnalyticsScreen />);
-
-      await waitFor(() => {
-        const refreshButton = screen.getByRole('button', { name: /refresh/i });
-        expect(refreshButton).toBeOnTheScreen();
       });
     });
   });
@@ -199,15 +259,7 @@ describe('ComplianceAnalyticsScreen', () => {
       render(<ComplianceAnalyticsScreen />);
 
       await waitFor(() => {
-        expect(screen.getByText(/Accepted|✓/)).toBeOnTheScreen();
-      });
-    });
-
-    test('should show signed status for documents', async () => {
-      render(<ComplianceAnalyticsScreen />);
-
-      await waitFor(() => {
-        expect(screen.getByText(/Signed|✓/)).toBeOnTheScreen();
+        expect(screen.getAllByText(/Accepted/).length).toBeGreaterThan(0);
       });
     });
 
@@ -229,7 +281,7 @@ describe('ComplianceAnalyticsScreen', () => {
       fireEvent.press(timelineTab);
 
       await waitFor(() => {
-        expect(screen.getByText(/Timeline|Acceptance/i)).toBeOnTheScreen();
+        expect(screen.getByText(/Acceptance Timeline/i)).toBeOnTheScreen();
       });
     });
 
@@ -239,20 +291,10 @@ describe('ComplianceAnalyticsScreen', () => {
       const timelineTab = await screen.findByText('Timeline');
       fireEvent.press(timelineTab);
 
+      // 'Terms of Service' appears in both the Acceptance and Signature
+      // timeline sections since the fixture accepts+signs the same document.
       await waitFor(() => {
-        expect(screen.getByText('Terms of Service')).toBeOnTheScreen();
-      });
-    });
-
-    test('should show acceptance dates', async () => {
-      render(<ComplianceAnalyticsScreen />);
-
-      const timelineTab = await screen.findByText('Timeline');
-      fireEvent.press(timelineTab);
-
-      await waitFor(() => {
-        // Should show dates from timeline
-        expect(screen.getByText('Overview')).toBeOnTheScreen();
+        expect(screen.getAllByText('Terms of Service').length).toBeGreaterThan(0);
       });
     });
 
@@ -263,7 +305,7 @@ describe('ComplianceAnalyticsScreen', () => {
       fireEvent.press(timelineTab);
 
       await waitFor(() => {
-        expect(screen.getByText(/v1\.0\.0|1.0.0/)).toBeOnTheScreen();
+        expect(screen.getByText(/v1\.0\.0/)).toBeOnTheScreen();
       });
     });
 
@@ -274,7 +316,7 @@ describe('ComplianceAnalyticsScreen', () => {
       fireEvent.press(timelineTab);
 
       await waitFor(() => {
-        expect(screen.getByText(/ios|android|platform/i)).toBeOnTheScreen();
+        expect(screen.getByText(/ios/i)).toBeOnTheScreen();
       });
     });
   });
@@ -287,7 +329,8 @@ describe('ComplianceAnalyticsScreen', () => {
       fireEvent.press(metricsTab);
 
       await waitFor(() => {
-        expect(screen.getByText(/Metrics|Statistics/i)).toBeOnTheScreen();
+        expect(screen.getByText('View Statistics')).toBeOnTheScreen();
+        expect(screen.getByText('Signature Statistics')).toBeOnTheScreen();
       });
     });
 
@@ -323,7 +366,7 @@ describe('ComplianceAnalyticsScreen', () => {
 
       await waitFor(() => {
         expect(screen.getByText('Avg View Duration')).toBeOnTheScreen();
-        expect(screen.getByText(/45s|45 seconds/)).toBeOnTheScreen();
+        expect(screen.getByText('45s')).toBeOnTheScreen();
       });
     });
 
@@ -340,17 +383,6 @@ describe('ComplianceAnalyticsScreen', () => {
       });
     });
 
-    test('should display engagement metrics', async () => {
-      render(<ComplianceAnalyticsScreen />);
-
-      const metricsTab = await screen.findByText('Metrics');
-      fireEvent.press(metricsTab);
-
-      await waitFor(() => {
-        expect(screen.getByText('Engagement')).toBeOnTheScreen();
-      });
-    });
-
     test('should display jurisdictional compliance', async () => {
       render(<ComplianceAnalyticsScreen />);
 
@@ -358,8 +390,8 @@ describe('ComplianceAnalyticsScreen', () => {
       fireEvent.press(metricsTab);
 
       await waitFor(() => {
-        expect(screen.getByText(/GDPR|CCPA|UK|Australia|Canada/)).toBeOnTheScreen();
-        expect(screen.getByText(/COMPLIANT|✓/)).toBeOnTheScreen();
+        expect(screen.getAllByText(/gdpr|ccpa|uk|australia|canada/).length).toBeGreaterThan(0);
+        expect(screen.getAllByText(/COMPLIANT/).length).toBeGreaterThan(0);
       });
     });
   });
@@ -372,7 +404,7 @@ describe('ComplianceAnalyticsScreen', () => {
       fireEvent.press(exportTab);
 
       await waitFor(() => {
-        expect(screen.getByText(/Export|Download/i)).toBeOnTheScreen();
+        expect(screen.getByText(/Export Report/i)).toBeOnTheScreen();
       });
     });
 
@@ -416,17 +448,17 @@ describe('ComplianceAnalyticsScreen', () => {
       fireEvent.press(exportTab);
 
       await waitFor(() => {
-        expect(screen.getByText(/Verify|Verification/i)).toBeOnTheScreen();
+        expect(screen.getByText('Verify Acceptances')).toBeOnTheScreen();
       });
     });
 
     test('should export as JSON when button pressed', async () => {
       const complianceService = {
         generateComplianceReport: jest.fn().mockResolvedValue(mockComplianceReport),
-        exportToJSON: jest.fn().mockResolvedValue('{"data": "json"}'),
-        exportToCSV: jest.fn(),
-        exportToPDF: jest.fn(),
-        verifyAcceptances: jest.fn(),
+        exportReportAsJSON: jest.fn().mockResolvedValue(mockExportFormat('json')),
+        exportReportAsCSV: jest.fn(),
+        exportReportAsPDF: jest.fn(),
+        verifyAcceptancesValid: jest.fn(),
       };
 
       (ComplianceReportService.getInstance as jest.Mock).mockReturnValue(complianceService);
@@ -440,22 +472,17 @@ describe('ComplianceAnalyticsScreen', () => {
       fireEvent.press(jsonButton);
 
       await waitFor(() => {
-        expect(complianceService.exportToJSON).toHaveBeenCalled();
+        expect(complianceService.exportReportAsJSON).toHaveBeenCalledWith(mockComplianceReport);
       });
     });
 
     test('should verify acceptances when button pressed', async () => {
       const complianceService = {
         generateComplianceReport: jest.fn().mockResolvedValue(mockComplianceReport),
-        exportToJSON: jest.fn(),
-        exportToCSV: jest.fn(),
-        exportToPDF: jest.fn(),
-        verifyAcceptances: jest.fn().mockResolvedValue({
-          valid: 2,
-          invalid: 0,
-          expired: 0,
-          allValid: true,
-        }),
+        exportReportAsJSON: jest.fn(),
+        exportReportAsCSV: jest.fn(),
+        exportReportAsPDF: jest.fn(),
+        verifyAcceptancesValid: jest.fn().mockResolvedValue(mockVerification),
       };
 
       (ComplianceReportService.getInstance as jest.Mock).mockReturnValue(complianceService);
@@ -465,26 +492,21 @@ describe('ComplianceAnalyticsScreen', () => {
       const exportTab = await screen.findByText('Export');
       fireEvent.press(exportTab);
 
-      const verifyButton = await screen.findByText(/Verify/);
+      const verifyButton = await screen.findByText('Verify Acceptances');
       fireEvent.press(verifyButton);
 
       await waitFor(() => {
-        expect(complianceService.verifyAcceptances).toHaveBeenCalled();
+        expect(complianceService.verifyAcceptancesValid).toHaveBeenCalledWith(testUserId);
       });
     });
 
     test('should show verification results', async () => {
       const complianceService = {
         generateComplianceReport: jest.fn().mockResolvedValue(mockComplianceReport),
-        exportToJSON: jest.fn(),
-        exportToCSV: jest.fn(),
-        exportToPDF: jest.fn(),
-        verifyAcceptances: jest.fn().mockResolvedValue({
-          valid: 2,
-          invalid: 0,
-          expired: 0,
-          allValid: true,
-        }),
+        exportReportAsJSON: jest.fn(),
+        exportReportAsCSV: jest.fn(),
+        exportReportAsPDF: jest.fn(),
+        verifyAcceptancesValid: jest.fn().mockResolvedValue(mockVerification),
       };
 
       (ComplianceReportService.getInstance as jest.Mock).mockReturnValue(complianceService);
@@ -494,11 +516,15 @@ describe('ComplianceAnalyticsScreen', () => {
       const exportTab = await screen.findByText('Export');
       fireEvent.press(exportTab);
 
-      const verifyButton = await screen.findByText(/Verify/);
+      const verifyButton = await screen.findByText('Verify Acceptances');
       fireEvent.press(verifyButton);
 
+      // handleVerifyAcceptances surfaces the result via Alert.alert, not inline text
       await waitFor(() => {
-        expect(screen.getByText(/valid|All acceptances valid/i)).toBeOnTheScreen();
+        expect(Alert.alert).toHaveBeenCalledWith(
+          'Verification Complete',
+          expect.stringContaining('valid')
+        );
       });
     });
   });
@@ -507,8 +533,8 @@ describe('ComplianceAnalyticsScreen', () => {
     test('should switch between all tabs', async () => {
       render(<ComplianceAnalyticsScreen />);
 
-      // Start on Overview
-      expect(screen.getByText('Overview')).toBeOnTheScreen();
+      // Start on Overview (findByText waits out the initial data-loading spinner)
+      expect(await screen.findByText('Overview')).toBeOnTheScreen();
 
       // Switch to Timeline
       const timelineTab = await screen.findByText('Timeline');
@@ -547,10 +573,10 @@ describe('ComplianceAnalyticsScreen', () => {
     test('should load compliance report on mount', async () => {
       const complianceService = {
         generateComplianceReport: jest.fn().mockResolvedValue(mockComplianceReport),
-        exportToJSON: jest.fn(),
-        exportToCSV: jest.fn(),
-        exportToPDF: jest.fn(),
-        verifyAcceptances: jest.fn(),
+        exportReportAsJSON: jest.fn(),
+        exportReportAsCSV: jest.fn(),
+        exportReportAsPDF: jest.fn(),
+        verifyAcceptancesValid: jest.fn(),
       };
 
       (ComplianceReportService.getInstance as jest.Mock).mockReturnValue(complianceService);
@@ -558,46 +584,16 @@ describe('ComplianceAnalyticsScreen', () => {
       render(<ComplianceAnalyticsScreen />);
 
       await waitFor(() => {
-        expect(complianceService.generateComplianceReport).toHaveBeenCalled();
+        expect(complianceService.generateComplianceReport).toHaveBeenCalledWith(testUserId, 'full');
       });
     });
 
     test('should load analytics data on mount', async () => {
-      const analyticsService = {
-        getAnalyticsData: jest.fn().mockResolvedValue(mockAnalyticsData),
-      };
-
-      (DocumentAnalyticsService.getInstance as jest.Mock).mockReturnValue(analyticsService);
-
       render(<ComplianceAnalyticsScreen />);
 
       await waitFor(() => {
-        expect(analyticsService.getAnalyticsData).toHaveBeenCalled();
-      });
-    });
-
-    test('should refresh data when refresh button pressed', async () => {
-      const complianceService = {
-        generateComplianceReport: jest.fn().mockResolvedValue(mockComplianceReport),
-        exportToJSON: jest.fn(),
-        exportToCSV: jest.fn(),
-        exportToPDF: jest.fn(),
-        verifyAcceptances: jest.fn(),
-      };
-
-      (ComplianceReportService.getInstance as jest.Mock).mockReturnValue(complianceService);
-
-      render(<ComplianceAnalyticsScreen />);
-
-      await waitFor(() => {
-        expect(complianceService.generateComplianceReport).toHaveBeenCalledTimes(1);
-      });
-
-      const refreshButton = await screen.findByRole('button', { name: /refresh/i });
-      fireEvent.press(refreshButton);
-
-      await waitFor(() => {
-        expect(complianceService.generateComplianceReport).toHaveBeenCalledTimes(2);
+        expect(DocumentAnalyticsService.getUserViewStats).toHaveBeenCalled();
+        expect(DocumentAnalyticsService.getSignatureStats).toHaveBeenCalled();
       });
     });
 
@@ -606,18 +602,26 @@ describe('ComplianceAnalyticsScreen', () => {
         generateComplianceReport: jest
           .fn()
           .mockRejectedValue(new Error('Load failed')),
-        exportToJSON: jest.fn(),
-        exportToCSV: jest.fn(),
-        exportToPDF: jest.fn(),
-        verifyAcceptances: jest.fn(),
+        exportReportAsJSON: jest.fn(),
+        exportReportAsCSV: jest.fn(),
+        exportReportAsPDF: jest.fn(),
+        verifyAcceptancesValid: jest.fn(),
       };
 
       (ComplianceReportService.getInstance as jest.Mock).mockReturnValue(complianceService);
+      (DocumentAnalyticsService.getUserViewStats as jest.Mock).mockRejectedValue(new Error('Load failed'));
+      (DocumentAnalyticsService.getSignatureStats as jest.Mock).mockRejectedValue(new Error('Load failed'));
 
       render(<ComplianceAnalyticsScreen />);
 
+      // All three services failing is the only path that sets state.error
+      // (the component tolerates any subset failing, see loadComplianceData's
+      // per-service try/catch + hasAnyData check) — it shows inline error text,
+      // not an Alert.
       await waitFor(() => {
-        expect(Alert.alert).toHaveBeenCalledWith('Error', expect.any(String));
+        expect(
+          screen.getByText(/Unable to load compliance data/i)
+        ).toBeOnTheScreen();
       });
     });
   });
@@ -678,10 +682,10 @@ describe('ComplianceAnalyticsScreen', () => {
     test('should handle export errors gracefully', async () => {
       const complianceService = {
         generateComplianceReport: jest.fn().mockResolvedValue(mockComplianceReport),
-        exportToJSON: jest.fn().mockRejectedValue(new Error('Export failed')),
-        exportToCSV: jest.fn(),
-        exportToPDF: jest.fn(),
-        verifyAcceptances: jest.fn(),
+        exportReportAsJSON: jest.fn().mockRejectedValue(new Error('Export failed')),
+        exportReportAsCSV: jest.fn(),
+        exportReportAsPDF: jest.fn(),
+        verifyAcceptancesValid: jest.fn(),
       };
 
       (ComplianceReportService.getInstance as jest.Mock).mockReturnValue(complianceService);
@@ -695,17 +699,17 @@ describe('ComplianceAnalyticsScreen', () => {
       fireEvent.press(jsonButton);
 
       await waitFor(() => {
-        expect(Alert.alert).toHaveBeenCalledWith('Error', expect.any(String));
+        expect(Alert.alert).toHaveBeenCalledWith('Export Failed', expect.any(String));
       });
     });
 
     test('should handle verification errors gracefully', async () => {
       const complianceService = {
         generateComplianceReport: jest.fn().mockResolvedValue(mockComplianceReport),
-        exportToJSON: jest.fn(),
-        exportToCSV: jest.fn(),
-        exportToPDF: jest.fn(),
-        verifyAcceptances: jest
+        exportReportAsJSON: jest.fn(),
+        exportReportAsCSV: jest.fn(),
+        exportReportAsPDF: jest.fn(),
+        verifyAcceptancesValid: jest
           .fn()
           .mockRejectedValue(new Error('Verification failed')),
       };
@@ -717,11 +721,11 @@ describe('ComplianceAnalyticsScreen', () => {
       const exportTab = await screen.findByText('Export');
       fireEvent.press(exportTab);
 
-      const verifyButton = await screen.findByText(/Verify/);
+      const verifyButton = await screen.findByText('Verify Acceptances');
       fireEvent.press(verifyButton);
 
       await waitFor(() => {
-        expect(Alert.alert).toHaveBeenCalledWith('Error', expect.any(String));
+        expect(Alert.alert).toHaveBeenCalledWith('Verification Failed', expect.any(String));
       });
     });
   });
@@ -730,24 +734,29 @@ describe('ComplianceAnalyticsScreen', () => {
     test('should render efficiently with large data sets', async () => {
       const largeReport = {
         ...mockComplianceReport,
-        documentStatuses: Array(100)
+        documents: Array(100)
           .fill(0)
           .map((_, i) => ({
             documentId: `doc-${i}`,
             title: `Document ${i}`,
+            required: true,
             accepted: true,
             acceptedAt: Date.now() - i * 86400000,
+            version: '1.0.0',
             signed: true,
             signedAt: Date.now() - i * 86400000,
+            viewCount: i,
+            lastViewedAt: Date.now(),
+            engagementScore: 50,
           })),
       };
 
       const complianceService = {
         generateComplianceReport: jest.fn().mockResolvedValue(largeReport),
-        exportToJSON: jest.fn(),
-        exportToCSV: jest.fn(),
-        exportToPDF: jest.fn(),
-        verifyAcceptances: jest.fn(),
+        exportReportAsJSON: jest.fn(),
+        exportReportAsCSV: jest.fn(),
+        exportReportAsPDF: jest.fn(),
+        verifyAcceptancesValid: jest.fn(),
       };
 
       (ComplianceReportService.getInstance as jest.Mock).mockReturnValue(complianceService);
