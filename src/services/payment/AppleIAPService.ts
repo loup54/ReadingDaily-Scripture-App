@@ -608,7 +608,7 @@ export class AppleIAPService implements IPaymentService {
       this.products = products.map((product) => {
         // v14: product.type is 'in-app' | 'subs', product.id is the SKU
         const isSubscription = product.type === 'subs';
-        const billingPeriod = product.id.includes('yearly') ? 'yearly' : 'monthly';
+        const billingPeriod: 'monthly' | 'yearly' = product.id.includes('yearly') ? 'yearly' : 'monthly';
         // v14: product.price is already a number (or null)
         const price = product.price ?? 0;
 

@@ -38,6 +38,7 @@ describe('PracticeStorageService', () => {
         id: 'attempt-1',
         sentenceId: 'sentence-1',
         audioUri: 'file:///test.wav',
+        referenceText: 'This is a test sentence for practice.',
         result: {
           recognizedText: 'This is a test sentence for practice',
           scores: {
