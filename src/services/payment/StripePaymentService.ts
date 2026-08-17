@@ -273,40 +273,17 @@ export class StripePaymentService implements IPaymentService {
 
   /**
    * Cancel a subscription
-   * @param subscriptionId Stripe subscription ID
+   * Note: this service only creates one-time Stripe Checkout purchases
+   * (see class header) -- there is no recurring Stripe subscription to cancel
    */
   async cancelSubscription(subscriptionId: string): Promise<CancellationResult> {
-    console.log('[StripePaymentService] Cancelling subscription:', subscriptionId);
+    console.log('[StripePaymentService] Subscription cancellation initiated:', subscriptionId);
 
-    try {
-      // Call Firebase Cloud Function to cancel Stripe subscription
-      const cancelSubscription = httpsCallable(
-        this.functions,
-        'cancelStripeSubscription'
-      );
-
-      const result = await cancelSubscription({ subscriptionId });
-      const data = result.data as { success: boolean; canceledAt?: number };
-
-      if (data.success) {
-        return {
-          success: true,
-          subscriptionId,
-          effectiveDate: data.canceledAt || Date.now(),
-        };
-      } else {
-        return {
-          success: false,
-          error: 'Failed to cancel subscription',
-        };
-      }
-    } catch (error) {
-      console.error('[StripePaymentService] Cancellation failed:', error);
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Cancellation failed',
-      };
-    }
+    return {
+      success: false,
+      subscriptionId,
+      error: 'This purchase is a one-time payment, not a recurring subscription. There is nothing to cancel.',
+    };
   }
 
   /**

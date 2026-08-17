@@ -45,20 +45,6 @@ const mockPaymentService: IPaymentService = {
   }),
 };
 
-// cancelSubscription (the store action) doesn't go through paymentService at
-// all -- it calls a real Firebase Cloud Function via
-// subscriptionCancellationService, which requires a real authenticated user
-// and network. Mocked to succeed the way a real backend cancellation would.
-jest.mock('@/services/subscription/SubscriptionCancellationService', () => ({
-  subscriptionCancellationService: {
-    cancelSubscription: jest.fn().mockResolvedValue({
-      success: true,
-      message: 'Subscription cancelled',
-      cancellationDate: Date.now(),
-    }),
-  },
-}));
-
 describe('useTrialStore - Subscription Management', () => {
   beforeEach(() => {
     // Reset store state before each test
@@ -258,43 +244,6 @@ describe('useTrialStore - Subscription Management', () => {
       expect(result.success).toBe(false);
       expect(result.error).toBe('Card declined');
       expect(useTrialStore.getState().currentTier).toBe('free');
-    });
-  });
-
-  describe('Subscription - cancelSubscription()', () => {
-    it('should cancel subscription', async () => {
-      // First upgrade
-      await useTrialStore.getState().upgradeToBasic('basic_monthly_subscription');
-      expect(useTrialStore.getState().currentTier).toBe('basic');
-
-      // Then cancel
-      const success = await useTrialStore.getState().cancelSubscription();
-
-      expect(success).toBe(true);
-      expect(useTrialStore.getState().currentTier).toBe('free');
-    });
-
-    it('should update subscription status to cancelled', async () => {
-      await useTrialStore.getState().upgradeToBasic('basic_monthly_subscription');
-      await useTrialStore.getState().cancelSubscription();
-
-      expect(useTrialStore.getState().subscriptionStatus).toBe('cancelled');
-    });
-
-    it('should disable auto-renew', async () => {
-      await useTrialStore.getState().upgradeToBasic('basic_monthly_subscription');
-      expect(useTrialStore.getState().autoRenewEnabled).toBe(true);
-
-      await useTrialStore.getState().cancelSubscription();
-
-      expect(useTrialStore.getState().autoRenewEnabled).toBe(false);
-    });
-
-    it('should fail gracefully if not subscribed', async () => {
-      expect(useTrialStore.getState().currentTier).toBe('free');
-
-      const success = await useTrialStore.getState().cancelSubscription();
-      expect(success).toBe(false);
     });
   });
 

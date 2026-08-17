@@ -27,7 +27,6 @@ import {
 import { ENV } from '../config/env';
 import { PaymentServiceFactory } from '../services/payment';
 import { IPaymentService } from '../services/payment/IPaymentService';
-import { subscriptionCancellationService } from '../services/subscription/SubscriptionCancellationService';
 import { analyticsService } from '../services/analytics/AnalyticsService';
 
 // Development bypass: Skip trial/paywall when SKIP_TRIAL is enabled
@@ -54,7 +53,6 @@ interface TrialStoreState extends TrialState {
 
   // Subscription actions (NEW - Phase 1)
   upgradeToBasic: (subscriptionId: string) => Promise<{ success: boolean; error?: string }>;
-  cancelSubscription: () => Promise<boolean>;
   getSubscriptionFeatures: () => SubscriptionFeatures;
   isDailyLimitReached: () => boolean;
   getRemainingDailyMinutes: () => number;
@@ -385,60 +383,6 @@ export const useTrialStore = create<TrialStoreState>()(
           const errorMsg = error instanceof Error ? error.message : 'Subscription upgrade failed';
           console.error('Subscription upgrade exception:', error);
           return { success: false, error: errorMsg };
-        }
-      },
-
-      // Cancel subscription (NEW - Phase 1, ENHANCED - Phase 5)
-      cancelSubscription: async (): Promise<boolean> => {
-        try {
-          const state = get();
-
-          if (state.currentTier !== 'basic') {
-            console.warn('⚠️  Cannot cancel - user is not on basic tier');
-            return false;
-          }
-
-          console.log('🔄 Processing subscription cancellation via backend');
-
-          // Call backend Firebase Cloud Function
-          const response = await subscriptionCancellationService.cancelSubscription({
-            subscriptionId: 'basic_subscription',
-            reason: 'user_requested',
-          });
-
-          if (!response.success) {
-            console.error('❌ Backend cancellation failed:', response.error);
-            return false;
-          }
-
-          // Update local state after successful backend cancellation
-          const daysActive = state.subscriptionEndDate
-            ? Math.floor((Date.now() - state.subscriptionEndDate) / (24 * 60 * 60 * 1000))
-            : 0;
-
-          set({
-            currentTier: 'free',
-            subscriptionStatus: 'cancelled',
-            autoRenewEnabled: false,
-            subscriptionEndDate: Date.now(),
-            // Reset daily counter on downgrade
-            dailyPracticeMinutesUsed: 0,
-            lastPracticeResetDate: Date.now(),
-          });
-
-          // Log analytics: subscription cancelled
-          await analyticsService.logSubscriptionCancelled({
-            productId: 'basic_subscription',
-            daysActive,
-            reason: 'user_initiated',
-            provider: state.paymentService?.provider || 'unknown',
-          });
-
-          console.log('✅ Subscription cancelled successfully');
-          return true;
-        } catch (error) {
-          console.error('Subscription cancellation exception:', error);
-          return false;
         }
       },
 
