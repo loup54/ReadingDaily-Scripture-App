@@ -6,19 +6,66 @@
  */
 
 import { MockPaymentService } from '../MockPaymentService';
-import { PaymentProduct, PaymentResult } from '@/types/payment.types';
+import { PaymentResult } from '@/types/payment.types';
+
+// expo-crypto's digestStringAsync resolves to an empty string in this jest
+// environment (crypto.subtle isn't available under the "node" test env this
+// project uses) -- confirmed independent of any purchase-related test logic,
+// it silently returns '' rather than throwing. Mocked here the same way
+// sibling test files in this project already do (e.g.
+// DocumentAnalyticsService.test.ts), returning a value derived from the input
+// so uniqueness checks (different productId/timestamp -> different id) still
+// mean something.
+jest.mock('expo-crypto', () => ({
+  CryptoDigestAlgorithm: { SHA256: 'SHA-256' },
+  digestStringAsync: jest.fn((_algorithm: string, data: string) =>
+    Promise.resolve(`mock-hash-${data}`)
+  ),
+}));
 
 describe('MockPaymentService', () => {
   let service: MockPaymentService;
 
+  let randomSpy: jest.SpiedFunction<typeof Math.random>;
+
   beforeEach(async () => {
     service = new MockPaymentService();
     await service.initialize();
+    // purchase()'s 5% simulated-failure branch (`Math.random() > 0.05`) uses
+    // live randomness -- pinned into a safe (always-succeeds) range here so
+    // tests that need a purchase to succeed aren't ~5% flaky per call (this
+    // file has ~15 purchase call sites), while still varying per call so
+    // createPaymentIntent's uniqueness (which also mixes in Math.random())
+    // doesn't collide. The one test that explicitly wants the real
+    // distribution (success rate ~95%) restores real Math.random for itself.
+    const realRandom = Math.random.bind(Math);
+    randomSpy = jest.spyOn(Math, 'random').mockImplementation(() => 0.5 + realRandom() * 0.4);
   });
 
   afterEach(async () => {
     await service.cleanup();
+    randomSpy.mockRestore();
   });
+
+  /**
+   * purchase() simulates a real 1.5s network delay via setTimeout, which is
+   * appropriate for the two Performance tests below (they assert on that real
+   * delay) but makes every other test unnecessarily slow -- 100 sequential
+   * real-delay purchases (the "success rate" test) took ~2.5 minutes and blew
+   * past jest's default 5s per-test timeout. This helper fast-forwards just
+   * that one call's delay with local fake timers, leaving real timers (and
+   * the Performance tests, which call service.purchase() directly) untouched.
+   */
+  async function purchaseFast(productId: string): Promise<PaymentResult> {
+    jest.useFakeTimers();
+    try {
+      const promise = service.purchase(productId);
+      await jest.advanceTimersByTimeAsync(1500);
+      return await promise;
+    } finally {
+      jest.useRealTimers();
+    }
+  }
 
   // ==================== INITIALIZATION TESTS ====================
 
@@ -156,7 +203,7 @@ describe('MockPaymentService', () => {
 
   describe('Purchase - One-Time Products', () => {
     it('should complete one-time purchase', async () => {
-      const result = await service.purchase('com.readingdaily.lifetime.access');
+      const result = await purchaseFast('com.readingdaily.lifetime.access');
 
       expect(result.success).toBe(true);
       expect(result.provider).toBe('mock');
@@ -166,11 +213,13 @@ describe('MockPaymentService', () => {
     });
 
     it('should have success rate around 95%', async () => {
+      randomSpy.mockRestore(); // exercise the real distribution for this one
+
       const attempts = 100;
       let successes = 0;
 
       for (let i = 0; i < attempts; i++) {
-        const result = await service.purchase('com.readingdaily.lifetime.access');
+        const result = await purchaseFast('com.readingdaily.lifetime.access');
         if (result.success) successes++;
       }
 
@@ -181,14 +230,14 @@ describe('MockPaymentService', () => {
     });
 
     it('should have realistic transaction IDs', async () => {
-      const result = await service.purchase('com.readingdaily.lifetime.access');
+      const result = await purchaseFast('com.readingdaily.lifetime.access');
 
       expect(typeof result.transactionId).toBe('string');
       expect(result.transactionId!.length).toBeGreaterThan(0);
     });
 
     it('should include receipt for one-time purchases', async () => {
-      const result = await service.purchase('com.readingdaily.lifetime.access');
+      const result = await purchaseFast('com.readingdaily.lifetime.access');
 
       expect(result.receipt).toBeDefined();
       expect(typeof result.receipt).toBe('string');
@@ -200,7 +249,7 @@ describe('MockPaymentService', () => {
 
   describe('Purchase - Subscription Products', () => {
     it('should create subscription on purchase', async () => {
-      const result = await service.purchase('basic_monthly_subscription');
+      const result = await purchaseFast('basic_monthly_subscription');
 
       expect(result.success).toBe(true);
       expect(result.subscriptionId).toBeDefined();
@@ -208,14 +257,14 @@ describe('MockPaymentService', () => {
     });
 
     it('should return subscription ID for subscriptions', async () => {
-      const result = await service.purchase('basic_monthly_subscription');
+      const result = await purchaseFast('basic_monthly_subscription');
 
       expect(typeof result.subscriptionId).toBe('string');
       expect(result.subscriptionId!.length).toBeGreaterThan(0);
     });
 
     it('should handle monthly subscription', async () => {
-      const result = await service.purchase('basic_monthly_subscription');
+      const result = await purchaseFast('basic_monthly_subscription');
       expect(result.success).toBe(true);
 
       const status = await service.getSubscriptionStatus(result.subscriptionId!);
@@ -223,7 +272,7 @@ describe('MockPaymentService', () => {
     });
 
     it('should handle yearly subscription', async () => {
-      const result = await service.purchase('basic_yearly_subscription');
+      const result = await purchaseFast('basic_yearly_subscription');
       expect(result.success).toBe(true);
 
       const status = await service.getSubscriptionStatus(result.subscriptionId!);
@@ -231,8 +280,8 @@ describe('MockPaymentService', () => {
     });
 
     it('should have longer expiry for yearly subscriptions', async () => {
-      const monthlyResult = await service.purchase('basic_monthly_subscription');
-      const yearlyResult = await service.purchase('basic_yearly_subscription');
+      const monthlyResult = await purchaseFast('basic_monthly_subscription');
+      const yearlyResult = await purchaseFast('basic_yearly_subscription');
 
       const monthlyStatus = await service.getSubscriptionStatus(
         monthlyResult.subscriptionId!
@@ -249,7 +298,7 @@ describe('MockPaymentService', () => {
 
   describe('Subscription - getSubscriptionStatus()', () => {
     it('should return subscription status', async () => {
-      const purchaseResult = await service.purchase('basic_monthly_subscription');
+      const purchaseResult = await purchaseFast('basic_monthly_subscription');
       const status = await service.getSubscriptionStatus(purchaseResult.subscriptionId!);
 
       expect(status).toHaveProperty('isActive');
@@ -259,7 +308,7 @@ describe('MockPaymentService', () => {
     });
 
     it('should show active for new subscriptions', async () => {
-      const purchaseResult = await service.purchase('basic_monthly_subscription');
+      const purchaseResult = await purchaseFast('basic_monthly_subscription');
       const status = await service.getSubscriptionStatus(purchaseResult.subscriptionId!);
 
       expect(status.isActive).toBe(true);
@@ -276,7 +325,7 @@ describe('MockPaymentService', () => {
     });
 
     it('should include expiry date for active subscriptions', async () => {
-      const purchaseResult = await service.purchase('basic_monthly_subscription');
+      const purchaseResult = await purchaseFast('basic_monthly_subscription');
       const status = await service.getSubscriptionStatus(purchaseResult.subscriptionId!);
 
       expect(status.expiryDate).toBeDefined();
@@ -288,7 +337,7 @@ describe('MockPaymentService', () => {
 
   describe('Subscription - cancelSubscription()', () => {
     it('should cancel existing subscription', async () => {
-      const purchaseResult = await service.purchase('basic_monthly_subscription');
+      const purchaseResult = await purchaseFast('basic_monthly_subscription');
       const subId = purchaseResult.subscriptionId!;
 
       const cancelResult = await service.cancelSubscription(subId);
@@ -303,7 +352,7 @@ describe('MockPaymentService', () => {
     });
 
     it('should remove subscription after cancellation', async () => {
-      const purchaseResult = await service.purchase('basic_monthly_subscription');
+      const purchaseResult = await purchaseFast('basic_monthly_subscription');
       const subId = purchaseResult.subscriptionId!;
 
       await service.cancelSubscription(subId);
@@ -313,7 +362,7 @@ describe('MockPaymentService', () => {
     });
 
     it('should prevent duplicate cancellations', async () => {
-      const purchaseResult = await service.purchase('basic_monthly_subscription');
+      const purchaseResult = await purchaseFast('basic_monthly_subscription');
       const subId = purchaseResult.subscriptionId!;
 
       // First cancellation should succeed
@@ -330,7 +379,7 @@ describe('MockPaymentService', () => {
 
   describe('Subscription - updatePaymentMethod()', () => {
     it('should return success for valid subscription', async () => {
-      const purchaseResult = await service.purchase('basic_monthly_subscription');
+      const purchaseResult = await purchaseFast('basic_monthly_subscription');
       const subId = purchaseResult.subscriptionId!;
 
       const result = await service.updatePaymentMethod(subId);
@@ -344,7 +393,7 @@ describe('MockPaymentService', () => {
     });
 
     it('should allow multiple payment method updates', async () => {
-      const purchaseResult = await service.purchase('basic_monthly_subscription');
+      const purchaseResult = await purchaseFast('basic_monthly_subscription');
       const subId = purchaseResult.subscriptionId!;
 
       const result1 = await service.updatePaymentMethod(subId);
@@ -359,7 +408,7 @@ describe('MockPaymentService', () => {
 
   describe('Receipt Validation - validateReceipt()', () => {
     it('should validate receipts', async () => {
-      const purchase = await service.purchase('com.readingdaily.lifetime.access');
+      const purchase = await purchaseFast('com.readingdaily.lifetime.access');
       const valid = await service.validateReceipt(purchase.receipt!);
 
       expect(valid).toBe(true);
@@ -380,7 +429,7 @@ describe('MockPaymentService', () => {
   describe('Restore Purchases - restorePurchases()', () => {
     it('should restore previous purchases', async () => {
       // First make a purchase
-      await service.purchase('com.readingdaily.lifetime.access');
+      await purchaseFast('com.readingdaily.lifetime.access');
 
       // Then restore
       const result = await service.restorePurchases();
@@ -398,7 +447,7 @@ describe('MockPaymentService', () => {
     });
 
     it('should restore with correct purchase details', async () => {
-      const purchaseResult = await service.purchase('com.readingdaily.lifetime.access');
+      const purchaseResult = await purchaseFast('com.readingdaily.lifetime.access');
 
       const restoreResult = await service.restorePurchases();
       expect(restoreResult.success).toBe(true);
@@ -414,20 +463,27 @@ describe('MockPaymentService', () => {
 
   describe('Concurrent Operations', () => {
     it('should handle concurrent purchases', async () => {
-      const results = await Promise.all([
-        service.purchase('com.readingdaily.lifetime.access'),
-        service.purchase('com.readingdaily.lifetime.access'),
-        service.purchase('com.readingdaily.lifetime.access'),
-      ]);
+      jest.useFakeTimers();
+      try {
+        const promise = Promise.all([
+          service.purchase('com.readingdaily.lifetime.access'),
+          service.purchase('com.readingdaily.lifetime.access'),
+          service.purchase('com.readingdaily.lifetime.access'),
+        ]);
+        await jest.advanceTimersByTimeAsync(1500);
+        const results = await promise;
 
-      expect(results.length).toBe(3);
-      results.forEach(result => {
-        expect(result).toHaveProperty('transactionId');
-      });
+        expect(results.length).toBe(3);
+        results.forEach(result => {
+          expect(result).toHaveProperty('transactionId');
+        });
+      } finally {
+        jest.useRealTimers();
+      }
     });
 
     it('should handle concurrent subscription operations', async () => {
-      const purchaseResult = await service.purchase('basic_monthly_subscription');
+      const purchaseResult = await purchaseFast('basic_monthly_subscription');
       const subId = purchaseResult.subscriptionId!;
 
       const [status1, status2] = await Promise.all([
@@ -443,6 +499,9 @@ describe('MockPaymentService', () => {
   // ==================== ERROR HANDLING TESTS ====================
 
   describe('Error Handling', () => {
+    // purchase() validates the product exists before doing anything else
+    // (including the network-delay simulation), so these reject immediately
+    // -- no need for purchaseFast() here.
     it('should handle invalid product IDs gracefully', async () => {
       await expect(service.purchase('invalid_product')).rejects.toThrow();
     });
@@ -459,7 +518,7 @@ describe('MockPaymentService', () => {
       }
 
       // Should still be able to make valid purchases
-      const result = await service.purchase('com.readingdaily.lifetime.access');
+      const result = await purchaseFast('com.readingdaily.lifetime.access');
       expect(result.success).toBe(true);
     });
   });
