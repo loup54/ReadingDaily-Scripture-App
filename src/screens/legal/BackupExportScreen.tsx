@@ -35,7 +35,7 @@ import BackupScheduleService from '@/services/legal/BackupScheduleService';
 interface Tab {
   id: 'backup' | 'export' | 'restore' | 'history';
   label: string;
-  icon: string;
+  icon: keyof typeof Ionicons.glyphMap;
 }
 
 const TABS: Tab[] = [
@@ -128,7 +128,7 @@ const BackupCard: React.FC<{
 const BackupInfoCard: React.FC<{
   title: string;
   value: string;
-  icon: string;
+  icon: keyof typeof Ionicons.glyphMap;
   colors: any;
 }> = ({ title, value, icon, colors }) => (
   <View style={[styles.infoCard, { backgroundColor: colors.background.card }]}>
@@ -709,7 +709,7 @@ const styles = StyleSheet.create({
     ...Typography.body,
   },
   sectionTitle: {
-    ...Typography.h4,
+    ...Typography.h3,
     fontWeight: '700',
     marginBottom: Spacing.md,
   },
