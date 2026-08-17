@@ -104,6 +104,19 @@ function ReadingsTabContent() {
     setShowDatePicker(true);
   };
 
+  const handleRetryReading = async () => {
+    try {
+      setLoading(true);
+      const data = await ReadingService.getDailyReadings(selectedDate);
+      setReadings(data);
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load readings');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handlePlaybackComplete = async () => {
     try {
       console.log('[ReadingsTab] 🎬 handlePlaybackComplete CALLED!');
@@ -205,8 +218,24 @@ function ReadingsTabContent() {
     router.push('/(tabs)/settings');
   };
 
+  // ReadingService silently falls through to hardcoded demo content
+  // (id ends in "_demo") when Firestore, offline cache, and the bundled
+  // JSON backup all fail -- surface that instead of showing sample text
+  // as if it were the real reading
+  const isDemoContent = readings.id.endsWith('_demo');
+
   return (
     <>
+      {isDemoContent && (
+        <View style={[styles.demoBanner, { backgroundColor: colors.status.error }]}>
+          <Text style={styles.demoBannerText}>
+            Couldn't load today's real reading — showing sample content.
+          </Text>
+          <TouchableOpacity onPress={handleRetryReading}>
+            <Text style={styles.demoBannerRetry}>Retry</Text>
+          </TouchableOpacity>
+        </View>
+      )}
       <DailyReadingsScreen
         readings={readings}
         activeTab={activeTab}
@@ -320,6 +349,24 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: Colors.status.error,
     textAlign: 'center',
+  },
+  demoBanner: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+  },
+  demoBannerText: {
+    flex: 1,
+    fontSize: 13,
+    color: '#FFFFFF',
+  },
+  demoBannerRetry: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#FFFFFF',
+    marginLeft: 12,
   },
   calendarModalOverlay: {
     flex: 1,
