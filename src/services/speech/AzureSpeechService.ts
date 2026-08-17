@@ -31,19 +31,19 @@ if (!global.crypto) {
 }
 
 if (!global.crypto.getRandomValues) {
-  global.crypto.getRandomValues = (array: Uint8Array) => {
+  global.crypto.getRandomValues = <T extends ArrayBufferView>(array: T): T => {
+    const bytes = new Uint8Array(array.buffer, array.byteOffset, array.byteLength);
     try {
-      const randomBytes = Crypto.getRandomBytes(array.length);
-      array.set(new Uint8Array(randomBytes));
-      return array;
+      const randomBytes = Crypto.getRandomBytes(bytes.length);
+      bytes.set(new Uint8Array(randomBytes));
     } catch (error) {
       console.error('[CryptoPolyfill] Failed to get random values:', error);
       // Fallback: use Math.random (less secure but still works)
-      for (let i = 0; i < array.length; i++) {
-        array[i] = Math.floor(Math.random() * 256);
+      for (let i = 0; i < bytes.length; i++) {
+        bytes[i] = Math.floor(Math.random() * 256);
       }
-      return array;
     }
+    return array;
   };
 }
 
@@ -121,7 +121,7 @@ class AzureSpeechService {
       // Create audio config using push stream (compatible with React Native)
       // Use default format - the SDK will detect WAV format from header
       const pushStream = sdk.AudioInputStream.createPushStream();
-      pushStream.write(audioBytes);
+      pushStream.write(audioBytes.buffer as ArrayBuffer);
       pushStream.close();
       const audioConfig = sdk.AudioConfig.fromStreamInput(pushStream);
 
@@ -193,8 +193,9 @@ class AzureSpeechService {
     }
 
     try {
+      const audioBytes = await this.loadAudioBytes(audioFilePath);
       const audioConfig = sdk.AudioConfig.fromWavFileInput(
-        await this.loadAudioFile(audioFilePath)
+        Buffer.from(audioBytes)
       );
 
       const recognizer = new sdk.SpeechRecognizer(this.speechConfig, audioConfig);
