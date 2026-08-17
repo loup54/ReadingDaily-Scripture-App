@@ -25,9 +25,8 @@ import { useSettingsStore } from '@stores/useSettingsStore';
 import { useTrialStore } from '@stores/useTrialStore';
 import { useTranslationStore } from '@stores/useTranslationStore';
 import { useTheme } from '@/hooks/useTheme';
-import { useOfflineStore } from '@/stores/useOfflineStore';
 import { TranslationService } from '@/services/translation/TranslationService';
-import { CacheService } from '@services/cache';
+import { cacheService } from '@services/cache';
 import Constants from 'expo-constants';
 import { StorageCleanupService } from '@/services/offline/StorageCleanupService';
 import { OfflineSettingsSection } from '@/components/offline/OfflineSettingsSection';
@@ -35,8 +34,8 @@ import {
   useUpdateNotificationPreferences,
   useNotificationPreferences,
 } from '@/stores/useNotificationStore';
-import type { CacheStats } from '@services/cache';
-import type { SupportedLanguage, VoiceType, PlaybackSpeed } from '@types/settings.types';
+import type { CacheStats } from '@/types/cache.types';
+import type { SupportedLanguage, VoiceType, PlaybackSpeed } from '@/types/settings.types';
 import { sanitizeDisplayName, validateDisplayName } from '@/utils/validation';
 
 interface SettingsScreenProps {
@@ -52,6 +51,14 @@ interface SettingsScreenProps {
   onComplianceAnalytics?: () => void;
   onViewTutorial?: () => void;
 }
+
+const formatBytes = (bytes: number): string => {
+  if (bytes === 0) return '0 Bytes';
+  const k = 1024;
+  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
+};
 
 export const SettingsScreen: React.FC<SettingsScreenProps> = ({
   onBack,
@@ -76,7 +83,6 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
     updatePrivacySettings,
   } = useSettingsStore();
   const { isDark, toggleTheme, colors } = useTheme();
-  const { storageStats } = useOfflineStore();
 
   // New translation store
   const {
@@ -91,11 +97,11 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
   const [cacheStats, setCacheStats] = useState<CacheStats | null>(null);
   const [showLanguageSelector, setShowLanguageSelector] = useState(false);
   const [showAccentSelector, setShowAccentSelector] = useState(false);
-  const [selectedLanguage, setSelectedLanguage] = useState<string>(settings.translation.appLanguage || 'english-au');
-  const [selectedAccent, setSelectedAccent] = useState<string>(settings.translation.accent || 'australian');
+  const [selectedLanguage, setSelectedLanguage] = useState<string>(settings.audio.appLanguage || 'english-au');
+  const [selectedAccent, setSelectedAccent] = useState<string>(settings.audio.accent || 'australian');
   const [offlineStorageStats, setOfflineStorageStats] = useState<any>(null);
   const [showEditProfileModal, setShowEditProfileModal] = useState(false);
-  const [editedName, setEditedName] = useState(user?.displayName || user?.fullName || '');
+  const [editedName, setEditedName] = useState(user?.fullName || '');
   const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -165,14 +171,8 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
 
   const loadCacheStats = async () => {
     try {
-      // Check if CacheService has getCacheStats method
-      if (CacheService && typeof CacheService.getCacheStats === 'function') {
-        const stats = await CacheService.getCacheStats();
-        setCacheStats(stats);
-      } else {
-        console.warn('[Settings] CacheService.getCacheStats not available');
-        setCacheStats(null);
-      }
+      const stats = await cacheService.getCacheStats();
+      setCacheStats(stats);
     } catch (error) {
       console.error('[Settings] Failed to load cache stats:', error);
       setCacheStats(null);
@@ -237,7 +237,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
 
   // Handle Clear Cache
   const handleClearCache = () => {
-    const cacheSize = cacheStats ? CacheService.formatBytes(cacheStats.totalSize) : 'unknown';
+    const cacheSize = cacheStats ? formatBytes(cacheStats.totalSize) : 'unknown';
     Alert.alert(
       'Clear All Cache',
       `This will clear ${cacheSize} of cached data including settings, readings, and audio files. Your account data will not be affected. Continue?`,
@@ -252,17 +252,9 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
           onPress: async () => {
             setClearingCache(true);
             try {
-              if (CacheService && typeof CacheService.clearAllCache === 'function') {
-                await CacheService.clearAllCache();
-                await loadCacheStats(); // Reload stats
-                Alert.alert('Success', 'Cache cleared successfully. The app will continue to work smoothly.');
-              } else {
-                Alert.alert(
-                  'Not Available',
-                  'Cache clearing is not available in this version. Your app will continue to work normally.',
-                  [{ text: 'OK', style: 'default' }]
-                );
-              }
+              await cacheService.clearCache();
+              await loadCacheStats(); // Reload stats
+              Alert.alert('Success', 'Cache cleared successfully. The app will continue to work smoothly.');
             } catch (error: any) {
               console.error('[Settings] Failed to clear cache:', error);
               // Provide user-friendly error message
@@ -293,7 +285,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
 
   // Handle Edit Profile
   const handleOpenEditProfile = () => {
-    setEditedName(user?.displayName || user?.fullName || '');
+    setEditedName(user?.fullName || '');
     setShowEditProfileModal(true);
   };
 
@@ -643,6 +635,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
               variant="default"
               size="md"
               color={colors.text.white}
+              accessibilityLabel="Back"
             />
           )}
           <Text style={[styles.headerTitle, { color: colors.text.white }]}>Settings</Text>
@@ -865,7 +858,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
                       <Ionicons
                         name="send-outline"
                         size={22}
-                        color={colors.primary.green}
+                        color={Colors.accent.green}
                       />
                       <View style={styles.settingTextContainer}>
                         <Text style={dynamicStyles.settingLabel}>Test Notification</Text>
@@ -1860,7 +1853,7 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.md,
   },
   headerTitle: {
-    ...Typography.displaySmall,
+    ...Typography.displayMedium,
     color: Colors.text.white,
     fontWeight: '600',
   },

@@ -16,6 +16,8 @@ export interface AudioSettings {
   autoPlay: boolean;
   downloadForOffline: boolean;
   enableAudioHighlighting: boolean;
+  appLanguage?: string; // Reading voice language (e.g. 'english-au') — see LANGUAGE_OPTIONS in SettingsScreen
+  accent?: string; // Reading voice accent (e.g. 'australian') — see ACCENT_OPTIONS in SettingsScreen
 }
 
 /**
