@@ -20,7 +20,6 @@ import {
   CacheConfig,
   ReadingFilterOptions,
 } from '@/types/cache.types';
-import { PracticeSession } from '@/types/practice.types';
 
 // Default cache configuration
 const DEFAULT_CONFIG: CacheConfig = {
@@ -78,118 +77,6 @@ export class CacheService {
    */
   isReady(): boolean {
     return this.initialized;
-  }
-
-  /**
-   * Cache a practice session with expiration
-   */
-  async cachePracticeSession(session: PracticeSession): Promise<void> {
-    try {
-      const expiresAt = Date.now() + this.config.ttl;
-      const entry: CacheEntry<PracticeSession> = {
-        key: `session:${session.id}`,
-        value: session,
-        timestamp: Date.now(),
-        expiresAt,
-      };
-
-      // Add to memory cache
-      this.memoryCache.set(entry.key, entry);
-
-      // Persist to database
-      await databaseService.savePracticeSession(session);
-
-      console.log('[CacheService] Cached practice session:', session.id);
-    } catch (error) {
-      console.error('[CacheService] Failed to cache session:', error);
-      throw error;
-    }
-  }
-
-  /**
-   * Get cached practice sessions (memory-first with DB fallback)
-   */
-  async getCachedSessions(userId?: string): Promise<PracticeSession[]> {
-    try {
-      const sessions: PracticeSession[] = [];
-
-      // Check memory cache first
-      for (const [key, entry] of this.memoryCache.entries()) {
-        if (key.startsWith('session:') && !this.isExpired(entry)) {
-          const session = entry.value as PracticeSession;
-          if (!userId || session.user_id === userId) {
-            sessions.push(session);
-          }
-        }
-      }
-
-      // If found in memory, return
-      if (sessions.length > 0) {
-        return sessions;
-      }
-
-      // Fallback to database
-      const dbSessions = await databaseService.getUserSessions(userId);
-      const validSessions = dbSessions.filter((s) => {
-        const expiresAt = s.cached_at ? s.cached_at + this.config.ttl : 0;
-        return expiresAt > Date.now();
-      });
-
-      // Restore to memory cache
-      for (const session of validSessions) {
-        const expiresAt = session.cached_at ? session.cached_at + this.config.ttl : Date.now();
-        this.memoryCache.set(`session:${session.id}`, {
-          key: `session:${session.id}`,
-          value: session,
-          timestamp: session.cached_at || Date.now(),
-          expiresAt,
-        });
-      }
-
-      return validSessions;
-    } catch (error) {
-      console.error('[CacheService] Failed to get sessions:', error);
-      return [];
-    }
-  }
-
-  /**
-   * Get single cached practice session
-   */
-  async getCachedSession(sessionId: string): Promise<PracticeSession | null> {
-    try {
-      const key = `session:${sessionId}`;
-
-      // Check memory cache
-      const entry = this.memoryCache.get(key);
-      if (entry && !this.isExpired(entry)) {
-        return entry.value as PracticeSession;
-      }
-
-      // Remove expired entry
-      if (entry && this.isExpired(entry)) {
-        this.memoryCache.delete(key);
-      }
-
-      // Check database
-      const session = await databaseService.getCachedReading(sessionId);
-      if (session) {
-        // Restore to memory
-        const expiresAt = Date.now() + this.config.ttl;
-        this.memoryCache.set(key, {
-          key,
-          value: session,
-          timestamp: Date.now(),
-          expiresAt,
-        });
-        return session;
-      }
-
-      return null;
-    } catch (error) {
-      console.error('[CacheService] Failed to get session:', error);
-      return null;
-    }
   }
 
   /**
