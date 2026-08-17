@@ -83,7 +83,7 @@ export const getContextIconConfig = (
  * }
  */
 export const isStandardSize = (size: number): boolean => {
-  const standardSizes = Object.values(IconSizes);
+  const standardSizes: number[] = Object.values(IconSizes);
   return standardSizes.includes(size);
 };
 

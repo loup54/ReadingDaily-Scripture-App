@@ -368,7 +368,7 @@ export const OptimisticValidation = {
   },
 
   isValidHighlight: (highlight: { id: string; text: string; color: string }): boolean => {
-    return highlight.id && highlight.text && highlight.color;
+    return Boolean(highlight.id && highlight.text && highlight.color);
   },
 
   isValidRating: (rating: number): boolean => {

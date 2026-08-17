@@ -86,7 +86,7 @@ class SentenceExtractionService {
           readingContent: reading.content, // Include full reading for expand/collapse
         };
       })
-      .filter((s): s is PracticeSentence => s !== null);
+      .filter((s): s is NonNullable<typeof s> => s !== null);
 
     console.log(`[${source}] After filtering:`, {
       filtered: filtered.length,

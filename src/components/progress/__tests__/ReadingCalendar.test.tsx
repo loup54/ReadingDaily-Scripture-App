@@ -38,8 +38,13 @@ jest.mock('@/hooks/useTheme', () => ({
 
 describe('ReadingCalendar Component', () => {
   const mockReading: ReadingRecord = {
-    duration: 300,
+    date: '2025-11-01',
     readingType: 'full',
+    timestamp: new Date('2025-11-01T12:00:00Z'),
+    readingCount: 3,
+    audioUsed: true,
+    pronunciationUsed: false,
+    duration: 300,
   };
 
   const mockReadings: Record<string, ReadingRecord> = {

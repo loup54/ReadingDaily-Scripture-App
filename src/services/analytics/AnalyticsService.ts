@@ -18,6 +18,7 @@ import type {
   SessionCompletedEvent,
   FeatureAccessedEvent,
   UpgradeSource,
+  PaymentProvider,
 } from '@/types/analytics.types';
 
 class AnalyticsServiceManager {
@@ -139,7 +140,7 @@ class AnalyticsServiceManager {
   /**
    * Log payment retried
    */
-  async logPaymentRetried(productId: string, provider: string): Promise<void> {
+  async logPaymentRetried(productId: string, provider: PaymentProvider): Promise<void> {
     if (!this.initialized || !this.service) return;
     await this.service.logPaymentRetried(productId, provider);
   }

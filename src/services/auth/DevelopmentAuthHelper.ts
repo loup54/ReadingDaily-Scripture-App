@@ -43,6 +43,7 @@ export class DevelopmentAuthHelper {
               email: this.TEST_ACCOUNT.email,
               password: this.TEST_ACCOUNT.password,
               fullName: this.TEST_ACCOUNT.fullName,
+              acceptTerms: true,
             });
             console.log('[DevelopmentAuthHelper] ✅ Created and signed in with test account');
             return true;

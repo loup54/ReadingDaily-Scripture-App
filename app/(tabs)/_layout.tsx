@@ -95,7 +95,6 @@ export default function TabsLayout() {
           tabPress: (e) => {
             console.log('[TAB_PRESS] Notifications tab pressed', {
               target: e.target,
-              canPreventDefault: e.defaultPrevented,
               timestamp: new Date().toISOString(),
             });
           },

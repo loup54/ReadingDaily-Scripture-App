@@ -158,6 +158,7 @@ export const RecordingControls: React.FC<RecordingControlsProps> = ({
           backgroundColor={getButtonColor()}
           disabled={isDisabled}
           style={styles.recordButton}
+          accessibilityLabel={isRecording ? 'Stop recording' : 'Start recording'}
         />
       </View>
 

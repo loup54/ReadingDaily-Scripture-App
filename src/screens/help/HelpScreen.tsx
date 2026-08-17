@@ -112,6 +112,7 @@ export const HelpScreen: React.FC<HelpScreenProps> = ({ onBack }) => {
             variant="default"
             size="md"
             color={colors.text.primary}
+            accessibilityLabel="Back"
           />
         )}
         <Text style={[styles.headerTitle, { color: colors.text.primary }]}>Help & FAQ</Text>

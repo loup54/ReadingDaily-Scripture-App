@@ -12,6 +12,7 @@
 import { useEffect, useCallback, useRef } from 'react';
 import { offlineService } from '@/services/offline/OfflineService';
 import { useOfflineStore } from '@/stores/useOfflineStore';
+import { OfflineFeatures } from '@/types/cache.types';
 
 /**
  * Hook to integrate OfflineService with offline store
@@ -98,7 +99,7 @@ export function useOfflineIntegration() {
     return offlineService.getStatus();
   }, []);
 
-  const canUseFeature = useCallback((feature: keyof any) => {
+  const canUseFeature = useCallback((feature: keyof OfflineFeatures) => {
     return offlineService.canUseFeature(feature);
   }, []);
 
