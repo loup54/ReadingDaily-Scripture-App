@@ -57,6 +57,27 @@ export const PronunciationPracticeScreen: React.FC<PronunciationPracticeScreenPr
   const [showPronunciationTip, setShowPronunciationTip] = useState(false);
   const [showPermissionModal, setShowPermissionModal] = useState(false);
   const { addDiscoveredFeature, hasDiscoveredFeature } = useSettingsStore();
+  const {
+    currentSession,
+    recordingState,
+    recordingDuration,
+    latestResult,
+    latestAttempt,
+    error,
+    hasPermissions,
+    isLoadingSession,
+    isAssessing,
+    startSession,
+    startRecording,
+    stopRecording,
+    nextSentence,
+    previousSentence,
+    goToSentence,
+    requestPermissions,
+    checkPermissions,
+    clearError,
+    reset,
+  } = usePracticeStore();
 
   // Handle modal close - scroll back to top to show header with recording button
   const handleModalClose = useCallback(() => {
@@ -109,27 +130,6 @@ export const PronunciationPracticeScreen: React.FC<PronunciationPracticeScreenPr
       pulseAnim.setValue(1);
     }
   }, [recordingState, pulseAnim]);
-  const {
-    currentSession,
-    recordingState,
-    recordingDuration,
-    latestResult,
-    latestAttempt,
-    error,
-    hasPermissions,
-    isLoadingSession,
-    isAssessing,
-    startSession,
-    startRecording,
-    stopRecording,
-    nextSentence,
-    previousSentence,
-    goToSentence,
-    requestPermissions,
-    checkPermissions,
-    clearError,
-    reset,
-  } = usePracticeStore();
 
   const { readings } = useReadingStore();
 
@@ -470,6 +470,7 @@ export const PronunciationPracticeScreen: React.FC<PronunciationPracticeScreenPr
             <IconButton
               icon="arrow-back"
               onPress={onBack}
+              accessibilityLabel="Back"
               variant="default"
               size="md"
               color={colors.text.white}
@@ -576,7 +577,7 @@ export const PronunciationPracticeScreen: React.FC<PronunciationPracticeScreenPr
           {/* Session Complete */}
           {isSessionComplete && !latestResult && (
             <View style={[styles.completeContainer, { backgroundColor: colors.background.card }]}>
-              <Ionicons name="trophy" size={64} color={colors.accent.yellow} />
+              <Ionicons name="trophy" size={64} color={colors.accent.orange} />
               <Text style={[styles.completeTitle, { color: colors.text.primary }]}>Practice Complete!</Text>
               <Text style={[styles.completeText, { color: colors.text.secondary }]}>
                 You've completed all {currentSession.sentences.length} sentences.
