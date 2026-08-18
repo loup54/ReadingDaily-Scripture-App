@@ -134,6 +134,7 @@ export class ReadingService {
 
           if (ageHours >= 24) {
             console.warn(`⚠️ Today's Firestore reading is stale (${ageHours.toFixed(1)}h old), falling back`);
+            this.lastFallbackReason = `Firestore reading is stale (${ageHours.toFixed(1)}h old, scraped ${data.metadata.scrapedAt})`;
             // fall through to bundled JSON / demo
           } else {
             console.log(`✅ Using Firestore reading (${ageHours.toFixed(1)}h old)`);
