@@ -230,6 +230,7 @@ function ReadingsTabContent() {
         <View style={[styles.demoBanner, { backgroundColor: colors.status.error }]}>
           <Text style={styles.demoBannerText}>
             Couldn't load today's real reading — showing sample content.
+            {ReadingService.lastFallbackReason ? ` (${ReadingService.lastFallbackReason})` : ''}
           </Text>
           <TouchableOpacity onPress={handleRetryReading}>
             <Text style={styles.demoBannerRetry}>Retry</Text>

@@ -73,6 +73,13 @@ const getBundledReading = (dateStr: string, date: Date): DailyReadings | null =>
 
 export class ReadingService {
   /**
+   * Set right before getDailyReadings falls all the way through to demo
+   * content, cleared on any real success. Lets the UI show the actual
+   * cause instead of a generic "couldn't load" message.
+   */
+  static lastFallbackReason: string | null = null;
+
+  /**
    * Get daily readings for a specific date
    * Prioritizes offline cache when offline, otherwise uses Firestore
    * Fallback order:
@@ -130,17 +137,22 @@ export class ReadingService {
             // fall through to bundled JSON / demo
           } else {
             console.log(`✅ Using Firestore reading (${ageHours.toFixed(1)}h old)`);
+            this.lastFallbackReason = null;
             return convertFirestoreReading(data, date);
           }
         } else {
           console.log(`✅ Using Firestore reading for ${dateStr}`);
+          this.lastFallbackReason = null;
           return convertFirestoreReading(data, date);
         }
       } else {
         console.warn(`No Firestore document found for ${dateStr}`);
+        this.lastFallbackReason = `No Firestore document for ${dateStr}`;
       }
     } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
       console.error('[ReadingService] Error fetching from Firestore:', error);
+      this.lastFallbackReason = `Firestore error: ${message}`;
 
       // If online request failed, try offline cache as fallback
       if (isOnline) {
@@ -148,6 +160,7 @@ export class ReadingService {
         const cachedReading = await ReadingDownloadService.getCachedReading(date);
         if (cachedReading) {
           console.log(`✅ Using cached reading (online request failed)`);
+          this.lastFallbackReason = null;
           return cachedReading;
         }
       }
@@ -159,6 +172,7 @@ export class ReadingService {
 
     if (bundledReading) {
       console.log('✅ Using bundled reading');
+      this.lastFallbackReason = null;
       return bundledReading;
     }
 
@@ -170,6 +184,9 @@ export class ReadingService {
 
     // Final fallback: Demo reading for testing (only for past/current dates)
     console.warn('⚠️ No data found, using demo reading for testing');
+    if (!this.lastFallbackReason) {
+      this.lastFallbackReason = `No bundled JSON for ${dateStr} either`;
+    }
     return this.getDemoReading(date);
   }
 
