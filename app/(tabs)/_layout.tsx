@@ -104,6 +104,12 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
+        name="subscription"
+        options={{
+          href: null, // Reached via Profile → Manage Subscription, not a top-level tab
+        }}
+      />
+      <Tabs.Screen
         name="help"
         options={{
           href: null, // Hide from tab bar
