@@ -19,7 +19,7 @@ export default function NotificationsTab() {
   }, []);
 
   try {
-    return <NotificationCenterScreen showHeader={false} />;
+    return <NotificationCenterScreen showHeader={true} />;
   } catch (error) {
     console.error('[NOTIFICATIONS_TAB] Fatal error rendering NotificationCenterScreen:', error);
 

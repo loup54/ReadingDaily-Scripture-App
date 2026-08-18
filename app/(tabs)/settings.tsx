@@ -1,12 +1,19 @@
-import React from 'react';
-import { Alert } from 'react-native';
+import React, { useState } from 'react';
+import { Alert, Modal, StyleSheet, TouchableOpacity } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { SettingsScreen } from '@/screens/settings';
 import { useAuthStore } from '@/stores/useAuthStore';
+import { useTheme } from '@/hooks/useTheme';
+import { ProgressDashboard } from '@/screens/progress/ProgressDashboard';
+import { EmptyState } from '@/components/common';
+import { Ionicons } from '@expo/vector-icons';
 
 export default function SettingsTab() {
   const router = useRouter();
-  const { logout } = useAuthStore();
+  const { logout, user } = useAuthStore();
+  const { colors } = useTheme();
+  const [showProgress, setShowProgress] = useState(false);
 
   const handleEditProfile = () => {
     // TODO: Navigate to edit profile screen in future phase
@@ -40,6 +47,14 @@ export default function SettingsTab() {
 
   const handleViewTutorial = () => {
     router.push('/onboarding');
+  };
+
+  const handleViewProgress = () => {
+    setShowProgress(true);
+  };
+
+  const handleNotifications = () => {
+    router.push('/(tabs)/notifications');
   };
 
   const handleLogout = () => {
@@ -86,17 +101,64 @@ export default function SettingsTab() {
   };
 
   return (
-    <SettingsScreen
-      onEditProfile={handleEditProfile}
-      onChangePassword={handleChangePassword}
-      onManageSubscription={handleManageSubscription}
-      onLogout={handleLogout}
-      onDeleteAccount={handleDeleteAccount}
-      onHelpFAQ={handleHelpFAQ}
-      onLegalDocuments={handleLegalDocuments}
-      onBackupExport={handleBackupExport}
-      onComplianceAnalytics={handleComplianceAnalytics}
-      onViewTutorial={handleViewTutorial}
-    />
+    <>
+      <SettingsScreen
+        onEditProfile={handleEditProfile}
+        onChangePassword={handleChangePassword}
+        onManageSubscription={handleManageSubscription}
+        onLogout={handleLogout}
+        onDeleteAccount={handleDeleteAccount}
+        onHelpFAQ={handleHelpFAQ}
+        onLegalDocuments={handleLegalDocuments}
+        onBackupExport={handleBackupExport}
+        onComplianceAnalytics={handleComplianceAnalytics}
+        onViewTutorial={handleViewTutorial}
+        onViewProgress={handleViewProgress}
+        onNotifications={handleNotifications}
+      />
+
+      <Modal
+        visible={showProgress}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onRequestClose={() => setShowProgress(false)}
+      >
+        <SafeAreaView style={[modalStyles.container, { backgroundColor: colors.background.primary }]}>
+          <TouchableOpacity
+            style={modalStyles.closeButton}
+            onPress={() => setShowProgress(false)}
+            accessibilityRole="button"
+            accessibilityLabel="Close"
+          >
+            <Ionicons name="close" size={28} color={colors.text.primary} />
+          </TouchableOpacity>
+          {user?.id ? (
+            <ProgressDashboard userId={user.id} />
+          ) : (
+            <EmptyState
+              icon="stats-chart-outline"
+              title="Sign In to Track Progress"
+              message="Create an account or sign in to track your reading streaks, earn badges, and view your reading calendar."
+              tips={[
+                '📊 Track your daily reading streaks',
+                '🏆 Earn badges for milestones',
+                '📅 View your reading history calendar',
+                '🎯 Monitor your reading consistency',
+              ]}
+            />
+          )}
+        </SafeAreaView>
+      </Modal>
+    </>
   );
 }
+
+const modalStyles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  closeButton: {
+    alignSelf: 'flex-end',
+    padding: 16,
+  },
+});

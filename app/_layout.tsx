@@ -43,7 +43,6 @@ const linking = {
       // Main tab screens
       '(tabs)/readings': 'readings',
       '(tabs)/practice': 'practice',
-      '(tabs)/progress': 'progress',
       '(tabs)/notifications': 'notifications',
       '(tabs)/settings': 'settings',
       '(tabs)/help': 'help',

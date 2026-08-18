@@ -50,6 +50,8 @@ interface SettingsScreenProps {
   onBackupExport?: () => void;
   onComplianceAnalytics?: () => void;
   onViewTutorial?: () => void;
+  onViewProgress?: () => void;
+  onNotifications?: () => void;
 }
 
 const formatBytes = (bytes: number): string => {
@@ -72,6 +74,8 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
   onBackupExport,
   onComplianceAnalytics,
   onViewTutorial,
+  onViewProgress,
+  onNotifications,
 }) => {
   const { user } = useAuthStore();
   const { hasPurchased, isActive, getFormattedTimeRemaining, remainingMinutes } = useTrialStore();
@@ -667,6 +671,51 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
                   </Text>
                 </View>
               </View>
+            </View>
+          </View>
+
+          {/* Overview Section */}
+          <View style={styles.section}>
+            <View style={dynamicStyles.card}>
+              <TouchableOpacity
+                style={styles.settingRow}
+                onPress={onViewProgress}
+                activeOpacity={0.7}
+              >
+                <View style={styles.settingLeft}>
+                  <Ionicons
+                    name="trending-up-outline"
+                    size={22}
+                    color={colors.primary.blue}
+                  />
+                  <Text style={dynamicStyles.settingLabel}>View Progress</Text>
+                </View>
+                <Ionicons
+                  name="chevron-forward"
+                  size={20}
+                  color={colors.text.tertiary}
+                />
+              </TouchableOpacity>
+              <View style={dynamicStyles.divider} />
+              <TouchableOpacity
+                style={styles.settingRow}
+                onPress={onNotifications}
+                activeOpacity={0.7}
+              >
+                <View style={styles.settingLeft}>
+                  <Ionicons
+                    name="notifications-outline"
+                    size={22}
+                    color={colors.primary.blue}
+                  />
+                  <Text style={dynamicStyles.settingLabel}>Notifications</Text>
+                </View>
+                <Ionicons
+                  name="chevron-forward"
+                  size={20}
+                  color={colors.text.tertiary}
+                />
+              </TouchableOpacity>
             </View>
           </View>
 
