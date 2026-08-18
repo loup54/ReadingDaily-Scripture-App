@@ -12,6 +12,7 @@ import { Colors } from '@constants';
 import { ErrorBoundary } from '@/components/common';
 import { useTheme } from '@/hooks/useTheme';
 import { Ionicons } from '@expo/vector-icons';
+import { OfferedOverlay } from '@/components/reading/OfferedOverlay';
 
 function ReadingsTabContent() {
   const [readings, setReadings] = useState<DailyReadings | null>(null);
@@ -21,6 +22,7 @@ function ReadingsTabContent() {
   const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showOffered, setShowOffered] = useState(false);
 
   const router = useRouter();
   const { colors, isDark } = useTheme();
@@ -120,6 +122,7 @@ function ReadingsTabContent() {
   const handlePlaybackComplete = async () => {
     try {
       console.log('[ReadingsTab] 🎬 handlePlaybackComplete CALLED!');
+      setShowOffered(true);
       console.log('[ReadingsTab] Current state:', {
         hasReadings: !!readings,
         activeTab,
@@ -248,6 +251,15 @@ function ReadingsTabContent() {
         onCalendarPress={handleCalendarPress}
         selectedDate={selectedDate}
         autoPlayAudio={params.action === 'listen'}
+      />
+
+      <OfferedOverlay
+        visible={showOffered}
+        onDismiss={() => setShowOffered(false)}
+        onStayWithVerse={() => {
+          setShowOffered(false);
+          router.push('/(tabs)/practice');
+        }}
       />
 
       {/* Calendar Modal */}
