@@ -17,6 +17,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   Animated,
+  Easing,
   Pressable,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -36,9 +37,10 @@ export const OfferedOverlay: React.FC<OfferedOverlayProps> = ({
 }) => {
   const { liturgical, colors } = useTheme();
   const [promptVisible, setPromptVisible] = useState(false);
+  const [rendered, setRendered] = useState(visible);
 
   const backdropOpacity = useRef(new Animated.Value(0)).current;
-  const symbolScale = useRef(new Animated.Value(0.6)).current;
+  const symbolScale = useRef(new Animated.Value(0.9)).current;
   const symbolOpacity = useRef(new Animated.Value(0)).current;
   const promptOpacity = useRef(new Animated.Value(0)).current;
 
@@ -46,33 +48,69 @@ export const OfferedOverlay: React.FC<OfferedOverlayProps> = ({
 
   useEffect(() => {
     if (visible) {
+      setRendered(true);
       setPromptVisible(false);
 
-      // Fade in backdrop + symbol
+      // Fade in backdrop + symbol — ease-out so the entrance reads
+      // immediately, not sluggish
       Animated.parallel([
-        Animated.timing(backdropOpacity, { toValue: 1, duration: 700, useNativeDriver: true }),
+        Animated.timing(backdropOpacity, {
+          toValue: 1,
+          duration: 700,
+          easing: Easing.out(Easing.cubic),
+          useNativeDriver: true,
+        }),
         Animated.spring(symbolScale, { toValue: 1, friction: 6, useNativeDriver: true }),
-        Animated.timing(symbolOpacity, { toValue: 1, duration: 600, useNativeDriver: true }),
+        Animated.timing(symbolOpacity, {
+          toValue: 1,
+          duration: 600,
+          easing: Easing.out(Easing.cubic),
+          useNativeDriver: true,
+        }),
       ]).start();
 
       // After quiet hold (1.8s), fade in the prompt
       const promptTimer = setTimeout(() => {
         setPromptVisible(true);
-        Animated.timing(promptOpacity, { toValue: 1, duration: 500, useNativeDriver: true }).start();
+        Animated.timing(promptOpacity, {
+          toValue: 1,
+          duration: 500,
+          easing: Easing.out(Easing.cubic),
+          useNativeDriver: true,
+        }).start();
       }, 1800);
 
       return () => clearTimeout(promptTimer);
-    } else {
-      // Reset all animations for next use
-      backdropOpacity.setValue(0);
-      symbolScale.setValue(0.6);
-      symbolOpacity.setValue(0);
-      promptOpacity.setValue(0);
-      setPromptVisible(false);
     }
+
+    // Fade out quickly rather than cutting to nothing, then unmount
+    Animated.parallel([
+      Animated.timing(backdropOpacity, {
+        toValue: 0,
+        duration: 200,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: true,
+      }),
+      Animated.timing(symbolOpacity, {
+        toValue: 0,
+        duration: 200,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: true,
+      }),
+      Animated.timing(promptOpacity, {
+        toValue: 0,
+        duration: 200,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: true,
+      }),
+    ]).start(() => {
+      symbolScale.setValue(0.9);
+      setPromptVisible(false);
+      setRendered(false);
+    });
   }, [visible]);
 
-  if (!visible) return null;
+  if (!rendered) return null;
 
   return (
     <Pressable style={StyleSheet.absoluteFill} onPress={onDismiss}>
