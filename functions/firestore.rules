@@ -73,6 +73,11 @@ service cloud.firestore {
       match /giftHistory/{document=**} {
         allow read, write: if isOwner(userId);
       }
+
+      // Journal entries (LaSallian Daily) — per-user, per-date reflection text
+      match /journal/{document=**} {
+        allow read, write: if isOwner(userId);
+      }
     }
 
     // Gift codes collection (Subscription gifting system)
