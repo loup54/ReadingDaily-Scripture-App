@@ -123,29 +123,16 @@ export class ReadingService {
       if (docSnap.exists()) {
         const data = docSnap.data();
 
-        // For today's reading only, check freshness (< 24h) so stale data gets
-        // replaced on the next scrape cycle. Future and past dates don't change
-        // once published, so accept them regardless of age.
-        const isToday = requestedDate.getTime() === today.getTime();
-
-        if (isToday && data.metadata?.scrapedAt) {
-          const scrapedAt = new Date(data.metadata.scrapedAt);
-          const ageHours = (Date.now() - scrapedAt.getTime()) / (1000 * 60 * 60);
-
-          if (ageHours >= 24) {
-            console.warn(`⚠️ Today's Firestore reading is stale (${ageHours.toFixed(1)}h old), falling back`);
-            this.lastFallbackReason = `Firestore reading is stale (${ageHours.toFixed(1)}h old, scraped ${data.metadata.scrapedAt})`;
-            // fall through to bundled JSON / demo
-          } else {
-            console.log(`✅ Using Firestore reading (${ageHours.toFixed(1)}h old)`);
-            this.lastFallbackReason = null;
-            return convertFirestoreReading(data, date);
-          }
-        } else {
-          console.log(`✅ Using Firestore reading for ${dateStr}`);
-          this.lastFallbackReason = null;
-          return convertFirestoreReading(data, date);
-        }
+        // daily_scrape looks 30 days ahead and skips re-writing a date that
+        // already has valid content (main.py's skip-if-exists check), so a
+        // date's scrapedAt is routinely weeks old by the time it becomes
+        // "today" -- that's the normal, healthy case, not staleness. Trust
+        // any Firestore doc that exists, same as future/past dates; the
+        // scraper's own gospel-length + validated checks are the real
+        // correctness gate before a doc is ever written.
+        console.log(`✅ Using Firestore reading for ${dateStr}`);
+        this.lastFallbackReason = null;
+        return convertFirestoreReading(data, date);
       } else {
         console.warn(`No Firestore document found for ${dateStr}`);
         this.lastFallbackReason = `No Firestore document for ${dateStr}`;
