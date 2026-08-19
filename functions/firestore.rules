@@ -37,6 +37,14 @@ service cloud.firestore {
                                resource.data.userId == request.auth.uid;
     }
 
+    // LaSallian daily cards (pre-generated scripture + De La Salle quote pairing)
+    match /lasallian_cards/{date} {
+      // Read: Anyone can read cards (public content)
+      allow read: if true;
+      // Write: Only Cloud Functions can write (via admin SDK)
+      allow write: if false;
+    }
+
     // Readings collection (Daily scripture readings)
     match /readings/{date} {
       // Read: Anyone can read readings (public content)
