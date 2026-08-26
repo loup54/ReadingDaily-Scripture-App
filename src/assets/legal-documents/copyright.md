@@ -21,11 +21,12 @@ You may not reproduce, distribute, modify, or transmit any content without expre
 **Copyright Notice:**
 The New American Bible, Revised Edition (NABRE) is copyright © 2010 Confraternity of Christian Doctrine. All rights reserved.
 
-**Used with Permission:**
+**Licensing status:**
 - Daily readings aligned with the Catholic liturgical calendar
 - Complete gospel passages and selections
 - First readings and responsorial psalms
 - Second readings (in appropriate seasons)
+- A digital-application license is required for this use per the copyright owner's published permissions policy. Licensing is in progress — this content is not yet used under a confirmed license.
 
 **Restrictions:**
 - NABRE content is provided for personal use only
