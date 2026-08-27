@@ -2,6 +2,12 @@
 
 ## Pending
 
+### Google Play technical quality requirements (announced 2026-08-26)
+- [ ] **Memory usage (Anon RSS + Swap) + bitmap memory** — enforcement starts **Feb 2027**. Foreground threshold ~2GB on 4GB-RAM devices (90th percentile); bitmap threshold 200MB background/services, 400MB cached. Worth a real check given audio playback + word-highlighting keep a fair bit in memory during active reading sessions — no data yet either way.
+- [ ] **Code optimization (R8/shrinking, min 25%)** — only applies to apps with **>10MB DEX code**; RN/Expo apps are usually well under that. Low risk, one-time check before Feb 2027.
+- [ ] **Zero-Tap Sign-In Restoration — enforcement Apr 2027.** Checked 2026-08-27: no native Google/Apple sign-in module found in this app (`grep` for GoogleSignin/expo-apple-authentication came up empty) — likely out of scope, but `LandingScreen.tsx`'s sign-up flow wasn't fully audited for this specifically. Confirm before assuming it doesn't apply.
+- [ ] See [[project_usccb_licensing]] memory / [LaSallian-Daily's TODO.md](../LaSallian-Daily/TODO.md) for the same notice, LaSallian-specific detail (has real account sign-in, this requirement is more likely relevant there).
+
 ### Daily scraper didn't run for 2026-08-18 — patched, root cause unchecked
 Found via the demo-content banner investigation. `readings/2026-08-18` existed in Firestore but `metadata.scrapedAt` was `2026-07-21T14:03:38Z` — a month old, from whatever bulk-prebaked the date range (`scripts/prebake_readings.py`, untracked WIP), not from today's actual scheduled scrape. The app's 24h freshness check correctly rejected it as stale and fell through to demo content — working as designed, not a client bug. Real users were very likely seeing demo content too, not just the device that reported this.
 - [x] Immediate fix: manually re-scraped via the documented `manual_scrape` endpoint (CLAUDE.md's "Known quirks" recovery recipe). Verified `scrapedAt` now `2026-08-18T00:33:42Z`, content unchanged (Ezekiel 28:1-10, same both times — content was always right, only the freshness metadata was stale).
