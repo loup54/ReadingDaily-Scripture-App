@@ -21,7 +21,8 @@
     },
     {
       "source": "python-functions",
-      "codebase": "python-scraper"
+      "codebase": "python-scraper",
+      "runtime": "python313"
     }
   ],
   "firestore": {
