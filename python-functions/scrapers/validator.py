@@ -78,9 +78,14 @@ def validate_reading_section(section: Dict, name: str) -> List[str]:
     # Validate text length (should have substantial content)
     # Gospel/First/Second readings are typically 300-2000 chars.
     # 50 chars is far too low — it allows "Verse Before the Gospel" to pass.
+    # 300 is too high — rejects legitimate short weekday gospels (e.g. Luke
+    # 8:19-21 at 290 chars, 2026-09-22 incident). usccb_scraper.py already
+    # excludes "Verse Before the Gospel" by heading match, not length — this
+    # is just a backstop, so 200 still catches that contamination class
+    # (a single acclamation line) without rejecting real short gospels.
     if 'text' in section:
         text = section['text']
-        min_length = 300 if name == 'Gospel' else 150
+        min_length = 200 if name == 'Gospel' else 150
         if len(text) < min_length:
             errors.append(f"{name}: Text too short ({len(text)} chars, minimum {min_length})")
 
