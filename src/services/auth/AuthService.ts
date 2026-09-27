@@ -8,6 +8,7 @@ import {
   createUserWithEmailAndPassword,
   signOut,
   sendPasswordResetEmail,
+  sendEmailVerification,
   confirmPasswordReset,
   onAuthStateChanged,
   User as FirebaseUser,
@@ -133,6 +134,12 @@ export class AuthService {
           expiresAt: Timestamp.fromDate(userProfile.subscription.expiresAt),
         },
       });
+
+      // Best-effort: a failed send must not block sign-up. Not enforced yet;
+      // sendGift etc. should require token.email_verified once users have had time to verify.
+      sendEmailVerification(firebaseUser).catch((e) =>
+        console.warn('[Firebase Auth] Verification email failed:', e)
+      );
 
       const idToken = await firebaseUser.getIdToken();
 
