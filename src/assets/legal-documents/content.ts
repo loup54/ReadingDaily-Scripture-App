@@ -161,7 +161,43 @@ Email: ourenglish2019@gmail.com
 In the app: Settings, then Legal & Compliance
 `;
 
+const COPYRIGHT = `# Copyright & Attribution
+
+## About this page
+This page lists who owns the content in ReadingDaily Scripture, and the sources and software the app uses.
+Last updated: 30 September 2026. Version 2.0.0.
+
+## 1. Scripture readings
+The daily readings follow the Lectionary for Mass used in the Catholic dioceses of the United States.
+Scripture texts are from the New American Bible, Revised Edition, copyright 2010, 1991, 1986, 1970 Confraternity of Christian Doctrine, Washington, D.C. All rights reserved.
+Lectionary texts are copyright Confraternity of Christian Doctrine. All rights reserved.
+We have applied to the copyright owner for a licence covering digital use in this app. That application is pending.
+The readings are here for your personal reading, prayer, and study. Please don't copy them out of the app for other uses. For permission, contact the Confraternity of Christian Doctrine through the United States Conference of Catholic Bishops at usccb.org.
+
+## 2. Audio
+The reading audio is computer-generated speech, produced with Microsoft Azure and Google Cloud text-to-speech. It isn't a human recording, and some words, especially names, may be mispronounced.
+When you practise pronunciation, your recording is scored and not kept. It stays yours.
+
+## 3. Translations
+Translations of the readings are produced by Google Translate. They're machine translations for study, not approved liturgical translations.
+
+## 4. The app itself
+The app's design, code, artwork, and original text are copyright 2025-2026 OurEnglish.info Pty Ltd. All rights reserved.
+You're welcome to share screenshots of the app in reviews, posts, and articles, as long as you don't alter them to misrepresent the app.
+
+## 5. Open-source software
+The app is built with open-source software, including React Native, Expo, Firebase, Zustand, React Navigation, and Sentry. We use each under its licence: MIT, or Apache 2.0 for Firebase. Our thanks to their authors.
+
+## 6. Reporting a copyright concern
+If you believe something in the app infringes your copyright, email ourenglish2019@gmail.com. Tell us what the work is, where it appears in the app, and how to contact you. We'll look into it promptly, and remove the content if it infringes.
+
+## 7. Contact
+OurEnglish.info Pty Ltd, Australia
+Email: ourenglish2019@gmail.com
+`;
+
 export const LEGAL_CONTENT: Record<string, string> = {
+  'copyright.md': COPYRIGHT,
   'privacy-policy.md': PRIVACY_POLICY,
   'terms-of-service.md': TERMS_OF_SERVICE,
 };
