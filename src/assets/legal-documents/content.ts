@@ -13,7 +13,7 @@ const PRIVACY_POLICY = `# Privacy Policy
 ## About this policy
 ReadingDaily Scripture is made by OurEnglish.info Pty Ltd, an Australian company. This policy explains what the app collects, why, who else handles it, and how to ask us to delete it.
 In short: we collect what the app needs to show you the day's readings, play audio, save your progress, and handle purchases. We don't sell your data, we don't show ads, and we don't track you across other apps.
-Last updated: 30 September 2026. Version 2.0.1.
+Last updated: 30 September 2026. Version 2.0.2.
 
 ## 1. What we collect
 If you create an account:
@@ -46,7 +46,7 @@ We don't collect advertising identifiers, and we don't track your location.
 We use these service providers. Each gets only what it needs to do its job.
 - Google Firebase (United States): sign-in, database, cloud functions, and usage analytics. Receives your account, progress, settings, and usage events.
 - Microsoft Azure Speech (Australia): pronunciation scoring and reading audio. Receives your practice recording and the reading text.
-- Google Cloud Text-to-Speech (United States): word timing for audio highlighting. Receives reading text only.
+- Google Cloud Text-to-Speech (United States): word timing for the optional follow-along highlighting. Receives reading text only.
 - Google Translate (United States): translating readings. Receives reading text only.
 - Sentry (United States): crash reporting. Receives crash and device details.
 - Apple App Store and Google Play: purchases and payment, under their own privacy policies.
@@ -92,11 +92,11 @@ const TERMS_OF_SERVICE = `# Terms of Service
 
 ## About these terms
 These terms are an agreement between you and OurEnglish.info Pty Ltd, the Australian company that makes ReadingDaily Scripture. By using the app, you agree to them. If you don't agree, please don't use the app.
-Last updated: 30 September 2026. Version 2.0.0.
+Last updated: 30 September 2026. Version 2.0.1.
 
 ## 1. What the app does
 - Shows the daily Catholic Mass readings, following the liturgical calendar.
-- Plays the readings aloud, with word-by-word highlighting.
+- Plays the readings aloud.
 - Offers pronunciation practice, with feedback on how you read aloud.
 - Translates readings into other languages.
 - Saves your reading progress, bookmarks, and settings.
@@ -251,11 +251,10 @@ const ACCESSIBILITY = `# Accessibility Statement
 
 ## About this statement
 We want everyone to be able to pray and read with ReadingDaily Scripture, including people who are blind or have low vision, are hard of hearing, or find reading difficult. This statement says what works today, what doesn't yet, and how to tell us about a problem.
-Last updated: 30 September 2026. Version 2.0.1.
+Last updated: 30 September 2026. Version 2.0.2.
 
 ## 1. What helps today
 - Listen instead of read: every reading can be played aloud.
-- Follow along: words are highlighted as they're spoken, which helps readers with dyslexia and English learners.
 - Choose your pace: play audio at 0.5x, 0.75x, 1x, 1.25x, or 1.5x speed.
 - Read in your language: translate readings into 18 other languages.
 - Dark mode: turn it on in the app's settings, under Appearance.
@@ -283,7 +282,7 @@ Email: ourenglish2019@gmail.com
 const HELP_FAQ = `# Help & FAQ
 
 ## Getting started
-ReadingDaily Scripture gives you each day's Catholic Mass readings, read aloud with the words highlighted as you listen.
+ReadingDaily Scripture gives you each day's Catholic Mass readings, with audio so you can listen as you read.
 You can start reading straight away as a guest. Create an account if you want your progress saved across devices.
 Can't find an answer here? Email ourenglish2019@gmail.com.
 
