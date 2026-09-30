@@ -7,7 +7,8 @@ OTA group `1399c79d-7fad-4ffc-8af9-4e1126c518fd`, runtime 1.1.34, commit `887fc5
 - [ ] Smoke test on a real device: translation + audio still work (OTA bundles the local `.env`, see Security below; `.env` unchanged since 2026-07-23, same as the 2026-08-19 OTA).
 - [ ] Customize Firebase verification email template (sender, subject) and check spam placement — shipped before this was done; send is best-effort, doesn't block sign-up.
 - [x] Terms of Service v2.0.0 + privacy v2.0.1 (gift recipient data) — OTA group `2b25a37c-8518-4561-879e-c244b658b3de`, commit `830b8c2`, 2026-09-30.
-- [ ] Accessibility, consumer-rights, copyright, help-faq still render placeholder text in the Legal screen — add real text to `src/assets/legal-documents/content.ts`. Copyright's own .md also still says "© 2025 by ReadingDaily".
+- [x] Copyright & Attribution v2.0.0 — OTA group `f60592ca-1a2b-4473-936f-3dd415a285b0`, commit `5b71ea5`, 2026-09-30. States publicly that the NABRE licence application is pending (Lou approved the wording) — update it when USCCB replies.
+- [ ] Accessibility, consumer-rights, help-faq still render placeholder text in the Legal screen — add real text to `src/assets/legal-documents/content.ts`.
 - [ ] Update the hosted policy at `ourenglish.best/privacy-policy` (WordPress) to match the in-app v2.0.0 — it still lists Mixpanel/Google STT, omits Sentry/Azure.
 - [ ] Confirm Sentry (90 days) and Firebase Analytics (14 months) retention settings match what the policy states.
 
