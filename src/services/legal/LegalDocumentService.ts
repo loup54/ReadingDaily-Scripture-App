@@ -10,6 +10,7 @@
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import documentIndex from '@/assets/legal-documents/index.json';
+import { LEGAL_CONTENT } from '@/assets/legal-documents/content';
 
 export interface LegalDocument {
   id: string;
@@ -118,6 +119,10 @@ class LegalDocumentService {
    * Using inline content for now as require() doesn't work with .md files in React Native
    */
   private static async loadMarkdownFile(filename: string): Promise<string> {
+    if (LEGAL_CONTENT[filename]) {
+      return LEGAL_CONTENT[filename];
+    }
+
     // Get document metadata from index to generate proper content
     const docMetadata = documentIndex.documents.find(d => d.filename === filename);
     const docTitle = docMetadata?.title || filename;
@@ -181,9 +186,10 @@ If you have any questions about this document, please contact us at:
 
       const cache = JSON.parse(cached) as DocumentCache;
 
-      // Check if cache has expired
-      if (cache.expiresAt < Date.now()) {
-        console.log(`[LegalDocumentService] Cache expired: ${documentId}`);
+      // Reload if expired, or if the bundled document has a newer version
+      const bundledVersion = documentIndex.documents.find(d => d.id === documentId)?.version;
+      if (cache.expiresAt < Date.now() || cache.version !== bundledVersion) {
+        console.log(`[LegalDocumentService] Cache stale: ${documentId}`);
         await AsyncStorage.removeItem(cacheKey);
         // Reload from bundle
         await this.loadDocumentFromBundle(documentId);
