@@ -13,7 +13,7 @@ const PRIVACY_POLICY = `# Privacy Policy
 ## About this policy
 ReadingDaily Scripture is made by OurEnglish.info Pty Ltd, an Australian company. This policy explains what the app collects, why, who else handles it, and how to ask us to delete it.
 In short: we collect what the app needs to show you the day's readings, play audio, save your progress, and handle purchases. We don't sell your data, we don't show ads, and we don't track you across other apps.
-Last updated: 30 September 2026. Version 2.0.2.
+Last updated: 1 October 2026. Version 2.0.3.
 
 ## 1. What we collect
 If you create an account:
@@ -48,7 +48,7 @@ We use these service providers. Each gets only what it needs to do its job.
 - Microsoft Azure Speech (Australia): pronunciation scoring and reading audio. Receives your practice recording and the reading text.
 - Google Cloud Text-to-Speech (United States): word timing for the optional follow-along highlighting. Receives reading text only.
 - Google Translate (United States): translating readings. Receives reading text only.
-- Sentry (United States): crash reporting. Receives crash and device details.
+- Sentry (Germany): crash reporting. Receives crash and device details.
 - Apple App Store and Google Play: purchases and payment, under their own privacy policies.
 We don't sell, rent, or trade your personal information, and we don't share it with anyone for their own marketing.
 
@@ -63,7 +63,7 @@ The app uses software to score your pronunciation when you practise. That score 
 We don't use software to make decisions that could significantly affect your rights or interests.
 
 ## 6. Overseas disclosure
-We're based in Australia. Some of our service providers store and process data overseas, mainly in the United States (see section 3). We choose providers with established security and privacy practices.
+We're based in Australia. Some of our service providers store and process data overseas, mainly in the United States, and in Germany for crash reports (see section 3). We choose providers with established security and privacy practices.
 
 ## 7. Security
 Data travels over encrypted connections (TLS), and Firebase encrypts stored data. Access to our systems is limited, and our server endpoints use authentication and rate limiting.
