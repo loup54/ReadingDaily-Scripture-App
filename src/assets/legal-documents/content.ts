@@ -251,7 +251,7 @@ const ACCESSIBILITY = `# Accessibility Statement
 
 ## About this statement
 We want everyone to be able to pray and read with ReadingDaily Scripture, including people who are blind or have low vision, are hard of hearing, or find reading difficult. This statement says what works today, what doesn't yet, and how to tell us about a problem.
-Last updated: 30 September 2026. Version 2.0.0.
+Last updated: 30 September 2026. Version 2.0.1.
 
 ## 1. What helps today
 - Listen instead of read: every reading can be played aloud.
@@ -263,7 +263,7 @@ Last updated: 30 September 2026. Version 2.0.0.
 - Screen readers: the main buttons and controls have labels for VoiceOver and TalkBack.
 
 ## 2. What doesn't work well yet
-- Text size: the scripture text doesn't grow with your phone's Larger Text setting. We turned that off after very large sizes broke the reading layout, and we're working on a fix that lets the text grow within limits.
+- Text size: the scripture text now grows with your phone's text size setting, up to one and a half times its normal size. At the very largest accessibility sizes, the heading at the top of the reading screen grows too, and it can push the reading off the screen. We're working on that.
 - Screen reader coverage: some screens and controls may not be labelled yet.
 - Audio: reading audio is computer-generated. Some words, especially names, may be mispronounced.
 - Captions: the reading text works as the transcript for the audio, but there are no separate captions.
