@@ -247,7 +247,110 @@ Email: ourenglish2019@gmail.com
 In the app: Settings, then Legal & Compliance
 `;
 
+const ACCESSIBILITY = `# Accessibility Statement
+
+## About this statement
+We want everyone to be able to pray and read with ReadingDaily Scripture, including people who are blind or have low vision, are hard of hearing, or find reading difficult. This statement says what works today, what doesn't yet, and how to tell us about a problem.
+Last updated: 30 September 2026. Version 2.0.0.
+
+## 1. What helps today
+- Listen instead of read: every reading can be played aloud.
+- Follow along: words are highlighted as they're spoken, which helps readers with dyslexia and English learners.
+- Choose your pace: play audio at 0.5x, 0.75x, 1x, 1.25x, or 1.5x speed.
+- Read in your language: translate readings into 18 other languages.
+- Dark mode: turn it on in the app's settings, under Appearance.
+- Reduced motion: the app respects your phone's Reduce Motion setting.
+- Screen readers: the main buttons and controls have labels for VoiceOver and TalkBack.
+
+## 2. What doesn't work well yet
+- Text size: the scripture text doesn't grow with your phone's Larger Text setting. We turned that off after very large sizes broke the reading layout, and we're working on a fix that lets the text grow within limits.
+- Screen reader coverage: some screens and controls may not be labelled yet.
+- Audio: reading audio is computer-generated. Some words, especially names, may be mispronounced.
+- Captions: the reading text works as the transcript for the audio, but there are no separate captions.
+
+## 3. Our aim
+We aim to meet the Web Content Accessibility Guidelines (WCAG) 2.1 at level AA, as they apply to mobile apps. We aren't there yet, and we'll keep fixing the gaps above.
+
+## 4. Tell us about a problem
+If something in the app is hard to use, email ourenglish2019@gmail.com. Tell us what you were trying to do, what got in the way, your device, and any assistive technology you use.
+We aim to reply within 5 business days. If we can't fix a problem quickly, we'll try to find another way to give you what you need.
+
+## 5. Contact
+OurEnglish.info Pty Ltd, Australia
+Email: ourenglish2019@gmail.com
+`;
+
+const HELP_FAQ = `# Help & FAQ
+
+## Getting started
+ReadingDaily Scripture gives you each day's Catholic Mass readings, read aloud with the words highlighted as you listen.
+You can start reading straight away as a guest. Create an account if you want your progress saved across devices.
+Can't find an answer here? Email ourenglish2019@gmail.com.
+
+## Readings
+**Which readings does the app show?**
+The daily Mass readings from the Lectionary used in the Catholic dioceses of the United States: first reading, psalm, gospel, and a second reading on Sundays and major feasts.
+**A reading looks wrong or is missing. What should I do?**
+Tap Retry if the app shows a sample-content notice, or close and reopen the app. If it's still wrong, email us the date, and we'll fix it for everyone.
+**Can I read past days?**
+Yes, with Archive access, a one-time purchase.
+**Can I read without an internet connection?**
+Yes. The app can download readings, audio, and translations ahead of time, so you can use them offline.
+
+## Audio
+**Why does the voice sometimes mispronounce a word?**
+The audio is computer-generated. It handles most words well, but some names and places can come out wrong.
+**Can I slow it down?**
+Yes. Change the speed on the audio player, from 0.5x to 1.5x.
+**The audio won't play. What can I try?**
+Check that your phone isn't on silent, that the volume is up, and that you're online, or that you've downloaded the reading. Then close and reopen the app.
+
+## Translation
+**How do I read in my own language?**
+Choose a translation language in the app's settings. There are 18 to choose from, including Spanish, Vietnamese, Chinese, Tamil, and Arabic.
+**Is the translation official?**
+No. It's a machine translation to help you understand the English text, not an approved liturgical translation.
+
+## Pronunciation practice
+**How does it work?**
+Read a passage aloud, and the app scores your pronunciation word by word, so you can see which words to practise.
+**Is my voice recorded and kept?**
+No. Your recording is sent for scoring and then discarded.
+
+## Purchases and gifts
+**Is the app free?**
+Yes. The daily readings, audio, translation, and pronunciation practice are free. Only Archive access costs money.
+**Is Archive a subscription?**
+No. It's a one-time purchase, so nothing renews and there's nothing to cancel.
+**I bought Archive, but it isn't showing on my new phone.**
+Use Restore Purchase in the app's settings, signed in to the same Apple or Google account you bought with.
+**How do I get a refund?**
+Request it through the App Store or Google Play. If that doesn't work, email us. The Consumer Rights Guide has the details.
+**Can I give the app to someone?**
+Yes. Use Send Gift to send someone a gift code. They redeem it with Redeem Gift.
+
+## Account and privacy
+**Do I need an account?**
+No. You can read as a guest. An account saves your progress and settings across devices.
+**How do I delete my account?**
+Use Delete Account in the app's settings, or email us.
+**What do you do with my data?**
+Only what the app needs to work. We don't sell data or show ads. The Privacy Policy has the details.
+
+## Reminders and widget
+**Can the app remind me to read each day?**
+Yes. Turn on daily reminders in the app's settings.
+**Is there a home-screen widget?**
+Yes. Add the ReadingDaily widget from your phone's widget gallery to see today's reading at a glance.
+
+## Contact
+Email: ourenglish2019@gmail.com
+We aim to reply within 5 business days.
+`;
+
 export const LEGAL_CONTENT: Record<string, string> = {
+  'accessibility.md': ACCESSIBILITY,
+  'help-faq.md': HELP_FAQ,
   'consumer-rights.md': CONSUMER_RIGHTS,
   'copyright.md': COPYRIGHT,
   'privacy-policy.md': PRIVACY_POLICY,
