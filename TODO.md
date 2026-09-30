@@ -7,7 +7,8 @@ Live Android build (versionCode 31, 2026-08-15, commit `e9ae2bd`) has runtime **
 - Fix: `app.config.js` `android.runtimeVersion: "1.1.33"` override; Android-only OTA group `d7d501d1-2851-4057-8836-8b2e5067b491` published from `8568998` (legal pages + reading fix, **without** the font-scaling change).
 - [ ] Lou: confirm on Android phone — real reading shows, legal pages are v2.
 - [ ] **Next Android store build:** set `expo_runtime_version` in `strings.xml` to match the top-level `runtimeVersion`, then remove the `android.runtimeVersion` override. Check this before every Android build.
-- [ ] Font scaling (`23a2a8b`, `e6eaff3`) not yet shipped on either platform — test on Android once this OTA lands.
+- [x] Android OTA confirmed by Lou 2026-09-30: real readings, legal pages, Compliance & Analytics all load.
+- [ ] Font scaling (`23a2a8b`, `e6eaff3`) + highlighting-claim removal (`c761c7d`) shipped 2026-09-30 — iOS group `12150486-168a-4b27-9377-880cb9f80f8e` (1.1.34), Android group `ad924623-5e6a-4b44-92ed-ca8e5ffe5371` (1.1.33). Lou to test with large system font on both phones; rollback = set `ENABLE_SCRIPTURE_FONT_SCALING: false` in `src/config/featureFlags.ts` + OTA.
 
 ### Privacy policy + verification email — OTA shipped 2026-09-30
 OTA group `1399c79d-7fad-4ffc-8af9-4e1126c518fd`, runtime 1.1.34, commit `887fc52`. Carries: real in-app privacy policy v2.0.0 (`ca9e6a6` — the Legal screen had been showing generated placeholder text for every document), and `sendEmailVerification` on sign-up (`c50a62e`).
