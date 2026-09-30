@@ -12,8 +12,8 @@ const PRIVACY_POLICY = `# Privacy Policy
 
 ## About this policy
 ReadingDaily Scripture is made by OurEnglish.info Pty Ltd, an Australian company. This policy explains what the app collects, why, who else handles it, and how to ask us to delete it.
-In short: we collect what the app needs to show you the day's readings, play audio, save your progress, and run subscriptions. We don't sell your data, we don't show ads, and we don't track you across other apps.
-Last updated: 30 September 2026. Version 2.0.0.
+In short: we collect what the app needs to show you the day's readings, play audio, save your progress, and handle purchases. We don't sell your data, we don't show ads, and we don't track you across other apps.
+Last updated: 30 September 2026. Version 2.0.1.
 
 ## 1. What we collect
 If you create an account:
@@ -25,8 +25,9 @@ As you use the app:
 - A record of when you accepted our terms and this policy.
 Pronunciation practice, only if you use it:
 - Your voice while you read a passage aloud, and the pronunciation scores that come back. Recordings are not stored.
-Subscriptions:
-- Whether you have an active subscription and which plan. Apple or Google handle the payment itself; we never see your card details.
+Purchases and gifts:
+- Whether you've bought Archive access. Apple or Google handle the payment itself; we never see your card details.
+- If you send a gift: the recipient's email address and your optional message, kept until the gift is redeemed or expires.
 Automatically:
 - Crash reports and error logs: device model, operating system, app version, and what the app was doing when it failed.
 - App usage events, such as which screens and features get used, through Firebase Analytics.
@@ -36,7 +37,7 @@ We don't collect advertising identifiers, and we don't track your location.
 - To show you the daily readings, play audio, and keep your place.
 - To score your pronunciation when you ask for it.
 - To translate readings into your chosen language.
-- To manage your subscription or gift subscription.
+- To manage your purchase, and to deliver gifts you send.
 - To find and fix crashes.
 - To see which features get used, so we know what to improve.
 - To send notifications you've turned on.
@@ -48,7 +49,7 @@ We use these service providers. Each gets only what it needs to do its job.
 - Google Cloud Text-to-Speech (United States): word timing for audio highlighting. Receives reading text only.
 - Google Translate (United States): translating readings. Receives reading text only.
 - Sentry (United States): crash reporting. Receives crash and device details.
-- Apple App Store and Google Play: subscriptions and payment, under their own privacy policies.
+- Apple App Store and Google Play: purchases and payment, under their own privacy policies.
 We don't sell, rent, or trade your personal information, and we don't share it with anyone for their own marketing.
 
 ## 4. How long we keep it
@@ -58,7 +59,7 @@ We don't sell, rent, or trade your personal information, and we don't share it w
 - Analytics: deleted automatically by Firebase, within 14 months.
 
 ## 5. Automated decisions
-The app uses software to score your pronunciation when you practise. That score is feedback for you only. It isn't used to decide anything about you, and it doesn't affect your access to the app, your subscription, or anything else.
+The app uses software to score your pronunciation when you practise. That score is feedback for you only. It isn't used to decide anything about you, and it doesn't affect your access to the app, your purchases, or anything else.
 We don't use software to make decisions that could significantly affect your rights or interests.
 
 ## 6. Overseas disclosure
