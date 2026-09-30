@@ -196,7 +196,59 @@ OurEnglish.info Pty Ltd, Australia
 Email: ourenglish2019@gmail.com
 `;
 
+const CONSUMER_RIGHTS = `# Consumer Rights Guide
+
+## About this guide
+This guide explains your rights when you use or buy something in ReadingDaily Scripture, and how to get help if something goes wrong. It's a plain summary. Your actual rights come from the law where you live, and nothing here reduces them.
+Last updated: 30 September 2026. Version 2.0.0.
+
+## 1. What you pay for
+- The daily readings, audio, translation, and pronunciation practice are free.
+- Archive access, for past readings, is a one-time purchase. It isn't a subscription, so it never renews and there's nothing to cancel.
+- You always see the price in the app before you buy. Apple or Google take the payment.
+- If you change devices, use Restore Purchase in the app's settings, signed in to the same Apple or Google account.
+
+## 2. Your rights in Australia
+Under the Australian Consumer Law, what you buy from us comes with guarantees that can't be excluded. It must:
+- work as described, and match what we told you about it,
+- be of acceptable quality: free from defects, safe, and reasonably durable, and
+- be fit for any purpose we said it was for.
+If there's a major failure, such as Archive access that doesn't work at all and we can't fix, you can choose a refund.
+If the problem is minor, we'll fix it within a reasonable time. If we don't, you can ask for a refund.
+
+## 3. Your rights elsewhere
+If you live outside Australia, you keep the consumer rights your own law gives you.
+In the European Union and the United Kingdom, digital content must be as described, fit for purpose, and of satisfactory quality, and you can ask for a repair or a refund if it isn't.
+Apple and Google also have their own refund policies, which may be more generous than the law requires.
+
+## 4. How to get a refund
+1. Request it through the store you bought from. On iPhone, go to reportaproblem.apple.com. On Android, go to your Google Play order history.
+2. If the store declines, or you're not sure, email us at ourenglish2019@gmail.com with your purchase date and what went wrong. We'll help, including by supporting your refund request where the law entitles you to one.
+
+## 5. If something isn't working
+Email ourenglish2019@gmail.com and tell us what happened, on which device, and roughly when. We aim to reply within 5 business days.
+If a daily reading looks wrong, tell us the date. We check these quickly because they affect everyone.
+
+## 6. If you're not satisfied
+If we can't resolve your problem, you can contact an independent body:
+- Australia, purchases: your state or territory consumer protection agency. In Queensland, that's the Office of Fair Trading. The ACCC (accc.gov.au) also has information on your rights.
+- Australia, privacy: the Office of the Australian Information Commissioner (oaic.gov.au).
+- Elsewhere: your national or local consumer protection body.
+
+## 7. Your data
+You can ask to see, correct, get a copy of, or delete the personal information we hold about you. Delete your account with Delete Account in the app's settings, or email us. Our Privacy Policy has the details.
+
+## 8. Accessibility
+If something in the app is hard to use because of a disability, please tell us. We'll try to fix it, or find another way to give you what you need.
+
+## 9. Contact
+OurEnglish.info Pty Ltd, Australia
+Email: ourenglish2019@gmail.com
+In the app: Settings, then Legal & Compliance
+`;
+
 export const LEGAL_CONTENT: Record<string, string> = {
+  'consumer-rights.md': CONSUMER_RIGHTS,
   'copyright.md': COPYRIGHT,
   'privacy-policy.md': PRIVACY_POLICY,
   'terms-of-service.md': TERMS_OF_SERVICE,
