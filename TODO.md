@@ -2,6 +2,13 @@
 
 ## Pending
 
+### Android never received OTAs — fixed 2026-09-30, verify on device
+Live Android build (versionCode 31, 2026-08-15, commit `e9ae2bd`) has runtime **1.1.33** baked into `android/app/src/main/res/values/strings.xml`, but every OTA since went to 1.1.34 (`app.config.js`). So Android ran its embedded Aug 15 bundle, which still had the old <24h freshness check (fixed only by OTA in `9dc2244`) — today's reading is pre-scraped ~30 days ahead, so **every Android user saw demo readings every day** since that build shipped, with no banner (banner also OTA-only, `1bc6eb2`).
+- Fix: `app.config.js` `android.runtimeVersion: "1.1.33"` override; Android-only OTA group `d7d501d1-2851-4057-8836-8b2e5067b491` published from `8568998` (legal pages + reading fix, **without** the font-scaling change).
+- [ ] Lou: confirm on Android phone — real reading shows, legal pages are v2.
+- [ ] **Next Android store build:** set `expo_runtime_version` in `strings.xml` to match the top-level `runtimeVersion`, then remove the `android.runtimeVersion` override. Check this before every Android build.
+- [ ] Font scaling (`23a2a8b`, `e6eaff3`) not yet shipped on either platform — test on Android once this OTA lands.
+
 ### Privacy policy + verification email — OTA shipped 2026-09-30
 OTA group `1399c79d-7fad-4ffc-8af9-4e1126c518fd`, runtime 1.1.34, commit `887fc52`. Carries: real in-app privacy policy v2.0.0 (`ca9e6a6` — the Legal screen had been showing generated placeholder text for every document), and `sendEmailVerification` on sign-up (`c50a62e`).
 - [ ] Smoke test on a real device: translation + audio still work (OTA bundles the local `.env`, see Security below; `.env` unchanged since 2026-07-23, same as the 2026-08-19 OTA).
