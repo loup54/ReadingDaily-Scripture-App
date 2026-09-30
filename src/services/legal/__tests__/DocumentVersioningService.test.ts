@@ -8,6 +8,7 @@
 import DocumentVersioningService from '../DocumentVersioningService';
 import LegalDocumentService from '../LegalDocumentService';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import documentIndex from '@/assets/legal-documents/index.json';
 
 // Mock dependencies
 jest.mock('@react-native-async-storage/async-storage');
@@ -96,7 +97,9 @@ describe('DocumentVersioningService', () => {
 
       expect(Array.isArray(history)).toBe(true);
       expect(history).toHaveLength(1);
-      expect(history[0].version).toBe('1.0.0');
+      expect(history[0].version).toBe(
+        documentIndex.documents.find(d => d.id === testDocId)?.version
+      );
       expect(history[0].documentId).toBe(testDocId);
     });
 

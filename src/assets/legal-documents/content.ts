@@ -88,6 +88,80 @@ Email: ourenglish2019@gmail.com
 In the app: Settings, then Legal & Compliance
 `;
 
+const TERMS_OF_SERVICE = `# Terms of Service
+
+## About these terms
+These terms are an agreement between you and OurEnglish.info Pty Ltd, the Australian company that makes ReadingDaily Scripture. By using the app, you agree to them. If you don't agree, please don't use the app.
+Last updated: 30 September 2026. Version 2.0.0.
+
+## 1. What the app does
+- Shows the daily Catholic Mass readings, following the liturgical calendar.
+- Plays the readings aloud, with word-by-word highlighting.
+- Offers pronunciation practice, with feedback on how you read aloud.
+- Translates readings into other languages.
+- Saves your reading progress, bookmarks, and settings.
+- Offers an Archive of past readings, which you can unlock with a one-time purchase.
+
+## 2. Your account
+You can use much of the app without an account. If you create one:
+- You must be at least 13 years old.
+- Give us an email address you can access, and keep your password to yourself.
+- Tell us at ourenglish2019@gmail.com if you think someone else has used your account.
+You can delete your account at any time with Delete Account in the app's settings, or by emailing us. We may suspend or close an account that's used to break the law, attack the app, or abuse other people. If we do, and it wasn't for one of those reasons, we'll refund any purchase you haven't had the use of.
+
+## 3. Using the app fairly
+Please don't:
+- use the app for anything unlawful,
+- try to break into, overload, or disrupt the app or its servers,
+- copy the app's content in bulk, or scrape it with automated tools, or
+- use someone else's account without their permission.
+
+## 4. Purchases and gifts
+- The daily readings are free. Archive access is a one-time purchase, not a subscription, so nothing renews and nothing needs cancelling.
+- The price is shown in the app before you buy. Apple or Google process the payment, under their own terms.
+- To restore a purchase on a new device, use Restore Purchase in the app's settings, signed in to the same Apple or Google account.
+- Gift codes expire on the date shown with the gift, and can't be exchanged for cash.
+
+## 5. Refunds and your consumer rights
+Refunds for purchases are handled by Apple or Google. Request one through your App Store or Google Play account.
+Our goods and services come with guarantees that can't be excluded under the Australian Consumer Law, and you may have similar rights where you live. Nothing in these terms limits those rights. If something you bought doesn't work as it should, email us and we'll help, including by arranging a refund where the law requires it.
+
+## 6. Scripture and other content
+The scripture texts belong to their copyright owners and are shown for your personal, non-commercial reading and prayer. See Copyright in Legal & Compliance for the details of each source.
+The app's own design, code, audio, and text belong to OurEnglish.info Pty Ltd. You may use them within the app, but please don't copy, resell, or redistribute them.
+If you send us feedback, we may use your ideas to improve the app, without owing you anything for them.
+
+## 7. Accuracy
+We work hard to show the correct readings for each day, but mistakes can happen, such as a wrong reading, a translation error, or audio that mispronounces a word. For liturgical use, check your parish's official lectionary.
+Translations are produced by software and may be imperfect. Pronunciation scores are guidance for practice, not a formal assessment.
+The app isn't spiritual direction or professional language teaching.
+
+## 8. Availability and changes
+We aim to keep the app running at all times, but it may sometimes be unavailable, for example during maintenance or an outage at one of our providers.
+We may add, change, or remove features. If we remove something you paid for, we'll offer you a fair alternative or a refund.
+
+## 9. Our liability
+We're not responsible for losses you suffer that we couldn't reasonably have foreseen, or that weren't caused by our failure to meet these terms or the law.
+Where the law lets us limit our liability for a failure to meet a consumer guarantee, our liability is limited to supplying the service again, or paying the cost of having it supplied again.
+Nothing in these terms limits liability that can't legally be limited.
+
+## 10. Privacy
+Our Privacy Policy explains what information we collect and how we use it. You can read it in Legal & Compliance.
+
+## 11. Changes to these terms
+If we change these terms, we'll update the date in "About these terms". If a change is significant, we'll tell you in the app before it takes effect. If you don't agree with a change, you can stop using the app and ask us to delete your account.
+
+## 12. Disputes and governing law
+If you have a problem with the app, please email us first at ourenglish2019@gmail.com. Most problems can be sorted out quickly that way.
+These terms are governed by the laws of Queensland, Australia. If you're a consumer living in another country, you also keep any rights your local law gives you, and you can bring a claim in your local courts.
+
+## 13. Contact
+OurEnglish.info Pty Ltd, Australia
+Email: ourenglish2019@gmail.com
+In the app: Settings, then Legal & Compliance
+`;
+
 export const LEGAL_CONTENT: Record<string, string> = {
   'privacy-policy.md': PRIVACY_POLICY,
+  'terms-of-service.md': TERMS_OF_SERVICE,
 };
