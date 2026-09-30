@@ -9,6 +9,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { SCRIPTURE_TEXT_SCALING_PROPS } from '@/config/featureFlags';
 import { Reading } from '@/types/reading.types';
 import { Colors, Typography, Spacing, BorderRadius } from '@constants';
 import { useTheme } from '@/hooks/useTheme';
@@ -123,7 +124,7 @@ export const ScriptureTextWithHighlighting: React.FC<ScriptureTextWithHighlighti
       <View style={styles.wordsContainer}>
         {contentTokens.map((token, tokenIdx) => {
           if (token.trim().length === 0) {
-            return <Text key={tokenIdx} style={[styles.content, { color: colors.text.primary }]} allowFontScaling={false}>{token}</Text>;
+            return <Text key={tokenIdx} style={[styles.content, { color: colors.text.primary }]} {...SCRIPTURE_TEXT_SCALING_PROPS}>{token}</Text>;
           }
           const isCurrent = isHighlightingActive && tokenIdx === currentTokenIdx;
           return (
@@ -138,7 +139,7 @@ export const ScriptureTextWithHighlighting: React.FC<ScriptureTextWithHighlighti
                   backgroundColor: isCurrent ? colors.primary.blue : 'transparent',
                 },
               ]}
-              allowFontScaling={false}
+              {...SCRIPTURE_TEXT_SCALING_PROPS}
             >
               {token}
             </Text>

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal, ActivityIndicator, NativeScrollEvent, NativeSyntheticEvent, useWindowDimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { SCRIPTURE_TEXT_SCALING_PROPS } from '@/config/featureFlags';
 import { Reading } from '@/types/reading.types';
 import { Colors, Typography, Spacing, BorderRadius } from '@constants';
 import { useTheme } from '@/hooks/useTheme';
@@ -75,7 +76,7 @@ export const ScriptureText: React.FC<ScriptureTextProps> = ({ reading }) => {
     const words = text.split(/(\s+)/);
 
     return (
-      <Text style={[styles.content, { color: colors.text.primary }]} allowFontScaling={false}>
+      <Text style={[styles.content, { color: colors.text.primary }]} {...SCRIPTURE_TEXT_SCALING_PROPS}>
         {words.map((word, index) => {
           if (word.trim().length === 0) {
             return <Text key={index}>{word}</Text>;
@@ -125,7 +126,7 @@ export const ScriptureText: React.FC<ScriptureTextProps> = ({ reading }) => {
         {/* English Reading Section */}
         {translationEnabled
           ? renderTappableText(reading.content)
-          : <Text style={[styles.content, { color: colors.text.primary }]} allowFontScaling={false}>{reading.content}</Text>
+          : <Text style={[styles.content, { color: colors.text.primary }]} {...SCRIPTURE_TEXT_SCALING_PROPS}>{reading.content}</Text>
         }
 
         {/* Translation Section - Only show if translation enabled */}
