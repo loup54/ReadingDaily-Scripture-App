@@ -22,6 +22,8 @@ OTA group `1399c79d-7fad-4ffc-8af9-4e1126c518fd`, runtime 1.1.34, commit `887fc5
 - [x] Consumer Rights, Accessibility, Help & FAQ v2.0.0 — OTA group `c0759c5d-b150-4a22-ab89-10950e162698`, commit `9a67975`, 2026-09-30. All six Legal & Compliance docs now real.
 - [ ] Scripture text ignores system text size (`allowFontScaling={false}`, from `771eadb`) — Accessibility statement admits it; update that line when fixed.
 - [x] Hosted policy `ourenglish.best/privacy-policy` replaced 2026-10-01 with combined v3.0.0 (website + ReadingDaily 2.0.3 + LaSallian Daily), verified live. Source: `~/Documents/Projects/OurEnglish/privacy-policy-2026-10-01.md` (+ `.html`). Lives in an Elementor Text Editor widget: edit via "Edit with Elementor", not the block editor. Keep Part B in sync when in-app policy changes.
+- [x] App Store privacy (2026-10-01): URL was the homepage, label said "Data Not Collected". Now URL = https://ourenglish.best/privacy-policy/, label = Name, Email, Other User Content, User ID, Purchase History (App Functionality, linked); Product Interaction (Analytics, not linked); Crash + Performance Data (not linked, no Sentry setUser). No tracking. Voice left out (real-time Azure, not retained).
+- [ ] Play Console Data safety + privacy URL: check against the same list.
 - [ ] Confirm Sentry (90 days) and Firebase Analytics (14 months) retention settings match what the policy states.
 
 ### Google Play technical quality requirements (announced 2026-08-26)
