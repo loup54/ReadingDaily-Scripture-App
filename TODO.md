@@ -2,6 +2,14 @@
 
 ## Pending
 
+### Privacy policy + verification email — OTA shipped 2026-09-30
+OTA group `1399c79d-7fad-4ffc-8af9-4e1126c518fd`, runtime 1.1.34, commit `887fc52`. Carries: real in-app privacy policy v2.0.0 (`ca9e6a6` — the Legal screen had been showing generated placeholder text for every document), and `sendEmailVerification` on sign-up (`c50a62e`).
+- [ ] Smoke test on a real device: translation + audio still work (OTA bundles the local `.env`, see Security below; `.env` unchanged since 2026-07-23, same as the 2026-08-19 OTA).
+- [ ] Customize Firebase verification email template (sender, subject) and check spam placement — shipped before this was done; send is best-effort, doesn't block sign-up.
+- [ ] Terms of Service, accessibility, consumer-rights, copyright, help-faq still render placeholder text in the Legal screen — add real text to `src/assets/legal-documents/content.ts`.
+- [ ] Update the hosted policy at `ourenglish.best/privacy-policy` (WordPress) to match the in-app v2.0.0 — it still lists Mixpanel/Google STT, omits Sentry/Azure.
+- [ ] Confirm Sentry (90 days) and Firebase Analytics (14 months) retention settings match what the policy states.
+
 ### Google Play technical quality requirements (announced 2026-08-26)
 - [ ] **Memory usage (Anon RSS + Swap) + bitmap memory** — enforcement starts **Feb 2027**. Foreground threshold ~2GB on 4GB-RAM devices (90th percentile); bitmap threshold 200MB background/services, 400MB cached. Worth a real check given audio playback + word-highlighting keep a fair bit in memory during active reading sessions — no data yet either way.
 - [ ] **Code optimization (R8/shrinking, min 25%)** — only applies to apps with **>10MB DEX code**; RN/Expo apps are usually well under that. Low risk, one-time check before Feb 2027.
