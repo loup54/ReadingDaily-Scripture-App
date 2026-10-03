@@ -42,11 +42,6 @@ module.exports = {
       }
     },
     android: {
-      // Live Android build (versionCode 31) was built with runtime 1.1.33
-      // (android/app/src/main/res/values/strings.xml). Keep OTAs targeting it
-      // until the next Android store build; then align strings.xml with the
-      // top-level runtimeVersion and remove this override.
-      runtimeVersion: "1.1.33",
       adaptiveIcon: {
         foregroundImage: "./assets/icon.png",
         backgroundColor: "#7C3AED"

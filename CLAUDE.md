@@ -113,7 +113,7 @@ eas update --channel production --message "description of fix"
 2. `eas build --platform android --profile production`
 3. `eas submit --platform android --profile production --latest --no-wait` — the `--wait` default (implicit) has hung for 10+ min with zero output at least twice (2026-08-15); `--no-wait` schedules and returns immediately, submission itself still completes server-side in ~2 min — check status at the submission URL printed by the command instead of waiting on the CLI
    - Google Play service account key: `readingdaily-scripture-fe502-7e5cff3f3956.json`, kept in the project root, gitignored (`*service-account*.json` / `readingdaily-scripture-fe502-*.json` in `.gitignore`) — **do not move it back to `~/Downloads`**, that's why the last two keys got lost
-   - Service account: `readingdaily-play-billing-982@readingdaily-scripture-fe502.iam.gserviceaccount.com` (already has Release-to-production permission in Play Console → Users and permissions)
+   - Service account: `readingdaily-play-billing-982@readingdaily-scripture-fe502.iam.gserviceaccount.com` (has Release-to-production + Release-to-testing-tracks permissions in Play Console → Users and permissions; testing-track permission added 2026-10-03 — without it `eas submit --profile internal` fails with "service account is missing the necessary permissions")
    - Google Play rejects a versionCode that's EVER been used before, even in an abandoned/failed submission — if submit fails with "Version code N has already been used", bump versionCode and rebuild, don't retry the same build
 
 ### Deploy Python Cloud Functions
