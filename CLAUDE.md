@@ -87,7 +87,7 @@ Catholic daily Mass readings with audio playback, word-level highlighting, pronu
 
 ### Current versions
 - **iOS:** v1.1.34 build 163 (home-screen widget) — LIVE 2026-08-16, see TODO.md "App Store / Play Store" for the version-string saga behind this release
-- **Android:** versionCode 31 (home-screen widget + API36 + OTA fix) — submitted 2026-08-15, check Play Console for current review/release status before assuming live
+- **Android:** v1.1.34 versionCode 32 (R8 on, expo-audio removed, runtime 1.1.34) — LIVE 2026-10-03. Android OTAs now target runtime 1.1.34 (the 1.1.33 override is gone); users still on versionCode 31 no longer get OTAs
 - **OTA updates active** from v1.1.31 onwards (channel: `production`) — check TODO.md for the latest OTA-shipped fixes, this file isn't kept current turn-by-turn
 
 ### For a JS-only fix (instant, no review)
