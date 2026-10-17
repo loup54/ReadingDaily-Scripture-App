@@ -11,6 +11,7 @@ Before touching any existing feature:
 2. **New code in new files** — new services, themes, and components go in new files. Existing files (colors.ts, ThemeContext.tsx, screen files) are wired in minimally, not rewritten.
 3. **Preserve existing theme** — before changing colors.ts, snapshot current values as `classicTheme` export. One-line rollback if needed.
 4. **Run tests before and after each phase** — existing test suite must pass before starting and after completing each change.
+5. **Flag shipped OFF in a store build = disclose it to App Review (Apple Guideline 2.5.19, hidden/dormant/undocumented features, clarified 2026-10).** Before submitting any iOS build that contains a flag set to `false`, add one line per flag to App Store Connect → App Review Information → Notes (flag name, what it does, that it's enabled later via OTA). Flags shipped `true` need nothing. Android has no equivalent rule.
 
 ### Visual refresh phases (Project Vespers)
 All phases are pure JS — ship via OTA, no store builds needed.
