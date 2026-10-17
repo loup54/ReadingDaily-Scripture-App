@@ -36,51 +36,13 @@ Catholic daily Mass readings with audio playback, word-level highlighting, pronu
 ---
 
 ## Stack
-- **Frontend:** Expo (bare workflow) · React Native · TypeScript
-- **Backend:** Firebase/Firestore · Python Cloud Functions (scraping, TTS) · Node.js Cloud Functions (IAP, gifting)
 - **Audio:** Azure TTS (production) · Google TTS (word timing via SSML marks)
 - **Crash reporting:** Sentry (`ourenglishbest` / `react-native`)
-- **Payments:** Apple IAP + Google Play Billing
 
 ---
 
 ## Key files
-
-### Frontend
-| File | Purpose |
-|------|---------|
-| `app/_layout.tsx` | App root — Sentry init, ErrorBoundary |
-| `src/screens/readings/DailyReadingsScreen.tsx` | Main reading screen |
-| `src/services/readings/ReadingService.ts` | Fetches readings from Firestore — freshness check applies to TODAY only (not future dates) |
-| `src/components/reading/ScriptureTextWithHighlighting.tsx` | Word-level highlighting |
-| `src/components/audio/EnhancedAudioPlayer.tsx` | Audio player + highlighting |
-| `src/services/audio/AudioHighlightingService.ts` | Singleton, drives highlighting via charOffset timing |
-| `src/services/audio/AudioPlaybackService.ts` | Expo AV wrapper, 100ms polling |
-| `src/services/logging/LoggerService.ts` | Centralised logger — hooks into Sentry |
-| `src/utils/validation.ts` | Input validation and sanitization |
-| `src/components/common/ErrorBoundary.tsx` | Catches crashes, reports to Sentry |
-
-### Backend
-| File | Purpose |
-|------|---------|
-| `python-functions/main.py` | daily_scrape, generate_timings, manual_scrape, validate_google_receipt |
-| `python-functions/scrapers/usccb_scraper.py` | USCCB scraper — explicitly excludes "Verse Before the Gospel" to avoid gospel extraction bug |
-| `functions/src/apple.ts` | Apple receipt validation |
-| `functions/src/google.ts` | Google Play purchase validation |
-| `functions/src/gifting.ts` | Gift subscription logic |
-| `functions/src/highlighting.ts` | synthesizeReading HTTP endpoint |
-| `functions/src/scheduledTasks.ts` | Daily synthesis scheduler |
-| `functions/src/rateLimit.ts` | Firestore-backed rate limiting (all endpoints) |
-
-### Config
-| File | Purpose |
-|------|---------|
-| `app.config.js` | Expo config — version, plugins, EAS project ID |
-| `ios/ReadingDailyScriptureApp/Info.plist` | Native iOS version — **must be updated manually alongside app.config.js** |
-| `eas.json` | EAS build profiles — `appVersionSource: remote` |
-| `functions/firestore.rules` | Firestore security rules |
-| `firestore.indexes.json` | All composite indexes (source of truth) |
-| `TODO.md` | Open task list |
+`firestore.indexes.json` is the source of truth for composite indexes.
 
 ---
 
@@ -91,43 +53,8 @@ Catholic daily Mass readings with audio playback, word-level highlighting, pronu
 - **Android:** v1.1.34 versionCode 32 (R8 on, expo-audio removed, runtime 1.1.34) — LIVE 2026-10-03. Android OTAs now target runtime 1.1.34 (the 1.1.33 override is gone); users still on versionCode 31 no longer get OTAs
 - **OTA updates active** from v1.1.31 onwards (channel: `production`) — check TODO.md for the latest OTA-shipped fixes, this file isn't kept current turn-by-turn
 
-### For a JS-only fix (instant, no review)
-```bash
-cd ~/ReadingDaily-Scripture-App
-eas update --channel production --message "description of fix"
-```
-
-### For a native change (requires full build + store submission)
-
-**iOS — critical: bare workflow requires updating TWO places for version:**
-1. `app.config.js` → bump `version` and `runtimeVersion` (must match)
-2. `ios/ReadingDailyScriptureApp/Info.plist` → bump `CFBundleShortVersionString`, and `Supporting/Expo.plist`'s `EXUpdatesRuntimeVersion` (bare workflow doesn't always regen this automatically, and if it does it can regen a stale value — check it explicitly)
-3. `eas build:version:set --platform ios --profile production` — interactive, type new build number
-4. `eas build --platform ios --profile production`
-5. `eas submit --platform ios --profile production --latest --no-wait` — same CLI-hang risk as Android, use `--no-wait`
-6. App Store Connect → create new version → attach build → Submit for Review
-
-**Do the version bump BEFORE building, not after (2026-08-15 lesson):** a build's marketing version string (`CFBundleShortVersionString`) is baked in at build time and can never be changed post-hoc. App Store Connect only lets you attach a build to an App Store version whose string matches *exactly* — if you create a new App Store Connect version (e.g. 1.1.34) after already building with the old string (1.1.33) still baked in, the build picker will be silently empty with no explanation, because that build genuinely isn't eligible. If the *previous* version is already "Ready for Distribution" (Apple-approved, awaiting release), its build is permanently locked — you can't swap it retroactively either. Confirm `app.config.js`'s `version` matches the App Store Connect version you're about to create BEFORE running `eas build`.
-
-**Android:**
-1. `eas build:version:set --platform android --profile production` — interactive, type new versionCode
-2. `eas build --platform android --profile production`
-3. `eas submit --platform android --profile production --latest --no-wait` — the `--wait` default (implicit) has hung for 10+ min with zero output at least twice (2026-08-15); `--no-wait` schedules and returns immediately, submission itself still completes server-side in ~2 min — check status at the submission URL printed by the command instead of waiting on the CLI
-   - Google Play service account key: `readingdaily-scripture-fe502-7e5cff3f3956.json`, kept in the project root, gitignored (`*service-account*.json` / `readingdaily-scripture-fe502-*.json` in `.gitignore`) — **do not move it back to `~/Downloads`**, that's why the last two keys got lost
-   - Service account: `readingdaily-play-billing-982@readingdaily-scripture-fe502.iam.gserviceaccount.com` (has Release-to-production + Release-to-testing-tracks permissions in Play Console → Users and permissions; testing-track permission added 2026-10-03 — without it `eas submit --profile internal` fails with "service account is missing the necessary permissions")
-   - Google Play rejects a versionCode that's EVER been used before, even in an abandoned/failed submission — if submit fails with "Version code N has already been used", bump versionCode and rebuild, don't retry the same build
-
-### Deploy Python Cloud Functions
-```bash
-cd ~/ReadingDaily-Scripture-App/python-functions
-firebase deploy --only functions:python-scraper:FUNCTION_NAME
-```
-
-### Deploy Node.js Cloud Functions
-```bash
-cd ~/ReadingDaily-Scripture-App
-firebase deploy --only functions:FUNCTION_NAME
-```
+### Releasing
+Build, version-bump, and store-submission steps (including the `--no-wait` submit, version-string-before-build, and Play service-account gotchas) live in the `eas-release` skill. OTA: `eas update --channel production --message "..."`.
 
 ---
 
@@ -157,11 +84,6 @@ Admin secret is in `python-functions/.env` (gitignored).
 ### Android layout (fixed 2026-03-17)
 Galaxy S26 (API 35) clipped bottom buttons. Fix: `DailyReadingsScreen` uses `flex: 1` on API 31+, explicit height calculation only on API ≤ 30 (old Samsung workaround).
 
-### EAS build numbers
-`eas build:version:set` requires interactive input — cannot be run non-interactively. Always run it in a real terminal session before building.
-
-Apple closes the version train once a build is approved — cannot submit new builds to an old version number (ITMS-90186). Always create a new version in App Store Connect for each submission.
-
 ---
 
 ## Security
@@ -170,8 +92,6 @@ All endpoints have:
 - Admin token protection for admin HTTP endpoints (`ADMIN_SECRET` in `.env` files, gitignored)
 - Product ID whitelisting on receipt validators
 - Firebase ID token verification on user-facing endpoints
-
-Quarterly security review due: **2026-06-24**
 
 ---
 
