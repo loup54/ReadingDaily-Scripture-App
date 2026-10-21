@@ -6,12 +6,17 @@
  */
 
 import * as functions from 'firebase-functions';
+import { defineSecret } from 'firebase-functions/params';
 import * as admin from 'firebase-admin';
 import Stripe from 'stripe';
 
-// Initialize Stripe with secret key from environment
+// Secrets live in Secret Manager (functions.config() shuts down March 2027).
+// Set with: firebase functions:secrets:set STRIPE_SECRET_KEY
+const STRIPE_SECRET_KEY = defineSecret('STRIPE_SECRET_KEY');
+const STRIPE_WEBHOOK_SECRET = defineSecret('STRIPE_WEBHOOK_SECRET');
+
 const getStripe = () => {
-  const secretKey = functions.config().stripe?.secret_key;
+  const secretKey = STRIPE_SECRET_KEY.value();
   if (!secretKey) {
     throw new Error('Stripe secret key not configured');
   }
@@ -24,7 +29,7 @@ const getStripe = () => {
  * Create Stripe Checkout Session
  * Called by client when user initiates purchase
  */
-export const createCheckoutSession = functions.https.onCall(async (data, context) => {
+export const createCheckoutSession = functions.runWith({ secrets: [STRIPE_SECRET_KEY] }).https.onCall(async (data, context) => {
   const { productId, successUrl, cancelUrl } = data;
 
   // Validate input
@@ -103,7 +108,7 @@ export const createCheckoutSession = functions.https.onCall(async (data, context
  * Validate Stripe Checkout Session
  * Called by client after payment completion
  */
-export const validateSession = functions.https.onCall(async (data, context) => {
+export const validateSession = functions.runWith({ secrets: [STRIPE_SECRET_KEY] }).https.onCall(async (data, context) => {
   const { sessionId } = data;
 
   if (!sessionId) {
@@ -167,9 +172,9 @@ export const validateSession = functions.https.onCall(async (data, context) => {
  * Stripe Webhook Handler
  * Handles asynchronous payment events from Stripe
  */
-export const stripeWebhook = functions.https.onRequest(async (req, res) => {
+export const stripeWebhook = functions.runWith({ secrets: [STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET] }).https.onRequest(async (req, res) => {
   const sig = req.headers['stripe-signature'] as string;
-  const webhookSecret = functions.config().stripe?.webhook_secret;
+  const webhookSecret = STRIPE_WEBHOOK_SECRET.value();
 
   if (!webhookSecret) {
     functions.logger.error('Webhook secret not configured');

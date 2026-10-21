@@ -6,10 +6,14 @@
  */
 
 import * as functions from 'firebase-functions';
+import { defineSecret } from 'firebase-functions/params';
 import * as admin from 'firebase-admin';
 import fetch from 'node-fetch';
 
 import { checkRateLimit } from './rateLimit';
+
+// Set with: firebase functions:secrets:set APPLE_SHARED_SECRET
+const APPLE_SHARED_SECRET = defineSecret('APPLE_SHARED_SECRET');
 
 // Apple receipt validation endpoints
 const APPLE_PRODUCTION_URL = 'https://buy.itunes.apple.com/verifyReceipt';
@@ -32,7 +36,7 @@ interface AppleReceiptResponse {
  * Validate Apple IAP Receipt
  * Called by client after completing purchase
  */
-export const validateAppleReceipt = functions.https.onCall(async (data, context) => {
+export const validateAppleReceipt = functions.runWith({ secrets: [APPLE_SHARED_SECRET] }).https.onCall(async (data, context) => {
   const { receipt, productId } = data;
 
   if (!receipt) {
@@ -52,7 +56,7 @@ export const validateAppleReceipt = functions.https.onCall(async (data, context)
 
   try {
     // Get shared secret from config
-    const sharedSecret = functions.config().apple?.shared_secret;
+    const sharedSecret = APPLE_SHARED_SECRET.value();
     if (!sharedSecret) {
       throw new functions.https.HttpsError(
         'failed-precondition',
