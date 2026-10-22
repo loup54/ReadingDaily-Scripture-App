@@ -30,7 +30,13 @@ logger = logging.getLogger(__name__)
 # Admin secret for protecting admin-only HTTP endpoints
 ADMIN_SECRET = os.environ.get('ADMIN_SECRET', '')
 
+# Per-partner read-only API keys, e.g. {"tendingdaily": "<token>"}. Each partner
+# gets their own key so they can be individually rate-limited and revoked
+# without affecting anyone else.
+PARTNER_API_KEYS = json.loads(os.environ.get('PARTNER_API_KEYS', '{}'))
+
 RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000  # 1 hour in milliseconds
+PARTNER_RATE_LIMIT = 100  # requests per partner per hour
 
 
 def verify_admin_token(req: https_fn.Request) -> bool:
@@ -42,6 +48,19 @@ def verify_admin_token(req: https_fn.Request) -> bool:
     if not auth_header.startswith('Bearer '):
         return False
     return auth_header[7:] == ADMIN_SECRET
+
+
+def verify_partner_token(req: https_fn.Request) -> str | None:
+    """Check Authorization: Bearer <token> against PARTNER_API_KEYS. Returns the
+    matching partner name if valid, None otherwise."""
+    auth_header = req.headers.get('Authorization', '')
+    if not auth_header.startswith('Bearer '):
+        return None
+    token = auth_header[7:]
+    for partner_name, key in PARTNER_API_KEYS.items():
+        if key == token:
+            return partner_name
+    return None
 
 
 def check_rate_limit(key: str, fn_name: str, limit: int) -> bool:
@@ -587,6 +606,62 @@ def generate_timings(req: https_fn.Request) -> https_fn.Response:
             status=500,
             headers={'Content-Type': 'application/json'}
         )
+
+
+@https_fn.on_request()
+def get_reading(req: https_fn.Request) -> https_fn.Response:
+    """
+    Read-only endpoint for partner apps to fetch a single day's reading, so
+    they don't need Firestore rules opened to public read.
+    Usage: GET /get_reading?date=2026-07-24
+    Header: Authorization: Bearer <partner API key>
+    Returns the readings/{date} document fields as-is (no remapping).
+    """
+    if req.method != 'GET':
+        return https_fn.Response(
+            json.dumps({'error': 'Method not allowed'}),
+            status=405,
+            headers={'Content-Type': 'application/json'}
+        )
+
+    partner_name = verify_partner_token(req)
+    if not partner_name:
+        return https_fn.Response(
+            json.dumps({'error': 'Unauthorized'}),
+            status=401,
+            headers={'Content-Type': 'application/json'}
+        )
+
+    if not check_rate_limit(partner_name, 'get_reading', PARTNER_RATE_LIMIT):
+        return https_fn.Response(
+            json.dumps({'error': 'Too many requests. Please try again later.'}),
+            status=429,
+            headers={'Content-Type': 'application/json'}
+        )
+
+    date_str = req.args.get('date', '')
+    if not re.fullmatch(r'\d{4}-\d{2}-\d{2}', date_str):
+        return https_fn.Response(
+            json.dumps({'error': 'Missing or invalid date parameter. Use ?date=YYYY-MM-DD'}),
+            status=400,
+            headers={'Content-Type': 'application/json'}
+        )
+
+    logger.info(f"get_reading requested by partner '{partner_name}' for {date_str}")
+
+    doc = get_db().collection('readings').document(date_str).get()
+    if not doc.exists:
+        return https_fn.Response(
+            json.dumps({'error': 'not_found', 'date': date_str}),
+            status=404,
+            headers={'Content-Type': 'application/json'}
+        )
+
+    return https_fn.Response(
+        json.dumps(doc.to_dict(), default=str),
+        status=200,
+        headers={'Content-Type': 'application/json'}
+    )
 
 
 def scrape_reading_for_date(date):
